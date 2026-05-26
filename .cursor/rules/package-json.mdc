@@ -1,0 +1,22 @@
+---
+description: package.json — scripts e dependências Node do front-end
+globs: package.json
+alwaysApply: false
+---
+
+# `package.json`
+
+Seguir `AGENTS.md`; alterações afetam **build** (Vite, Mix) e **CI** — alinhar ao que o repositório já usa.
+
+## Dependências
+
+- Não adicionar pacotes **sem necessidade**; respeitar lockfile (`package-lock.json` / `pnpm-lock.yaml` / `yarn.lock`) — mencionar quando o utilizador deve correr install.
+- Versões compatíveis com a stack Laravel/PHP do projeto (ex. plugin Vite oficial).
+
+## Scripts
+
+- `dev`, `build`, `preview`: nomes **padrão** ou os já definidos; não remover scripts referenciados na documentação ou CI sem pedido explícito.
+
+## Segurança
+
+- Não colocar tokens ou URLs privadas em scripts ou campos de configuração versionados.

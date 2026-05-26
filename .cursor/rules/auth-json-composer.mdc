@@ -1,0 +1,21 @@
+---
+description: auth.json — credenciais Composer (nunca versionar segredos)
+globs: auth.json
+alwaysApply: false
+---
+
+# `auth.json` (Composer)
+
+Seguir `AGENTS.md`; ficheiro **privado** com credenciais de Packagist privado, Satis, etc.
+
+## Crítico
+
+- **Nunca** colocar `username`/`password` ou `token` reais em cópia que vá para o Git; garantir `auth.json` em **`.gitignore`** quando contiver segredos.
+
+## Alternativa segura
+
+- CI: `COMPOSER_AUTH` env; local: `auth.json` fora do repo ou template sem valores.
+
+## Anti-alucinação
+
+- Não inventar hosts ou paths de repositório privado sem confirmação do utilizador.

@@ -1,0 +1,25 @@
+---
+description: Jobs em fila — idempotência, falhas e alinhamento com o worker
+globs: app/Jobs/**/*.php
+alwaysApply: false
+---
+
+# Jobs (`app/Jobs`)
+
+Seguir `AGENTS.md` e a forma como o projeto já define jobs (interface `ShouldQueue`, `$tries`, `backoff`, `failed()`).
+
+## Antes de alterar
+
+- Ver `config/queue.php` e `.env.example` para driver (database, redis, sync) e compatibilidade com **XAMPP** / ambiente local.
+- Não referenciar modelos, serviços ou filas **inexistentes**.
+
+## Boas práticas
+
+- Trabalho **idempotente** quando possível (reexecução segura).
+- **Tratamento de erros**: `failed()`, logs ou notificações alinhados ao padrão do repositório.
+- **Serialização** de models: usar `SerializesModels` como nos outros jobs; não expor dados sensíveis em logs.
+
+## Evitar
+
+- Operações destrutivas ou irreversíveis sem confirmação explícita do utilizador.
+- Lógica duplicada já existente em services — reutilizar.

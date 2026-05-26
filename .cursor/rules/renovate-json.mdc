@@ -1,0 +1,17 @@
+---
+description: Renovate — renovate.json(5)
+globs: renovate.json
+alwaysApply: false
+---
+
+# `renovate.json`
+
+Seguir `AGENTS.md`; alternativa ao Dependabot — **ranges**, `packageRules` e `schedule` coerentes com política de release do projeto.
+
+## Pinning
+
+- Pin de digest para imagens Docker/actions quando o projeto exige **reprodutibilidade** máxima.
+
+## Conflitos
+
+- Não duplicar automação com Dependabot no mesmo repo sem desativar um dos fluxos.

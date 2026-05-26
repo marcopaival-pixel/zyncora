@@ -1,0 +1,24 @@
+---
+description: Configuração Laravel — cautela, segredos e compatibilidade
+globs: config/**/*.php
+alwaysApply: false
+---
+
+# Config (`config/`)
+
+Seguir `AGENTS.md`: alterações aqui afetam **todo o ambiente** — explicar impacto antes e não remover chaves usadas sem confirmação.
+
+## Segurança
+
+- **Nunca** colocar segredos reais (passwords, API keys) em ficheiros de config versionados; usar `env()` com fallback documentado em `.env.example` quando o projeto já faz assim.
+- Não desativar proteções (CORS, sessão, hashing) sem pedido explícito e análise de risco.
+
+## Consistência
+
+- Ler `config/*.php` adjacentes: **mesmo estilo** de arrays, `env()` vs `config()` e comentários.
+- Compatibilidade **XAMPP**: drivers (`mysql`), URLs e paths alinhados ao que `php artisan config` e `.env.example` esperam.
+
+## Evitar
+
+- Renomear ou remover ficheiros de config **críticos** (`app`, `database`, `auth`) sem pedido explícito.
+- Valores que quebrem produção ou local sem o utilizador saber (debug, `APP_URL`, `SESSION_DOMAIN`).

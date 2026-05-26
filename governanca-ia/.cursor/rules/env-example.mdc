@@ -1,0 +1,22 @@
+---
+description: .env.example — variáveis documentadas sem segredos
+globs: .env.example
+alwaysApply: false
+---
+
+# `.env.example`
+
+Seguir `AGENTS.md`; este ficheiro **documenta** chaves — nunca valores secretos reais.
+
+## Conteúdo
+
+- Cada variável relevante para app, BD, fila, mail e storage com **placeholder** ou valor seguro de exemplo (`localhost`, `APP_KEY=` vazio com comentário para `php artisan key:generate`).
+- Comentários curtos quando a chave não for óbvia; alinhar nomes a `config/*.php`.
+
+## Sincronização
+
+- Ao adicionar uso de `env()` novo em config, refletir aqui para onboarding — não inventar chaves não lidas pelo código.
+
+## Evitar
+
+- Remover chaves ainda referenciadas em `config/` ou documentação sem migração clara.

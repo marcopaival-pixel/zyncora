@@ -1,0 +1,27 @@
+---
+description: Dockerfile — imagem da aplicação e segurança de build
+globs: Dockerfile
+alwaysApply: false
+---
+
+# `Dockerfile`
+
+Seguir `AGENTS.md`; a imagem deve ser **reproduzível** e alinhada a `docker-compose*.yml` / `compose.yaml`, se existirem.
+
+## Boas práticas
+
+- **Versões** explícitas de imagens base (`php:8.x-fpm`, etc.) — não usar sempre `latest` em produção sem pedido explícito.
+- Extensões PHP e dependências do sistema **mínimas** necessárias ao Laravel e ao projeto.
+
+## Segurança
+
+- **Não** copiar `.env` com segredos para a imagem; usar build args e runtime env conforme padrão do repositório.
+- Utilizador de processo não-root quando o projeto já o configura.
+
+## Anti-alucinação
+
+- Caminhos (`COPY`, `WORKDIR`) e comandos (`composer install`, `npm run build`) devem refletir a **estrutura real** do repo.
+
+## Evitar
+
+- Apagar caches ou otimizações (`opcache`, `composer --no-dev`) sem alinhar ambiente (dev vs prod).

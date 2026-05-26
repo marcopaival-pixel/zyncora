@@ -1,0 +1,9 @@
+---
+description: Renovate — renovate.json5
+globs: renovate.json5
+alwaysApply: false
+---
+
+# `renovate.json5`
+
+Seguir `AGENTS.md`; equivalente a `renovate.json` com comentários — mesmas regras de **pinning**, `packageRules` e conflito com outros bots de update.

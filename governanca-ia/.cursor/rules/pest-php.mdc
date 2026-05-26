@@ -1,0 +1,21 @@
+---
+description: Pest.php — configuração global Pest PHP
+globs: "**/Pest.php"
+alwaysApply: false
+---
+
+# `tests/Pest.php`
+
+Seguir `AGENTS.md`; ponto de arranque **Pest** — `uses()`, plugins e `expect()->extend()` devem alinhar ao resto da suite.
+
+## Integração Laravel
+
+- `uses(TestCase::class, ...)` ou trait `RefreshDatabase` como nos testes existentes; não duplicar bootstrap já feito em `phpunit.xml`.
+
+## Estilo
+
+- Extensões globais de `expect()` **documentadas** e consistentes; evitar magia que obscurece falhas.
+
+## Anti-alucinação
+
+- Não referenciar classes ou paths **inexistentes** em `uses()` ou `in()`.

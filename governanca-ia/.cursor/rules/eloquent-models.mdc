@@ -1,0 +1,23 @@
+---
+description: Modelos Eloquent — esquema real, relações e mass assignment
+globs: app/Models/**/*.php
+alwaysApply: false
+---
+
+# Modelos Eloquent (`app/Models`)
+
+Seguir `AGENTS.md`: tabelas e colunas devem refletir **migrações e BD reais** — não inventar `$table`, atributos ou relações.
+
+## Alinhamento
+
+- **`$fillable` / `$guarded` / `$casts`**: padrão já usado nos outros models do projeto.
+- **`$table` / `$primaryKey`**: só quando o projeto ou o esquema exigir; caso contrário convenções Laravel.
+- **Relações** (`hasMany`, `belongsTo`, etc.): chaves estrangeiras e nomes de classes **consistentes** com migrações e models existentes.
+
+## Segurança
+
+- Não expor campos sensíveis em serialização (`$hidden`, `$visible`) alinhados ao que models similares já fazem.
+
+## Evitar
+
+- Lógica de negócio pesada no model se o projeto a centraliza em services; **scopes** e **accessors** podem seguir o estilo local.

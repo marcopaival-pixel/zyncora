@@ -1,0 +1,26 @@
+---
+description: Policies — autorização alinhada a models e rotas
+globs: app/Policies/**/*.php
+alwaysApply: false
+---
+
+# Policies (`app/Policies`)
+
+Seguir `AGENTS.md`; toda regra de **quem pode fazer o quê** deve ser explícita e consistente com o resto da app.
+
+## Mapeamento
+
+- Nome e model: convenção Laravel (`UserPolicy` ↔ `User`) salvo o projeto usar nomes diferentes — verificar `AuthServiceProvider` / `AppServiceProvider` ou descoberta automática.
+
+## Métodos
+
+- `view`, `update`, `delete`, etc.: assinaturas **`(User $user, Model $model)`** ou globais conforme ficheiros existentes.
+- **Nunca** autorizar por defeito operações sensíveis; negar quando em dúvida e alinhar com o utilizador.
+
+## Integração
+
+- Controllers: `$this->authorize()` ou middleware `can:` como já usado nas rotas e controladores do projeto.
+
+## Evitar
+
+- Lógica duplicada entre Policy e controller; fonte única de verdade na Policy quando o Laravel é o padrão local.

@@ -1,0 +1,17 @@
+---
+description: CODEOWNERS — revisão obrigatória por área
+globs: .github/CODEOWNERS
+alwaysApply: false
+---
+
+# `.github/CODEOWNERS`
+
+Seguir `AGENTS.md`; define **quem deve rever** mudanças sensíveis — não remover proteções sem alinhamento da equipa.
+
+## Padrões
+
+- Caminhos (`/routes/`, `/config/`, `composer.lock`) **precisos**; evitar wildcards largos que atribuam tudo a uma pessoa inexistente.
+
+## Anti-alucinação
+
+- Não inventar `@org/teams` ou utilizadores GitHub sem confirmação.

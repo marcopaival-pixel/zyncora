@@ -1,0 +1,29 @@
+---
+description: composer.json — dependências e autoload PHP
+globs: composer.json
+alwaysApply: false
+---
+
+# `composer.json`
+
+Seguir `AGENTS.md`; **fonte de verdade** para pacotes PHP, versão mínima e autoload — não inventar dependências fora deste ficheiro.
+
+## Requisitos
+
+- `require` / `require-dev`: versões **compatíveis** entre si e com **PHP** em `platform` ou ambiente (XAMPP); não usar `*` ou ranges absurdos sem critério.
+
+## Autoload
+
+- `psr-4` **alinhado** a pastas reais (`app/`, `database/`); não mapear namespaces para diretórios inexistentes.
+
+## Scripts
+
+- `post-install-cmd`, `test`, etc. — não quebrar pipelines existentes; documentar scripts novos.
+
+## Anti-alucinação
+
+- Não adicionar pacotes **sem necessidade** e sem pedido explícito; ver regras em `AGENTS.md` sobre dependências.
+
+## Evitar
+
+- Remover pacotes usados no código sem refatoração correspondente; lembrar `composer update` / lockfile.

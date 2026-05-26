@@ -1,0 +1,18 @@
+---
+description: Traduções legadas (resources/lang) — mesmas regras que lang/
+globs: resources/lang/**/*.php
+alwaysApply: false
+---
+
+# Traduções (`resources/lang/`)
+
+Seguir `AGENTS.md` e a regra equivalente em `lang/`; em projetos **Laravel mais antigos** as traduções PHP ficam aqui.
+
+## Consistência
+
+- Espelhar estrutura dos ficheiros do locale **principal** do projeto ao adicionar outro idioma.
+- Placeholders e chaves de validação alinhados ao Laravel da versão em `composer.json`.
+
+## Anti-alucinação
+
+- Não criar ficheiros de locale órfãos sem registo em `config/app.php` (`locale`, `fallback_locale`) quando aplicável.

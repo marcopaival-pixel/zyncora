@@ -1,0 +1,663 @@
+openapi: 3.0.3
+info:
+  title: Chatbox SaaS API
+  version: 1.0.0
+  description: |
+    API pública v1 do Chatbox SaaS — widget, autenticação de agentes, conversas e integrações.
+
+    Base URL: `{APP_URL}/api/v1`
+
+servers:
+  - url: /api/v1
+    description: API v1 relativa ao host da aplicação
+
+tags:
+  - name: Widget
+    description: Endpoints públicos do widget embebido
+  - name: Auth
+    description: Autenticação Sanctum para agentes/API
+  - name: Conversations
+    description: Gestão de conversas (requer Bearer token)
+  - name: Integrations
+    description: Webhooks externos
+  - name: Payments
+    description: Webhooks de pagamento
+
+paths:
+  /docs:
+    get:
+      tags: [Meta]
+      summary: Portal Swagger UI (requer API_DOCS_ENABLED)
+      operationId: getApiDocsPortal
+      responses:
+        '200':
+          description: Página HTML com Swagger UI
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Documentação desactivada
+
+  /openapi.yaml:
+    get:
+      tags: [Meta]
+      summary: Especificação OpenAPI desta API
+      operationId: getOpenApiSpec
+      responses:
+        '200':
+          description: Ficheiro YAML OpenAPI 3.0
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  /widget/{slug}/config:
+    get:
+      tags: [Widget]
+      summary: Configuração do widget por slug da empresa
+      operationId: getWidgetConfig
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+      responses:
+        '200':
+          description: Configuração do chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WidgetConfig'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /widget/{slug}/conversations:
+    post:
+      tags: [Widget]
+      summary: Iniciar ou retomar conversa (visitante)
+      operationId: startOrResumeConversation
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartConversationRequest'
+      responses:
+        '200':
+          description: Conversa existente ou nova
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /widget/{slug}/conversations/{conversationId}/messages:
+    get:
+      tags: [Widget]
+      summary: Listar mensagens (visitante)
+      operationId: listVisitorMessages
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/VisitorTokenHeader'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: Paginação de mensagens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagePagination'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Widget]
+      summary: Enviar mensagem do visitante
+      operationId: storeVisitorMessage
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/VisitorTokenHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreMessageRequest'
+      responses:
+        '200':
+          description: Mensagem do visitante e resposta opcional do bot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  visitor_message:
+                    $ref: '#/components/schemas/Message'
+                  bot_message:
+                    $ref: '#/components/schemas/Message'
+                    nullable: true
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/token:
+    post:
+      tags: [Auth]
+      summary: Obter token Sanctum (login API)
+      operationId: createAuthToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthTokenRequest'
+      responses:
+        '200':
+          description: Token Bearer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '403':
+          description: Conta inactiva
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Solicitar link de redefinição de password
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Pedido aceite (resposta genérica)
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Redefinir password com token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, email, password, password_confirmation]
+              properties:
+                token:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                password_confirmation:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password actualizada
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /conversations:
+    get:
+      tags: [Conversations]
+      summary: Listar conversas (agente autenticado)
+      operationId: listConversations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            example: open
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Paginação de conversas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /conversations/{conversationId}:
+    get:
+      tags: [Conversations]
+      summary: Detalhe da conversa com mensagens
+      operationId: showConversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - name: messages_limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 150
+        - name: messages_after
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Conversa com relações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /conversations/{conversationId}/messages:
+    post:
+      tags: [Conversations]
+      summary: Enviar mensagem como agente
+      operationId: storeAgentMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreMessageRequest'
+      responses:
+        '200':
+          description: Mensagem criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /integrations/whatsapp/webhook/{companySlug}:
+    get:
+      tags: [Integrations]
+      summary: Verificação do webhook WhatsApp (Meta)
+      operationId: verifyWhatsAppWebhook
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Challenge echo
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Integrations]
+      summary: Ingestão de eventos WhatsApp
+      operationId: ingestWhatsAppWebhook
+      parameters:
+        - $ref: '#/components/parameters/CompanySlug'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Evento processado
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /payments/stripe/webhook:
+    post:
+      tags: [Payments]
+      summary: Webhook Stripe (assinaturas)
+      operationId: stripeWebhook
+      parameters:
+        - name: Stripe-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Assinatura inválida
+        '503':
+          description: Webhook secret não configurado
+
+  /payments/mercadopago/webhook:
+    post:
+      tags: [Payments]
+      summary: Webhook Mercado Pago (assinaturas preapproval)
+      operationId: mercadoPagoWebhook
+      parameters:
+        - name: x-signature
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: subscription_preapproval
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Assinatura inválida
+        '503':
+          description: Access token não configurado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+
+  parameters:
+    CompanySlug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Slug único da empresa (tenant)
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: integer
+    VisitorTokenHeader:
+      name: X-Visitor-Token
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Token devolvido ao iniciar conversa no widget
+
+  responses:
+    NotFound:
+      description: Recurso não encontrado
+    Unauthorized:
+      description: Token em falta ou inválido
+    Forbidden:
+      description: Sem permissão ou token de visitante inválido
+    ValidationError:
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+
+  schemas:
+    WidgetConfig:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        chat_color:
+          type: string
+        logo_url:
+          type: string
+          nullable: true
+        welcome_message:
+          type: string
+          nullable: true
+        lgpd:
+          type: object
+          properties:
+            company_id:
+              type: integer
+            consent_token:
+              type: string
+        broadcasting:
+          type: object
+          properties:
+            key:
+              type: string
+              nullable: true
+            host:
+              type: string
+              nullable: true
+            port:
+              type: integer
+              nullable: true
+            scheme:
+              type: string
+              nullable: true
+
+    StartConversationRequest:
+      type: object
+      properties:
+        visitor_token:
+          type: string
+          maxLength: 64
+          nullable: true
+        client_name:
+          type: string
+          maxLength: 255
+          nullable: true
+        client_phone:
+          type: string
+          maxLength: 64
+          nullable: true
+        client_email:
+          type: string
+          format: email
+          maxLength: 255
+          nullable: true
+
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        visitor_token:
+          type: string
+        status:
+          type: string
+
+    ConversationDetail:
+      type: object
+      description: Modelo Conversation serializado com assignee, channel e messages
+      additionalProperties: true
+
+    ConversationPagination:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationDetail'
+        current_page:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversation_id:
+          type: integer
+        sender_type:
+          type: string
+          enum: [visitor, agent, bot]
+        sender_id:
+          type: integer
+          nullable: true
+        body:
+          type: string
+        message_type:
+          type: string
+        sent_at:
+          type: string
+          format: date-time
+
+    MessagePagination:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        current_page:
+          type: integer
+        last_page:
+          type: integer
+
+    StoreMessageRequest:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+          maxLength: 8000
+        message_type:
+          type: string
+          maxLength: 32
+          nullable: true
+
+    AuthTokenRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        device_name:
+          type: string
+          maxLength: 128
+          nullable: true
+
+    AuthTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+            role:
+              type: string
+            company_id:
+              type: integer
+              nullable: true

@@ -1,0 +1,26 @@
+---
+description: Traduções (lang/) — chaves e placeholders consistentes
+globs: lang/**/*.php
+alwaysApply: false
+---
+
+# Traduções (`lang/`)
+
+Seguir `AGENTS.md`; ficheiros PHP de idioma devem manter **estrutura e convenção** do projeto.
+
+## Consistência
+
+- Chaves aninhadas e nomes de ficheiros (`validation.php`, `auth.php`, etc.) **iguais** aos outros locales já presentes.
+- Placeholders `:attribute`, `:values` e regras de pluralização alinhados à documentação Laravel e ao locale de referência (ex. `en`).
+
+## Conteúdo
+
+- Mensagens **claras** para o utilizador final; não expor detalhes internos de segurança em strings de erro.
+
+## Anti-alucinação
+
+- Não referenciar chaves `__('...')` inexistentes sem adicionar a entrada correspondente nos ficheiros de idioma.
+
+## Evitar
+
+- Duplicar a mesma frase em dezenas de ficheiros; reutilizar chaves comuns quando o projeto já o faz.

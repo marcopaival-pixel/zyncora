@@ -1,0 +1,26 @@
+---
+description: Form Requests — validação, autorização e mensagens
+globs: app/Http/Requests/**/*.php
+alwaysApply: false
+---
+
+# Form Requests (`app/Http/Requests`)
+
+Seguir `AGENTS.md`; validação e autorização de entrada **antes** do controller, no padrão Laravel e do projeto.
+
+## Regras de validação
+
+- `rules()`: tipos, `required`, `exists`, `unique` e regras customizadas **alinhados** a outros requests similares — não inventar nomes de tabelas/colunas; confirmar em migrações/models.
+- `messages()` / `attributes()`: mesmo estilo de i18n ou strings que o resto da pasta.
+
+## Autorização
+
+- `authorize()`: delegar a Policy ou lógica **consistente** com controllers que já usam `$this->authorize()`.
+
+## Integração
+
+- Type-hint do Form Request nas actions do controller; não duplicar o mesmo array de `rules()` no controller.
+
+## Evitar
+
+- Side-effects pesados (e-mail, jobs) dentro do request salvo padrão local explícito.

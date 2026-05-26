@@ -1,0 +1,21 @@
+---
+description: Makefile — alvos de build e DX
+globs: Makefile
+alwaysApply: false
+---
+
+# `Makefile`
+
+Seguir `AGENTS.md`; alvos (`make test`, `make install`) **documentados** e **idempotentes** quando possível.
+
+## Segurança
+
+- Não passar segredos em linha de comando em alvos versionados; usar env do utilizador ou ficheiros ignorados.
+
+## Portabilidade
+
+- Evitar GNU-only sem documentar; em Windows, indicar WSL ou alvo alternativo se o projeto suporta.
+
+## Anti-alucinação
+
+- Comandos referenciam **scripts reais** (`composer`, `npm`, `php artisan`) presentes no repo.

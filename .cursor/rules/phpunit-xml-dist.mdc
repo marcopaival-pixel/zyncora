@@ -1,0 +1,21 @@
+---
+description: phpunit.xml.dist — modelo de configuração PHPUnit versionado
+globs: phpunit.xml.dist
+alwaysApply: false
+---
+
+# `phpunit.xml.dist`
+
+Seguir `AGENTS.md`; ficheiro **modelo** para CI e clones — mesmos princípios que `phpunit.xml` (suites, `env`, cobertura).
+
+## Dist vs local
+
+- Desenvolvedores podem copiar para `phpunit.xml` local; **não** remover opções necessárias ao pipeline descrito na documentação do projeto.
+
+## Consistência
+
+- Manter **paridade** com `phpunit.xml` quando ambos existem, salvo dist ser intencionalmente mais restritivo para CI.
+
+## Anti-alucinação
+
+- Versão de schema PHPUnit alinhada a `composer.json`.

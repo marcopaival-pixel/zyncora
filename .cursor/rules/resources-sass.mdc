@@ -1,0 +1,21 @@
+---
+description: SCSS/Sass em resources/sass — legado e Mix
+globs: resources/sass/**/*.scss
+alwaysApply: false
+---
+
+# SCSS (`resources/sass/**/*.scss`)
+
+Seguir `AGENTS.md`; comum em projetos **Laravel Mix** ou setups com `sass` no `package.json`.
+
+## Parciais
+
+- `_partial.scss` e `@import` / `@use` **no padrão** já usado na pasta; não quebrar ordem de variáveis e mixins.
+
+## Integração
+
+- Entrada principal (`app.scss` etc.) referenciada em `webpack.mix.js` ou Vite — não criar raiz nova sem atualizar o bundler.
+
+## Evitar
+
+- Deprecações Sass (`@import` global) se o projeto migra para `@use` — alinhar a uma estratégia só.

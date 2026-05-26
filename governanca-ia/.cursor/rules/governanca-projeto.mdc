@@ -1,0 +1,18 @@
+---
+description: Agente de governança — consultar AGENTS.md e diretrizes antes de implementar
+alwaysApply: true
+---
+
+# Governança (pré-voo obrigatório)
+
+Antes de planear, propor ou implementar **qualquer** alteração de código, configuração, base de dados ou arquitetura:
+
+1. **Ler** o ficheiro `AGENTS.md` na raiz do workspace (fonte única), incluindo **«Agentes especializados PHP (integrados no agente da raiz)»** quando o trabalho for PHP/Laravel — aí estão os protocolos alinhados aos ficheiros `agente-*.mdc`. Se ainda não estiver em contexto, **abrir/ler com as ferramentas disponíveis** antes de escrever código.
+2. **Verificar** no repositório (`composer.json`, estrutura de pastas, código existente) stack real (PHP/Laravel, XAMPP) — não assumir. Se o projeto for servido via **XAMPP**, seguir em `AGENTS.md` a secção **«Ambiente XAMPP (servidor web Apache)»** (Apache/`public`, `.htaccess`, `.env`, URLs, portabilidade).
+3. **Cumprir** integralmente princípios, regras obrigatórias e regras anti-alucinação definidos em `AGENTS.md`.
+4. **Não inventar** funções, bibliotecas, tabelas, caminhos, APIs ou configurações; em dúvida, perguntar.
+5. **Explicar antes** alterações em código existente; não remover funcionalidades nem alterar BD sem autorização explícita.
+6. Se o pedido conflitar com segurança ou regras de `AGENTS.md`, **alertar** e pedir confirmação em vez de violar silenciosamente.
+7. Aplicar a secção **«Código limpo e seguro (transversal a stacks)»** de `AGENTS.md` em qualquer linguagem ou infra (PHP, JS, CI, Docker), não só Laravel.
+
+Resumo: segurança e validação primeiro; código simples; baixo acoplamento e alta coesão; compatível com **XAMPP** e com o que o projeto já usa; escopo estrito ao solicitado; segredos e supply chain protegidos.

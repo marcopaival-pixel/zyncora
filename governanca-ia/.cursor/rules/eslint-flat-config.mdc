@@ -1,0 +1,25 @@
+---
+description: eslint.config.* — ESLint flat config (ESLint 9+)
+globs: eslint.config.*
+alwaysApply: false
+---
+
+# ESLint flat (`eslint.config.*`)
+
+Seguir `AGENTS.md`; regras e plugins devem existir em **`package.json`** e ser compatíveis com a versão do ESLint instalada.
+
+## Escopo
+
+- `files` / `ignores` **alinhados** a `resources/js`, `tests` front-end, etc. — não excluir pastas críticas sem motivo.
+
+## TypeScript / Vue
+
+- Parser e plugins (`typescript-eslint`, `vue-eslint-parser`) **só** se forem dependências reais do projeto.
+
+## Anti-alucinação
+
+- Não referenciar configs ou presets **não** instalados (`extends` de pacotes inexistentes não aplicam da mesma forma em flat config — usar imports explícitos).
+
+## Evitar
+
+- Desligar regras de segurança (`no-eval`, etc.) em massa sem pedido explícito.

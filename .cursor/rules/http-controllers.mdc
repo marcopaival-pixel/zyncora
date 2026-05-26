@@ -1,0 +1,25 @@
+---
+description: Controllers HTTP — finos, validação e autorização alinhados ao projeto
+globs: app/Http/Controllers/**/*.php
+alwaysApply: false
+---
+
+# Controllers (`app/Http/Controllers`)
+
+Seguir `AGENTS.md` e `laravel-php.mdc`; manter controllers **finos** como no restante projeto.
+
+## Responsabilidades
+
+- **HTTP apenas**: request/response, delegação a Services/Actions/Repositories já usados.
+- **Validação**: `Form Request` ou array de regras **no padrão local** — nunca ignorar validação de entrada.
+- **Autorização**: `authorize()`, `Policy`, middleware ou `$this->middleware()` conforme exemplos existentes no código.
+
+## Anti-alucinação
+
+- Não invocar serviços, jobs ou modelos **inexistentes** — importar e usar classes reais do namespace do projeto.
+- Nomes de rotas em `redirect()->route()` ou `view()` devem existir em `routes/`.
+
+## Evitar
+
+- Queries Eloquent complexas no controller se o projeto as coloca em models/repos/services.
+- Lógica de negócio duplicada já coberta por outra camada.

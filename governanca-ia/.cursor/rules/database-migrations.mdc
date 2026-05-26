@@ -1,0 +1,25 @@
+---
+description: Migrações e alterações de esquema — cautela e alinhamento
+globs: database/migrations/**/*.php
+alwaysApply: false
+---
+
+# Migrações (`database/migrations`)
+
+Seguir `AGENTS.md`: **não** criar ou alterar esquema de BD sem **autorização explícita** do utilizador.
+
+## Antes de escrever
+
+- Rever migrações existentes para **nomes de tabelas**, tipos de coluna, padrão de `foreignId` / `constrained` / `cascade`.
+- Alinhar com **modelos Eloquent** e `composer.json` (versão Laravel) — não inventar colunas ou relações.
+
+## Ao implementar
+
+- **Um propósito por migração** quando o projeto seguir esse hábito; evitar alterações não relacionadas no mesmo ficheiro.
+- `down()` **reversível** se o resto do projeto o utiliza; caso contrário, seguir o padrão local.
+- Índices e FKs: mesma convenção das migrações já no repositório.
+
+## Evitar
+
+- `Schema::drop` ou truncates em migrações salvo pedido explícito e alinhado à governança.
+- Dados sensíveis ou seeds em ficheiros de migração se o projeto separar seeds em `database/seeders`.

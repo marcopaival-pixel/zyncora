@@ -1,0 +1,21 @@
+---
+description: .npmrc — registry e tokens npm
+globs: .npmrc
+alwaysApply: false
+---
+
+# `.npmrc`
+
+Seguir `AGENTS.md`; pode conter **auth tokens** — tratar como sensível.
+
+## Versionamento
+
+- **Não** commitar `_authToken`, passwords ou URLs com credenciais; usar variáveis de ambiente (`${NPM_TOKEN}`) e documentar em `.env.example` / CI.
+
+## Registry
+
+- `registry` e `scope` **consistentes** com `package.json` e política da organização.
+
+## Evitar
+
+- `always-auth=true` com token em ficheiro partilhado.

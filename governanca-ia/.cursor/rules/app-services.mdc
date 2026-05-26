@@ -1,0 +1,22 @@
+---
+description: Camada de serviço — reutilização e dependências explícitas
+globs: app/Services/**/*.php
+alwaysApply: false
+---
+
+# Services (`app/Services`)
+
+Seguir `AGENTS.md`; centralizar **regra de negócio** aqui quando o projeto já o faz, mantendo controllers finos.
+
+## Design
+
+- **Dependências** via construtor (injeção) alinhada ao container e ao estilo dos services existentes.
+- Métodos **claros e testáveis**; evitar estado global ou singletons ocultos.
+
+## Anti-alucinação
+
+- Não chamar models, APIs ou tabelas **inexistentes** — verificar namespaces e migrações.
+
+## Evitar
+
+- Duplicar lógica já presente noutro service, action ou model; extrair abstração comum se o projeto favorecer DRY.

@@ -1,0 +1,23 @@
+---
+description: Middleware HTTP — pipeline, segurança e ordem
+globs: app/Http/Middleware/**/*.php
+alwaysApply: false
+---
+
+# Middleware (`app/Http/Middleware`)
+
+Seguir `AGENTS.md`; alterações aqui afetam **todas as rotas** que usam o middleware — explicar impacto.
+
+## Consistência
+
+- Assinatura `handle($request, Closure $next, ...)` e retornos (`$next($request)`, `redirect`, `abort`) como nos middlewares existentes.
+- **Registo**: `bootstrap/app.php` (Laravel 11+) ou `app/Http/Kernel.php` (versões anteriores) — verificar onde o projeto regista aliases e grupos.
+
+## Segurança
+
+- Cabeçalhos, CORS, autenticação e throttling: **não enfraquecer** sem pedido explícito e análise.
+- Não logar tokens, passwords ou PII.
+
+## Evitar
+
+- Duplicar middleware com comportamento quase idêntico; renomear/remover middleware **referenciado em rotas** sem atualizar `routes/`.

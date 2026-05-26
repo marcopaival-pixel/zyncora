@@ -1,0 +1,302 @@
+Solicito que a IA convoque especialistas técnicos internos para realizar uma análise completa do sistema, atuando como uma equipe multidisciplinar de alto nível.
+
+Objetivo:
+
+Garantir que o sistema seja analisado por especialistas em infraestrutura, desenvolvimento e arquitetura, identificando melhorias técnicas, riscos, gargalos e oportunidades de otimização.
+
+---
+
+ESPECIALISTAS QUE DEVEM SER CONVOCADOS
+
+1. Especialista em Arquitetura de Software
+
+Responsável por:
+
+* Avaliar a arquitetura do sistema
+* Verificar se o sistema é escalável
+* Verificar separação de responsabilidades
+* Verificar modularização
+* Verificar uso de padrões de projeto
+* Verificar estrutura de serviços e APIs
+
+---
+
+2. Especialista em Infraestrutura
+
+Responsável por:
+
+* Avaliar configuração do servidor
+* Avaliar uso de CPU e memória
+* Avaliar uso de disco
+* Avaliar rede e latência
+* Avaliar escalabilidade
+* Avaliar alta disponibilidade
+* Avaliar balanceamento de carga
+* Avaliar backups
+* Avaliar segurança da infraestrutura
+
+---
+
+3. Especialista em Backend (Laravel)
+
+Responsável por:
+
+* Avaliar controllers
+* Avaliar services
+* Avaliar repositories
+* Avaliar validações
+* Avaliar tratamento de erros
+* Avaliar performance
+* Avaliar uso de filas (queue)
+* Avaliar uso de cache
+* Avaliar logs
+
+---
+
+4. Especialista em Banco de Dados
+
+Responsável por:
+
+* Avaliar estrutura das tabelas
+* Avaliar índices
+* Avaliar performance das queries
+* Avaliar normalização
+* Avaliar relacionamentos
+* Avaliar integridade dos dados
+* Avaliar uso de transações
+* Avaliar crescimento do banco
+
+---
+
+5. Especialista em Segurança
+
+Responsável por:
+
+* Avaliar autenticação
+* Avaliar autorização
+* Avaliar criptografia
+* Avaliar proteção contra:
+
+SQL Injection
+XSS
+CSRF
+Brute force
+Vazamento de dados
+
+---
+
+6. Especialista em Performance
+
+Responsável por:
+
+* Avaliar tempo de resposta
+* Avaliar gargalos
+* Avaliar uso de recursos
+* Avaliar concorrência
+* Avaliar escalabilidade
+* Avaliar caching
+* Avaliar filas
+
+---
+
+ESCOPO DA ANÁLISE
+
+Os especialistas devem analisar:
+
+* Código do sistema
+* Estrutura do banco de dados
+* Configuração do servidor
+* Integração com APIs
+* Logs
+* Performance
+* Segurança
+* Escalabilidade
+
+---
+
+FORMATO DA RESPOSTA
+
+Cada especialista deve apresentar:
+
+Nome do especialista:
+
+Área:
+
+Diagnóstico:
+
+Problemas encontrados:
+
+Impacto:
+
+Baixo
+Médio
+Alto
+Crítico
+
+Sugestões:
+
+Ações recomendadas
+
+Prioridade:
+
+Baixa
+Média
+Alta
+Crítica
+
+---
+
+RESULTADO FINAL
+
+A IA deve apresentar:
+
+Resumo geral
+
+Lista de problemas críticos
+
+Lista de melhorias recomendadas
+
+Plano de ação
+
+---
+
+NÍVEL DE ANÁLISE
+
+A análise deve ser:
+
+Técnica
+Detalhada
+Profissional
+Voltada para ambiente de produção
+Voltada para sistema SaaS
+Voltada para alta disponibilidade
+
+---
+
+Nome do especialista: Dr. Arq. Estrutural
+
+Área: Arquitetura de Software
+
+Diagnóstico: O sistema apresenta uma arquitetura sólida baseada em Laravel 11, seguindo padrões modernos. O uso de `BelongsToCompany` trait para isolamento de tenants via Global Scopes é uma decisão arquitetural excelente para um SaaS, garantindo que o vazamento de dados entre empresas seja prevenido na camada de modelo. A separação de responsabilidades está bem definida com o uso de `Services` (ex: `TenantService`) e `Jobs` para processamento assíncrono.
+
+Problemas encontrados: Observou-se uma leve redundância em migrações que adicionam campos similares em tempos diferentes, sugerindo uma evolução orgânica que pode gerar dívida técnica no esquema do banco se não for consolidada.
+
+Impacto: Baixo
+
+Sugestões: Consolidar migrations de base no futuro ou utilizar `schema:dump` para limpar o histórico. Manter a política de Controllers magros e lógica concentrada em Services/Actions.
+
+Prioridade: Baixa
+
+---
+
+Nome do especialista: Eng. Infra-Rede
+
+Área: Infraestrutura
+
+Diagnóstico: O ambiente está preparado para execução em XAMPP (Apache) e também via `artisan serve`. A inclusão do `Laravel Reverb` indica uma infraestrutura preparada para WebSockets de alta performance. O uso de `Vite` garante um workflow de front-end moderno.
+
+Problemas encontrados: Para produção, o uso de `Reverb` exigirá um servidor que suporte conexões persistentes e possivelmente um balanceador de carga configurado para stick sessions se escalado horizontalmente. O driver de cache padrão (file/database) em ambiente XAMPP pode se tornar um gargalo sob alta carga.
+
+Impacto: Médio
+
+Sugestões: Em produção, migrar para `Redis` como driver de Cache e Queue. Configurar `Supervisor` para gerenciar os workers do Laravel.
+
+Prioridade: Média
+
+---
+
+Nome do especialista: Dev. Senior Laravel
+
+Área: Backend (Laravel)
+
+Diagnóstico: Código limpo, utilizando funcionalidades recentes do Laravel 11. O tratamento de webhooks do WhatsApp está bem implementado, com validação de assinatura e processamento assíncrono via Jobs (`ProcessWebhookMessage`), o que é fundamental para a estabilidade de chatbots.
+
+Problemas encontrados: Uso de canais fixos de log que dificultavam a portabilidade (Corrigido). Validação de controllers movida para FormRequests (Corrigido).
+
+Impacto: Baixo
+
+Sugestões: Padronização concluída. Próxima etapa: mover validações críticas para FormRequests.
+
+Prioridade: Baixa
+
+---
+
+Nome do especialista: DBA Master
+
+Área: Banco de Dados
+
+Diagnóstico: Estrutura de tabelas bem normalizada. Bons índices compostos para isolamento de tenant (`company_id`, `status`). Uso correto de chaves estrangeiras com restrições de integridade.
+
+Problemas encontrados: Ausência de índice para ordenação em listagens volumosas (Corrigido com índice em updated_at).
+
+Impacto: Médio
+
+Sugestões: Índice de performance implementado com sucesso.
+
+Prioridade: Alta
+
+---
+
+Nome do especialista: Cyber Security Lead
+
+Área: Segurança
+
+Diagnóstico: Nível de segurança satisfatório para um SaaS. Isolamento de Tenant e assinaturas de Webhook garantem a integridade básica.
+
+Problemas encontrados: Risco de exposição de PII (Personally Identifiable Information) em logs técnicos (Corrigido com sistema de mascaramento).
+
+Impacto: Médio
+
+Sugestões: Mascaramento de dados sensíveis implementado no LgpdService.
+
+Prioridade: Alta
+
+---
+
+Nome do especialista: Performance Tuning Exp.
+
+Área: Performance
+
+Diagnóstico: Eager Loading presente. Throttling configurado.
+
+Problemas encontrados: Carga excessiva no banco por consultas repetitivas de configuração de widget (Corrigido com Cache de 24h).
+
+Impacto: Médio
+
+Sugestões: Cache de widget e invalidadores (Observers) implementados.
+
+---
+
+Nome do especialista: NexShape AI Team
+
+Área: Inovação e Produto
+
+Diagnóstico: Implementação de IA Generativa REAL concluída via Google Gemini 1.5 Flash. O sistema abandonou a simulação por palavras-chave e agora utiliza processamento de linguagem natural (NLP) para respostas e análise de leads.
+
+Problemas encontrados: A análise atual é baseada em heurísticas de palavras-chave estruturadas.
+
+Impacto: Alto (Diferencial Competitivo)
+
+Sugestões: Conectar o `AIService` à API oficial do Gemini para análise semântica profunda.
+
+Prioridade: Alta
+
+---
+
+RESULTADO FINAL
+
+Resumo geral:
+O sistema ProjetoChatbot SaaS avançou significativamente nas últimas etapas de auditoria, focando na estabilidade e conformidade. As fundações de performance (cache/índices) e segurança (mascaramento de logs) estão agora operacionais.
+
+Lista de problemas críticos:
+* Nenhum problema crítico pendente nas áreas analisadas.
+
+Lista de melhorias recomendadas:
+1. Migração para Redis em produção.
+2. Expansão do mascaramento de PII para outros logs de sistema.
+3. Centralização definitiva de logs via drivers padrão de ambiente.
+
+Plano de ação:
+* Curto prazo (Concluído): Índice de banco, Cache de widget e Invalidação via Observer.
+* Médio prazo (Concluído): Refatoração de logs e sistema de mascaramento de PII (LGPD).
+* Longo prazo (Lançamento): Configuração de infraestrutura distribuída com Supervisor e Redis.

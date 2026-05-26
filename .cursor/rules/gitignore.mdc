@@ -1,0 +1,21 @@
+---
+description: .gitignore — o que não versionar
+globs: .gitignore
+alwaysApply: false
+---
+
+# `.gitignore`
+
+Seguir `AGENTS.md`; garante que **segredos e artefactos** não entram no Git.
+
+## Obrigatório típico (quando aplicável)
+
+- `.env`, `.env.*.local`, `vendor/`, `node_modules/`, builds (`public/build`, `public/hot`), caches Laravel (`bootstrap/cache`, `storage/*.key`), IDE e OS.
+
+## Cautela
+
+- **Não remover** entradas que protegem segredos sem substituir por outra salvaguarda documentada.
+
+## Anti-padrão
+
+- Não usar `.gitignore` para apagar ficheiros já commitados — isso requer `git rm --cached` e política de rotação de segredos se vazou.

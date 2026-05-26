@@ -1,0 +1,28 @@
+---
+description: Padrões PHP/Laravel ao editar código da aplicação
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# PHP / Laravel no projeto
+
+Aplicar em conjunto com `AGENTS.md` e a regra de governança global.
+
+## Antes de codificar
+
+- Confirmar Laravel via `composer.json` e estrutura (`artisan`, `app/`, `routes/`).
+- Rotas: consultar `routes/web.php`, `routes/api.php` e ficheiros em `routes/` — não inventar URIs ou nomes de rotas.
+- Modelos e BD: basear-se em `app/Models` e migrações em `database/migrations` — não inventar tabelas ou colunas.
+
+## Implementação
+
+- **Controllers**: finos; delegar regras de negócio a Services/Actions já usados no projeto.
+- **Entrada**: `Form Request` ou validação explícita alinhada ao que o projeto já faz.
+- **Autorização**: `Policy` / `Gate` / middleware existentes — não expor operações sem verificar o padrão atual.
+- **Consultas**: Eloquent/query builder como no restante código; evitar SQL cru salvo se o projeto já o fizer de forma consistente.
+- **Compatibilidade**: código executável em ambiente típico **XAMPP** (versão PHP do `composer.json` ou documentação).
+
+## O que evitar
+
+- Novos pacotes Composer sem necessidade clara e sem alinhamento com o utilizador.
+- Duplicar lógica que já exista em helpers, traits ou services do projeto.

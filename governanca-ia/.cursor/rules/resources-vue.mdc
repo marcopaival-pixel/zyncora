@@ -1,0 +1,25 @@
+---
+description: Componentes Vue em resources/js
+globs: resources/js/**/*.vue
+alwaysApply: false
+---
+
+# Vue (`resources/js/**/*.vue`)
+
+Seguir `AGENTS.md`; Single File Components **consistentes** com a versão Vue e o setup do projeto (`createApp`, plugins).
+
+## Estrutura
+
+- `<script setup>` ou Options API — **mesmo padrão** que outros `.vue` no repositório; props e emits **tipados** quando usar TS.
+
+## Dados
+
+- Dados de API: validação mínima no cliente; **fonte de verdade** de regras de negócio no backend.
+
+## Boas práticas
+
+- Componentes **pequenos** e reutilizáveis; estilos scoped ou convenção global do projeto.
+
+## Anti-alucinação
+
+- Não assumir Pinia/Vuex/router sem verificar `package.json` e ficheiros de arranque em `resources/js`.

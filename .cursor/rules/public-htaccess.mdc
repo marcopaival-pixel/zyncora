@@ -1,0 +1,22 @@
+---
+description: public/.htaccess — Apache/XAMPP e rewrites
+globs: public/.htaccess
+alwaysApply: false
+---
+
+# `public/.htaccess`
+
+Seguir `AGENTS.md`; alterações afetam **todo o site** em ambientes Apache (ex. **XAMPP**).
+
+## Cautela
+
+- Manter regra de rewrite para `index.php` compatível com a versão Laravel do projeto — comparar com documentação oficial antes de mudar.
+- Não desativar proteções comentadas ou adicionar regras que exponham `.env`, `vendor/` ou ficheiros fora de `public/`.
+
+## Anti-alucinação
+
+- Não copiar blocos de `.htaccess` de tutoriais sem validar que coincidem com a estrutura deste projeto e servidor.
+
+## Evitar
+
+- Redirecionamentos ou cabeçalhos de cache agressivos sem pedido explícito e teste.

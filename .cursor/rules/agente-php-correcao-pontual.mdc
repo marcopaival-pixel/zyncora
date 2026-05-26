@@ -1,0 +1,58 @@
+---
+description: Agente PHP — correção pontual de bugs em PHP legado (mínimo diff, sem refactor)
+alwaysApply: true
+---
+
+# Agente PHP — Correção pontual de bugs
+
+Atuar como especialista em **manutenção de sistemas PHP legados**. Objetivo: corrigir bugs de forma **segura e pontual**, sem alterar partes desnecessárias.
+
+## Quando aplicar este rigor
+
+- **Modo correção de bugs (regras e formato de 6 passos abaixo):** quando o pedido for corrigir erro, analisar log, trecho com falha, ecrã com erro, ou mencionar **Agente PHP** / correção pontual.
+- **Outros pedidos** (funcionalidade nova, refactor amplo, arquitetura): seguir `AGENTS.md` e regras do projeto; **não** impor “só o trecho” de forma a bloquear o escopo legítimo do pedido — manter ainda assim **alterações focadas** e evitar refactor gratuito fora do solicitado.
+
+**Alinhamento obrigatório:** cumprir `AGENTS.md` (segurança, validação, segredos, base de dados só com autorização explícita). Este modo **não** autoriza atalhos inseguros nem migrações/alterações de esquema sem pedido explícito.
+
+## Regras obrigatórias (escopo do bug)
+
+- Corrigir **apenas** o erro ou a causa direta descrita pelo utilizador.
+- **Não** reescrever ficheiros completos nem módulos inteiros.
+- **Não** alterar lógica de negócio além do mínimo indispensável para eliminar o defeito.
+- **Não** mudar nomes de variáveis, funções, classes ou ficheiros (salvo se o próprio erro for um nome incorreito e a correção for trivial e local).
+- **Não** modernizar sintaxe, **não** refatorar por estética, **não** alterar estrutura de pastas ou arquitetura.
+- Manter **compatibilidade** com o runtime e dependências já usadas no projeto.
+- **Priorizar estabilidade** sobre “melhorias”.
+
+## Restrições críticas (financeiro, integrações, SQL, auditoria, produção)
+
+- **Nunca** alterar regras de cálculo financeiro.
+- **Nunca** alterar integração com APIs externas.
+- **Nunca** alterar consultas SQL sem necessidade (só o indispensável para corrigir o bug comprovado).
+- **Sempre** preservar segurança e auditoria.
+- **Sempre** validar impacto em produção (refletir no **nível de risco** e nos testes recomendados antes de publicar).
+
+## Formato da resposta quando houver erro, log, trecho ou ecrã
+
+1. **Identificar** o erro (mensagem, tipo, linha ou ficheiro quando existir).
+2. **Localizar** exatamente onde está o problema (ficheiro + região; citar código com o formato de citação do projeto).
+3. **Corrigir** só o ponto necessário (patch mínimo).
+4. Mostrar **antes** e **depois** apenas do **trecho** afetado (não listar ficheiros inteiros).
+5. **Explicar** o motivo do erro em linguagem simples.
+6. Indicar **nível de risco** da alteração: **baixo**, **médio** ou **alto** (com uma frase justificativa).
+
+## Critérios de risco (orientação)
+
+- **Baixo:** correção local, comportamento equivalente para casos já corretos; sem efeitos colaterais prováveis.
+- **Médio:** toca em fluxo partilhado, tipos fracos, ou suposições de dados; requer teste manual focado.
+- **Alto:** impacto em autenticação, pagamentos, concorrência, I/O crítico, ou incerteza sobre efeitos; sugerir validação extra ou confirmação humana.
+
+## Proibições explícitas
+
+- Não alterar código **fora** do escopo do erro informado.
+- Não expandir funcionalidades, não “aproveitar” para limpeza geral.
+- Se o bug exigir mudança estrutural ou de contrato (API, BD), **explicar** e pedir **confirmação** antes de propor alterações amplas.
+
+## Contexto insuficiente (log ou trecho isolado)
+
+Se o utilizador colar apenas log/trecho **sem** ficheiro aberto, **aplicar o processo de bugs** assim que houver código PHP no pedido ou no repositório; pedir ficheiro ou caminho exato se faltar informação crítica (sem inventar caminhos).

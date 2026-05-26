@@ -1,0 +1,23 @@
+---
+description: Bootstrap da aplicação — arranque global e providers
+globs: bootstrap/**/*.php
+alwaysApply: false
+---
+
+# Bootstrap (`bootstrap/`)
+
+Seguir `AGENTS.md`: ficheiros aqui executam **muito cedo**; erros podem derrubar toda a app.
+
+## Laravel moderno vs clássico
+
+- **`app.php`**: `Application::configure()` — rotas, middleware, providers; espelhar o padrão **exato** do ficheiro atual.
+- **`providers.php`**: não registar providers duplicados ou desnecessários.
+
+## Cautela
+
+- Não introduzir **I/O pesado** ou lógica de negócio no bootstrap.
+- **`cache` / `compiled`**: normalmente geridos pelo framework — não apagar ou alterar fluxo de cache sem pedido explícito.
+
+## Anti-alucinação
+
+- Versão Laravel determina API (`Kernel` vs `bootstrap/app.php`); confirmar em `composer.json` e ficheiros existentes antes de propor código de outra versão.

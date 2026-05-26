@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Globo orbital Zyncora</title>
+  <desc id="description">Globo digital azul com o nome Zyncora orbitando em volta.</desc>
+  <defs>
+    <radialGradient id="globe-fill" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.55" />
+      <stop offset="45%" stop-color="#2563eb" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0.9" />
+    </radialGradient>
+
+    <linearGradient id="stroke-blue" x1="250" x2="950" y1="120" y2="680" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="45%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+
+    <linearGradient id="orbit-blue" x1="260" x2="940" y1="260" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2" />
+      <stop offset="35%" stop-color="#93c5fd" stop-opacity="1" />
+      <stop offset="70%" stop-color="#8b5cf6" stop-opacity="1" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.2" />
+    </linearGradient>
+
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="soft-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="18" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <clipPath id="globe-clip">
+      <circle cx="600" cy="400" r="238" />
+    </clipPath>
+
+    <path id="orbit-path" d="M 270 378 C 380 244, 820 244, 930 378 C 820 512, 380 512, 270 378 Z" />
+  </defs>
+
+  <style>
+    .grid-line {
+      fill: none;
+      stroke: #7dd3fc;
+      stroke-opacity: 0.38;
+      stroke-width: 1.8;
+    }
+
+    .continent {
+      fill: #38bdf8;
+      fill-opacity: 0.28;
+      stroke: #93c5fd;
+      stroke-opacity: 0.55;
+      stroke-width: 1.4;
+    }
+
+    .node {
+      fill: #bfdbfe;
+      filter: url(#glow);
+    }
+
+    .connection {
+      stroke: #60a5fa;
+      stroke-opacity: 0.35;
+      stroke-width: 1.2;
+    }
+
+    .orbit {
+      animation: orbit-spin 16s linear infinite;
+      transform-origin: 600px 378px;
+    }
+
+    .orbit-text {
+      fill: #f8fafc;
+      font-family: Inter, Poppins, Arial, sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      filter: url(#glow);
+    }
+
+    .globe-light {
+      animation: globe-pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes orbit-spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes globe-pulse {
+      0%, 100% {
+        opacity: 0.85;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <rect width="1200" height="800" fill="transparent" />
+
+  <g class="globe-light" filter="url(#soft-glow)">
+    <ellipse cx="600" cy="680" rx="260" ry="42" fill="#2563eb" opacity="0.18" />
+    <circle cx="600" cy="400" r="244" fill="#0ea5e9" opacity="0.18" />
+  </g>
+
+  <g>
+    <circle cx="600" cy="400" r="238" fill="url(#globe-fill)" stroke="url(#stroke-blue)" stroke-width="4" filter="url(#glow)" />
+
+    <g clip-path="url(#globe-clip)">
+      <ellipse class="grid-line" cx="600" cy="400" rx="218" ry="72" />
+      <ellipse class="grid-line" cx="600" cy="400" rx="222" ry="132" />
+      <ellipse class="grid-line" cx="600" cy="400" rx="224" ry="194" />
+      <path class="grid-line" d="M 362 400 H 838" />
+      <path class="grid-line" d="M 600 162 C 540 245 516 321 516 400 C 516 479 540 555 600 638" />
+      <path class="grid-line" d="M 600 162 C 660 245 684 321 684 400 C 684 479 660 555 600 638" />
+      <path class="grid-line" d="M 600 162 C 456 250 396 326 396 400 C 396 474 456 550 600 638" />
+      <path class="grid-line" d="M 600 162 C 744 250 804 326 804 400 C 804 474 744 550 600 638" />
+
+      <path class="continent" d="M 463 263 C 420 274 394 301 386 341 C 408 337 422 350 437 366 C 451 381 472 374 485 389 C 501 408 478 430 496 450 C 511 467 548 457 560 478 C 571 500 549 529 569 548 C 595 528 615 499 607 469 C 601 443 567 433 568 409 C 569 386 599 382 607 360 C 578 350 550 337 532 313 C 513 287 495 257 463 263 Z" />
+      <path class="continent" d="M 641 248 C 679 232 733 240 768 268 C 744 282 713 284 699 312 C 686 338 713 352 736 360 C 775 373 805 399 813 437 C 778 430 755 453 728 468 C 697 486 670 473 653 445 C 637 419 624 388 641 363 C 659 336 683 322 668 292 C 662 280 646 265 641 248 Z" />
+      <path class="continent" d="M 690 506 C 718 493 754 496 775 520 C 799 548 781 586 745 594 C 717 600 696 579 684 555 C 675 536 674 515 690 506 Z" />
+
+      <path class="connection" d="M 480 330 L 548 376 L 630 344 L 720 394 L 776 452" />
+      <path class="connection" d="M 438 418 L 530 455 L 616 430 L 704 492" />
+      <path class="connection" d="M 536 530 L 608 472 L 684 556" />
+
+      <circle class="node" cx="480" cy="330" r="4" />
+      <circle class="node" cx="548" cy="376" r="4" />
+      <circle class="node" cx="630" cy="344" r="4" />
+      <circle class="node" cx="720" cy="394" r="4" />
+      <circle class="node" cx="776" cy="452" r="4" />
+      <circle class="node" cx="438" cy="418" r="4" />
+      <circle class="node" cx="530" cy="455" r="4" />
+      <circle class="node" cx="616" cy="430" r="4" />
+      <circle class="node" cx="704" cy="492" r="4" />
+      <circle class="node" cx="536" cy="530" r="4" />
+      <circle class="node" cx="608" cy="472" r="4" />
+      <circle class="node" cx="684" cy="556" r="4" />
+    </g>
+  </g>
+
+  <g class="orbit">
+    <use href="#orbit-path" fill="none" stroke="url(#orbit-blue)" stroke-width="7" stroke-linecap="round" filter="url(#glow)" />
+    <use href="#orbit-path" fill="none" stroke="#020617" stroke-opacity="0.36" stroke-width="30" />
+    <text class="orbit-text">
+      <textPath href="#orbit-path" startOffset="0%">
+        Zyncora        Zyncora        Zyncora        Zyncora
+      </textPath>
+    </text>
+  </g>
+</svg>

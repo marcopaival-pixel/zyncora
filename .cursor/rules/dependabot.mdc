@@ -1,0 +1,21 @@
+---
+description: Dependabot — .github/dependabot.yml
+globs: .github/dependabot.yml
+alwaysApply: false
+---
+
+# `.github/dependabot.yml`
+
+Seguir `AGENTS.md`; atualizações **automáticas** de dependências com impacto em segurança e build.
+
+## Ecosystems
+
+- `package-ecosystem` e `directory` **corretos** (`composer`, `npm`, `github-actions`); intervalos `schedule` razoáveis para o tamanho da equipa.
+
+## Grupos / ignore
+
+- Agrupar updates quando reduz ruído **sem** misturar major breaking sem revisão; `ignore` só com justificativa.
+
+## Segurança
+
+- `open-pull-requests-limit` e reviewers alinhados à capacidade de rever PRs de segurança a tempo.

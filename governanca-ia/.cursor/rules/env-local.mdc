@@ -1,0 +1,21 @@
+---
+description: .env local — variáveis sensíveis (não replicar em ficheiros versionados)
+globs: .env
+alwaysApply: false
+---
+
+# `.env` (local)
+
+Seguir `AGENTS.md`; contém **segredos e ambiente real** — não copiar valores para `AGENTS.md`, chats, nem ficheiros versionados.
+
+## Boas práticas
+
+- Novas chaves: documentar **nome e placeholder** em `.env.example`; valores reais só em `.env` ignorado pelo Git.
+
+## Partilha
+
+- Não sugerir colar `.env` de produção em issues ou PRs; usar rotação de credenciais se houve exposição.
+
+## Evitar
+
+- Commit acidental: rever `git status` e política de hooks/pre-commit se o projeto as usa.

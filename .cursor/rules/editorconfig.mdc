@@ -1,0 +1,21 @@
+---
+description: .editorconfig — consistência de charset, indentação e newline
+globs: .editorconfig
+alwaysApply: false
+---
+
+# `.editorconfig`
+
+Seguir `AGENTS.md`; define estilo **transversal** (PHP, JS, YAML, Markdown) — evitar conflito com Prettier/Pint que também formatam.
+
+## Raiz
+
+- `root = true` e `charset`, `end_of_line`, `insert_final_newline` **estáveis** para todo o repo.
+
+## Por linguagem
+
+- `indent_style` / `indent_size` alinhados ao que **Pint, ESLint e Prettier** já impõem; não forçar tabs num projeto baseado em spaces sem migração acordada.
+
+## Evitar
+
+- Regras que quebrem ficheiros **gerados** ou `vendor/` — usar `path` excludes se o formato do `.editorconfig` suportar.

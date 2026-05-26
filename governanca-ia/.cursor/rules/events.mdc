@@ -1,0 +1,22 @@
+---
+description: Eventos de domínio — contratos e registo
+globs: app/Events/**/*.php
+alwaysApply: false
+---
+
+# Eventos (`app/Events`)
+
+Seguir `AGENTS.md`; eventos devem refletir **domínio e naming** já usados no projeto.
+
+## Contrato
+
+- Propriedades públicas / construtor **consistentes** com quem faz `event(new ...)` — procurar usos com grep antes de renomear.
+- Se existir `app/Listeners/`, alinhar payloads ao que os listeners esperam.
+
+## Registo
+
+- Listeners automáticos via `EventServiceProvider` ou descoberta — **não duplicar** registo; seguir `app/Providers/EventServiceProvider.php` (ou equivalente Laravel 11+).
+
+## Evitar
+
+- Eventos “órfãos” sem listener ou sem disparo; side-effects pesados no próprio evento (preferir listener/job conforme o projeto).

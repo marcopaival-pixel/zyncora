@@ -1,0 +1,25 @@
+---
+description: rector.php — refactors automáticos PHP
+globs: rector.php
+alwaysApply: false
+---
+
+# `rector.php`
+
+Seguir `AGENTS.md`; **Rector** altera código em massa — alto impacto; só sets e rules **intencionais** e alinhados à versão PHP do projeto.
+
+## Sets
+
+- `LevelSetList`, `SetList` ou `RectorConfig` custom — verificar `composer.json` / documentação Rector para versão instalada.
+
+## Paths
+
+- `withPaths` / `withSkip` **precisos**; não apontar para `vendor` ou gerados; espelhar estrutura real (`app`, `tests`, `routes`).
+
+## Compatibilidade
+
+- Refactors compatíveis com **Laravel** e **PHP** mínimos do `composer.json`; não aplicar sets que quebrem o framework sem migração planeada.
+
+## Evitar
+
+- Rules experimentais ou destrutivas sem revisão humana e backup (git).

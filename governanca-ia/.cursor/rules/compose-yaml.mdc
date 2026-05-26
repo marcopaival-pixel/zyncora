@@ -1,0 +1,17 @@
+---
+description: compose.yaml — Compose v2 (nome alternativo)
+globs: compose.yaml
+alwaysApply: false
+---
+
+# `compose.yaml`
+
+Seguir `AGENTS.md`; mesmo espírito que `docker-compose.yml` — definição de **serviços** para desenvolvimento ou deploy.
+
+## Alinhamento
+
+- Se coexistir com `docker-compose.yml`, **não divergir** sem intenção explícita; um ficheiro deve ser a fonte de verdade (documentar no projeto).
+
+## Segredos e portas
+
+- Sem credenciais reais versionadas; portas e volumes consistentes com a documentação local.

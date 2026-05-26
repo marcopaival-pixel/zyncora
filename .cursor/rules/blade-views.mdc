@@ -1,0 +1,24 @@
+---
+description: Views Blade — segurança, CSRF e consistência com o projeto
+globs: resources/views/**/*.php
+alwaysApply: false
+---
+
+# Views Blade (`resources/views`)
+
+Seguir `AGENTS.md` e o estilo **já usado** nas views existentes (layouts, componentes, stacks).
+
+## Segurança
+
+- Conteúdo gerado pelo utilizador: preferir **`{{ }}`** (escapado). **`{!! !!}`** só quando o projeto já trata HTML confiável da mesma forma.
+- Formulários: **`@csrf`**; métodos PUT/PATCH/DELETE com **`@method`** conforme documentação Laravel e padrão do projeto.
+- Não expor segredos nem dados sensíveis em HTML/JS inline.
+
+## Estrutura
+
+- Lógica pesada **fora** da view (controllers, view models, components com classe) — espelhar o que o diretório já faz.
+- Reutilizar **layouts**, **@extends**, **@section**, **components** ou **`<x-...>`** como no restante projeto.
+
+## Anti-alucinação
+
+- Não inventar nomes de rotas (`route('...')`) nem variáveis passadas à view — confirmar em controladores e `routes/`.

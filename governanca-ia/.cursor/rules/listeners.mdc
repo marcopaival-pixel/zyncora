@@ -1,0 +1,23 @@
+---
+description: Listeners — reação a eventos sem acoplar domínio indevido
+globs: app/Listeners/**/*.php
+alwaysApply: false
+---
+
+# Listeners (`app/Listeners`)
+
+Seguir `AGENTS.md`; espelhar **estrutura e assinaturas** (`handle(Event $event)`) dos listeners existentes.
+
+## Alinhamento
+
+- Ler o **evento** correspondente: não inventar propriedades em `$event`.
+- Registo em `EventServiceProvider` ou descoberta automática — igual ao resto do projeto.
+
+## Boas práticas
+
+- Lógica pesada: delegar a **services** ou despachar **jobs** se for o padrão local.
+- Falhas: não engolir exceções sem o tratamento que outros listeners usam (log, `failed()` em queued listeners).
+
+## Evitar
+
+- Chamadas HTTP síncronas ou IO bloqueante se o projeto usa filas para o mesmo tipo de trabalho.

@@ -1,0 +1,24 @@
+---
+description: Testes PHPUnit/Pest — alinhamento com a suite existente
+globs: tests/**/*.php
+alwaysApply: false
+---
+
+# Testes (`tests/`)
+
+Seguir `AGENTS.md` e a **estrutura real** (`Feature/`, `Unit/`, Pest vs PHPUnit, `TestCase` base).
+
+## Antes de escrever
+
+- Ver como os testes existentes arrancam a app (`RefreshDatabase`, `DatabaseTransactions`, `actingAs`, etc.).
+- Não inventar factories ou estados de BD — usar factories e seeders **já definidos** em `database/factories` e migrações.
+
+## Ao implementar
+
+- **Assertions** e estilo (PHPUnit `assert*` vs Pest `expect()`) iguais ao resto da pasta.
+- Rotas e payloads: copiar contratos reais das rotas e validações, não supor JSON ou campos.
+
+## Evitar
+
+- Testes que dependem de serviços externos sem o mesmo isolamento (HTTP fake, mocks) que o projeto usa.
+- Apagar ou enfraquecer testes existentes sem pedido explícito.

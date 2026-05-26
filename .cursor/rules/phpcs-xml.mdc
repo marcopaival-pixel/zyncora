@@ -1,0 +1,21 @@
+---
+description: PHP_CodeSniffer — phpcs.xml*
+globs: phpcs.xml*
+alwaysApply: false
+---
+
+# PHP_CodeSniffer (`phpcs.xml*`)
+
+Seguir `AGENTS.md`; padrões PSR/Laravel **explícitos** — compatível com Pint em alguns projetos; evitar regras duplicadas e conflituosas.
+
+## Ruleset
+
+- `rule ref` e `exclude-pattern` **justificados**; não excluir `app/` salvo exceção documentada.
+
+## Compatibilidade
+
+- Se o projeto usa **Pint** como formatador principal, alinhar PHPCS a **estilo + smells**, não duplicar formatação trivial.
+
+## Anti-alucinação
+
+- Nomes de sniffs e standards existentes na versão instalada (`squizlabs/php_codesniffer`).

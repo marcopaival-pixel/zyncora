@@ -1,0 +1,17 @@
+---
+description: Prettier — .prettierrc*
+globs: .prettierrc*
+alwaysApply: false
+---
+
+# `.prettierrc*`
+
+Seguir `AGENTS.md`; equivalente a `prettier.config.*` — **uma** fonte de verdade: se coexistirem vários ficheiros Prettier, alinhar ou documentar prioridade.
+
+## JSON/YAML
+
+- Sintaxe válida; chaves suportadas pela versão Prettier em `package.json`.
+
+## Evitar
+
+- Duplicar opções já definidas em `prettier.config.*` com valores contraditórios.

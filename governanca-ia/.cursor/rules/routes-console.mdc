@@ -1,0 +1,22 @@
+---
+description: routes/console.php — registo de comandos Artisan (Laravel 11+)
+globs: routes/console.php
+alwaysApply: false
+---
+
+# Consola (`routes/console.php`)
+
+Seguir `AGENTS.md`; este ficheiro **regista** comandos e closures Artisan — impacto em quem corre `php artisan`.
+
+## Padrão
+
+- `Artisan::command(...)` ou invocações `Schedule::` se o projeto as centraliza aqui — espelhar o estilo **já presente** no ficheiro.
+- Não duplicar comandos já definidos como classes em `app/Console/Commands` sem necessidade.
+
+## Segurança
+
+- Comandos que alteram BD ou ficheiros: mesmas salvaguardas que em `app/Console/Commands` (confirmação, `--force`, etc.).
+
+## Anti-alucinação
+
+- Não invocar classes ou helpers **inexistentes**; alinhar namespaces ao projeto.

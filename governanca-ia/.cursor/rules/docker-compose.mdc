@@ -1,0 +1,25 @@
+---
+description: docker-compose.yml — serviços e variáveis de ambiente
+globs: docker-compose.yml
+alwaysApply: false
+---
+
+# `docker-compose.yml`
+
+Seguir `AGENTS.md`; alterações afetam **toda a stack** local/CI — explicar impacto.
+
+## Consistência
+
+- Serviços, **portas**, **volumes** e **networks** alinhados aos nomes já usados no ficheiro; não duplicar serviços com o mesmo papel.
+
+## Segredos
+
+- **Não** commitar passwords reais; usar variáveis de ambiente ou ficheiros ignorados (`.env` para Compose) conforme o projeto.
+
+## Compatibilidade
+
+- Se o projeto também documenta **XAMPP**, não assumir Docker como único ambiente — evitar conflito de portas (80, 3306) sem nota.
+
+## Anti-alucinação
+
+- Não inventar imagens ou comandos `docker compose` não testados; alinhar versões a `Dockerfile` existente, se houver.

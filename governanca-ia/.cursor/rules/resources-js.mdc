@@ -1,0 +1,26 @@
+---
+description: JavaScript em resources/js — módulos e integração Laravel/Vite
+globs: resources/js/**/*.js
+alwaysApply: false
+---
+
+# JavaScript (`resources/js/**/*.js`)
+
+Seguir `AGENTS.md`; código front-end deve alinhar a **Vite/Mix**, `package.json` e uso em Blade (`@vite`, `mix()`).
+
+## Estrutura
+
+- Imports **resolvíveis** (aliases do Vite, extensões `.js`/`.vue` conforme config); não inventar APIs globais não expostas pelo Laravel.
+
+## Boas práticas
+
+- **Fetch/axios** para rotas nomeadas: usar URLs ou meta **geradas pelo backend** quando o projeto já o faz — não hardcodar domínios de produção.
+- Tratamento de erros e estados de loading **consistentes** com o restante código em `resources/js`.
+
+## Segurança
+
+- **Não** embutir tokens ou segredos; CSRF para POST conforme padrão Laravel (meta tag, cookie `XSRF`, etc.).
+
+## Evitar
+
+- Lógica de negócio sensível que deveria estar só no servidor.

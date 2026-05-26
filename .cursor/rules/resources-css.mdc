@@ -1,0 +1,25 @@
+---
+description: CSS em resources/css — camadas e integração Vite/Mix
+globs: resources/css/**/*.css
+alwaysApply: false
+---
+
+# CSS (`resources/css/**/*.css`)
+
+Seguir `AGENTS.md`; folhas de estilo **importadas** pelo entry (`app.css`) e pelo Vite/Mix.
+
+## Organização
+
+- `@tailwind` directives, `@import` e ordem **consistente** com o ficheiro principal do projeto; não duplicar resets em cada ficheiro sem padrão local.
+
+## Compatibilidade
+
+- Sintaxe suportada pelo pipeline (PostCSS, nesting) — ver `postcss.config.*`.
+
+## Boas práticas
+
+- Evitar `!important` em massa; variáveis CSS ou tema Tailwind conforme o design system.
+
+## Anti-alucinação
+
+- Caminhos em `url()` relativos ao build final em `public/build` — testar após `vite build` quando aplicável.

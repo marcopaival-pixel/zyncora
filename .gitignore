@@ -1,0 +1,24 @@
+# Monorepo ProjetoChatbot
+.DS_Store
+Thumbs.db
+*.log
+
+# Cursor / IDE (opcional — remova se quiser versionar)
+# .cursor/
+
+# Laravel app (chatbox-saas)
+chatbox-saas/.env
+chatbox-saas/.env.*
+!chatbox-saas/.env.example
+chatbox-saas/vendor/
+chatbox-saas/node_modules/
+chatbox-saas/public/build/
+chatbox-saas/public/hot/
+chatbox-saas/public/storage/
+chatbox-saas/storage/*.key
+chatbox-saas/storage/app/backups/
+chatbox-saas/bootstrap/cache/*.php
+!chatbox-saas/bootstrap/cache/.gitignore
+chatbox-saas/.phpunit.cache
+chatbox-saas/.phpunit.result.cache
+chatbox-saas/auth.json

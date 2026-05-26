@@ -1,0 +1,21 @@
+---
+description: webpack.mix.js — Laravel Mix (legado)
+globs: webpack.mix.js
+alwaysApply: false
+---
+
+# `webpack.mix.js`
+
+Seguir `AGENTS.md`; projetos **Laravel Mix** (pré-Vite) — alterações afetam o **bundle** publicado em `public/`.
+
+## Entradas e saída
+
+- `mix.js()`, `mix.sass()`, `mix.version()` **alinhados** aos ficheiros reais em `resources/js` e `resources/css`; não inventar caminhos.
+
+## Compatibilidade
+
+- Não misturar configuração Mix com Vite no mesmo projeto salvo migração explícita pedida pelo utilizador.
+
+## Evitar
+
+- Plugins ou loaders novos sem necessidade; manter paridade com `package.json` e versões suportadas.

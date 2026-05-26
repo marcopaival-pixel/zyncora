@@ -1,0 +1,25 @@
+---
+description: TypeScript em resources/js — tipos e build
+globs: resources/js/**/*.ts
+alwaysApply: false
+---
+
+# TypeScript (`resources/js/**/*.ts`)
+
+Seguir `AGENTS.md` e as mesmas integrações que **JavaScript** em `resources/js`; tipagem **estrita** conforme `tsconfig.json` do projeto.
+
+## Configuração
+
+- `tsconfig.json` (paths, `strict`) — não desligar `strict` ou ignorar erros em massa sem pedido explícito.
+
+## Tipos
+
+- **Não** inventar tipos para respostas de API — alinhar a contratos reais (resources, DTOs) ou tipos gerados se existirem.
+
+## Interop
+
+- Imports `.vue` ou `.js` apenas se o bundler e `tsconfig` já o suportam; espelhar exemplos existentes no repositório.
+
+## Evitar
+
+- `any` generalizado; duplicar interfaces que já existem em ficheiros partilhados.

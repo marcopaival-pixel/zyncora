@@ -1,0 +1,22 @@
+---
+description: vite.config — entrada, aliases e integração Laravel Vite
+globs: vite.config.*
+alwaysApply: false
+---
+
+# Vite (`vite.config.*`)
+
+Seguir `AGENTS.md`; o build front-end deve manter-se **compatível** com `resources/` e com `@vite` nas views.
+
+## Laravel Vite
+
+- Plugin `laravel-vite-plugin` e ponto de entrada (`resources/js/app.js`, `resources/css/app.css` ou equivalente **existente**) — não inventar caminhos sem verificar o disco.
+- `server.hmr` / `host` em Docker ou rede: só alterar se o projeto já documentar esse modo.
+
+## Aliases e pastas
+
+- `resolve.alias` alinhado ao que o código já importa; não quebrar imports relativos em massa.
+
+## Evitar
+
+- Mudanças agressivas em `build.rollupOptions` que excluam ficheiros necessários ao bundle sem análise.

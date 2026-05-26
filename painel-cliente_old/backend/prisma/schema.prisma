@@ -1,0 +1,98 @@
+// painel-cliente/backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                String         @id @default(uuid())
+  name              String
+  slug              String         @unique
+  logoUrl           String?
+  onboardingStatus  String         @default("pending")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  users             User[]
+  contacts          Contact[]
+  conversations     Conversation[]
+  chatbots          Chatbot[]
+  sectors           Sector[]
+  tags              Tag[]
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("agent") // admin, supervisor, agent
+  companyId     String
+  company       Company        @relation(fields: [companyId], references: [id])
+  conversations Conversation[]
+  createdAt     DateTime       @default(now())
+}
+
+model Sector {
+  id        String   @id @default(uuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6366f1")
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+}
+
+model Contact {
+  id            String         @id @default(uuid())
+  name          String?
+  phone         String
+  email         String?
+  companyId     String
+  company       Company        @relation(fields: [companyId], references: [id])
+  conversations Conversation[]
+  createdAt     DateTime       @default(now())
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  status    String   @default("open") // open, closed, pending
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id])
+  agentId   String?
+  agent     User?    @relation(fields: [agentId], references: [id])
+  messages  Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  type           String       @default("text") // text, image, file
+  sender         String       // visitor, agent, bot
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  createdAt      DateTime     @default(now())
+}
+
+model Chatbot {
+  id              String   @id @default(uuid())
+  name            String
+  active          Boolean  @default(false)
+  flowDefinition  Json
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+  createdAt       DateTime @default(now())
+}

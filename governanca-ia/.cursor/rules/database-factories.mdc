@@ -1,0 +1,26 @@
+---
+description: Model factories — estado válido e alinhamento ao esquema
+globs: database/factories/**/*.php
+alwaysApply: false
+---
+
+# Factories (`database/factories`)
+
+Seguir `AGENTS.md`; estados gerados devem ser **válidos** para o model e para as **migrações** (FKs, enums, NOT NULL).
+
+## Definição
+
+- `definition()`: campos obrigatórios preenchidos; `fake()` e formatos **consistentes** com outras factories do projeto.
+- Relações: `for()` / estados `afterCreating` quando o esquema exige registos relacionados — copiar padrão de factories existentes.
+
+## Estados
+
+- Métodos de estado (`active()`, `admin()`, etc.) **nomeados** como no resto do diretório; não criar estados que violem constraints da BD.
+
+## Anti-alucinação
+
+- Não inventar colunas; verificar `$fillable` / `$casts` / migrações do model associado.
+
+## Evitar
+
+- Dados sensíveis realistas que pareçam PII real; preferir padrões claramente fictícios.

@@ -1,0 +1,13 @@
+---
+description: SCSS dentro de resources/css
+globs: resources/css/**/*.scss
+alwaysApply: false
+---
+
+# SCSS em `resources/css/`
+
+Seguir `AGENTS.md`; mesmo espírito que `resources/sass/**/*.scss` e entrada no **Vite/Mix** — atualizar imports no CSS/JS principal quando adicionares ficheiros novos.
+
+## Consistência
+
+- Variáveis, mixins e `@use`/`@import` alinhados ao que já existe em `resources/css` ou `resources/sass`.

@@ -1,0 +1,17 @@
+---
+description: .eslintrc* — ESLint legado (eslintrc.json, yml, cjs)
+globs: .eslintrc*
+alwaysApply: false
+---
+
+# `.eslintrc*` (legado)
+
+Seguir `AGENTS.md`; mesmo espírito que `eslint.config.*` — `extends`, `plugins` e `parser` **só** com pacotes em `package.json`.
+
+## Migração
+
+- Se o projeto migrar para flat config, **não** duplicar regras em ambos os formatos sem remover o legado.
+
+## Consistência
+
+- `env`, `globals` e `rules` alinhados ao runtime real (browser vs node para scripts de build).

@@ -1,0 +1,21 @@
+---
+description: Psalm — análise estática PHP
+globs: psalm*.xml
+alwaysApply: false
+---
+
+# Psalm (`psalm*.xml`)
+
+Seguir `AGENTS.md`; paralelo ao PHPStan em alguns projetos — **não** misturar config contraditória sem estratégia clara.
+
+## Nível e stubs
+
+- `errorLevel`, `resolveFromConfigFile`, stubs para Laravel/vendor **alinhados** a `composer.json` e documentação Psalm.
+
+## Supressões
+
+- `@psalm-suppress` em massa no código **desencorajado**; preferir tipos corretos ou issues no baseline com justificação.
+
+## Paths
+
+- `<projectFiles>` e `<ignoreFiles>` refletem pastas **existentes**; não ignorar `app/` inteiro salvo legado documentado.

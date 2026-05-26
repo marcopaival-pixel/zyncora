@@ -1,0 +1,25 @@
+---
+description: Exceções da aplicação — mensagens, HTTP e logging
+globs: app/Exceptions/**/*.php
+alwaysApply: false
+---
+
+# Exceções (`app/Exceptions`)
+
+Seguir `AGENTS.md`; exceções customizadas e handler devem alinhar à **versão Laravel** e ao tratamento global já configurado (`bootstrap/app.php`, `Handler`, etc.).
+
+## Classes customizadas
+
+- Estender `Exception` ou classes base **já usadas** no projeto; propriedades e construtores **claros**; códigos HTTP quando forem `HttpException` ou renderizáveis.
+
+## Mensagens
+
+- **Não** expor stack traces ou detalhes internos ao cliente em produção; mensagens genéricas ao utilizador, detalhes em **log**.
+
+## Handler / render
+
+- Se existir `register`/`render`/`report` no handler, **espelhar** padrão existente; não silenciar erros críticos sem logging.
+
+## Anti-alucinação
+
+- Não referenciar middleware ou rotas inexistentes na resposta de erro; status HTTP coerentes com o resto da API.

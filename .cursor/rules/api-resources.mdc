@@ -1,0 +1,26 @@
+---
+description: API Resources — serialização JSON alinhada a models e versão da API
+globs: app/Http/Resources/**/*.php
+alwaysApply: false
+---
+
+# API Resources (`app/Http/Resources`)
+
+Seguir `AGENTS.md`; a resposta JSON deve refletir **models e relações reais** — não inventar campos.
+
+## Estrutura
+
+- `toArray($request)`: chaves e formatos **consistentes** com outros resources do projeto (snake_case vs camelCase, wrapping `data`).
+- **Relações**: `whenLoaded`, `mergeWhen` como nos resources existentes; evitar N+1 — documentar necessidade de `with()` no controller/query.
+
+## Condicionalidade
+
+- Expor atributos sensíveis só quando o projeto já o faz com Policy/`$this->when()` ou gates.
+
+## Anti-alucinação
+
+- Nomes de atributos do model e tipos alinhados a `$casts` / migrações; não supor paginação sem verificar o controlador.
+
+## Evitar
+
+- Lógica de negócio pesada no resource; delegar a accessors no model ou DTOs se for o padrão local.

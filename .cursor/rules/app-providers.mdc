@@ -1,0 +1,23 @@
+---
+description: Service providers — registo e boot sem efeitos colaterais indevidos
+globs: app/Providers/**/*.php
+alwaysApply: false
+---
+
+# Providers (`app/Providers`)
+
+Seguir `AGENTS.md`; `register()` e `boot()` executam no arranque da aplicação — impacto global.
+
+## Padrão do projeto
+
+- **Bindings** em `register()`; **rotas, views, policies** em `boot()` conforme a documentação Laravel e exemplos existentes nesta pasta.
+- Não duplicar registo já feito em `bootstrap/providers.php` (Laravel 11+) ou noutro provider.
+
+## Cautela
+
+- Evitar queries pesadas, HTTP externo ou lógica de negócio complexa no `boot()` salvo padrão local explícito.
+- `defer` / `DeferredServiceProvider` só se o projeto já usar para o mesmo tipo de serviço.
+
+## Anti-alucinação
+
+- Não registar facades, singletons ou caminhos para classes **inexistentes**.

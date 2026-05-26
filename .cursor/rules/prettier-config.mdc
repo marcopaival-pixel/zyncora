@@ -1,0 +1,21 @@
+---
+description: Prettier — prettier.config.*
+globs: prettier.config.*
+alwaysApply: false
+---
+
+# Prettier (`prettier.config.*`)
+
+Seguir `AGENTS.md`; formatação **consistente** com o que o CI e o editor já aplicam.
+
+## Opções
+
+- `semi`, `singleQuote`, `trailingComma`, `printWidth` — espelhar convenções **já usadas** no repositório (outros ficheiros formatados).
+
+## Integração
+
+- **Não** conflitar com ESLint (`eslint-config-prettier`) se o projeto combina ambos — ver `package.json` e configs ESLint.
+
+## Evitar
+
+- Mudanças que gerem **diff gigante** em todo o JS/TS sem pedido explícito do utilizador.

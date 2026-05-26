@@ -1,0 +1,25 @@
+---
+description: PHPStan — phpstan*.neon
+globs: phpstan*.neon
+alwaysApply: false
+---
+
+# PHPStan (`phpstan*.neon`)
+
+Seguir `AGENTS.md`; análise estática **obrigatória** em espírito — não desligar regras para “passar” sem corrigir causas.
+
+## Nível e paths
+
+- `level` e `paths` (`app`, `routes`, `tests`) **reais**; não excluir `app` salvo padrão documentado.
+
+## Laravel
+
+- Extensões `larastan` / bootstrap de aplicação **só** se constarem em `composer.json`.
+
+## Baseline
+
+- `baseline.neon` existe para dívida técnica **explícita** — não inflar baseline silenciosamente; preferir correções incrementais.
+
+## Anti-alucinação
+
+- Opções e nomes de regras válidos para a **versão** `phpstan/phpstan` (e extensões) instalada.

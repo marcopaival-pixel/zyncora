@@ -1,0 +1,25 @@
+---
+description: Definição de rotas Laravel — consistência e não invencionice
+globs: routes/**/*.php
+alwaysApply: false
+---
+
+# Rotas (`routes/`)
+
+Seguir `AGENTS.md` e a **organização atual** (`web.php`, `api.php`, `channels.php`, `console.php`, subpastas `routes/*`).
+
+## Antes de adicionar rotas
+
+- Ler ficheiros de rotas existentes: **prefixos**, **middleware** (`auth`, `verified`, grupos), **nomes** (`->name()`).
+- Não duplicar URIs nem nomes de rota; não inventar **controllers** ou **actions** — verificar que existem em `app/Http/Controllers` (ou estrutura equivalente).
+
+## Boas práticas
+
+- **API** vs **web**: respeitar a separação já usada; JSON e estado sem sessão tipicamente em `api`.
+- Parâmetros de rota: mesma convenção de naming (`{user}`, `{id}`) que o resto do ficheiro.
+- Middleware e `Route::middleware` alinhados ao que o projeto já aplica em grupos.
+
+## Evitar
+
+- Rotas “mortas” para controladores inexistentes.
+- Alterar em massa prefixos ou middleware globais sem analisar impacto e sem pedido explícito.

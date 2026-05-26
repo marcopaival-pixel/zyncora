@@ -1,0 +1,24 @@
+---
+description: Seeders — dados de desenvolvimento e idempotência
+globs: database/seeders/**/*.php
+alwaysApply: false
+---
+
+# Seeders (`database/seeders`)
+
+Seguir `AGENTS.md`: dados em massa ou destrutivos exigem **autorização explícita**; nunca assumir execução em produção.
+
+## Antes de alterar
+
+- Ler `DatabaseSeeder` e seeders existentes: **ordem**, factories usadas, `model::truncate` vs `firstOrCreate`.
+- Alinhar com **factories** em `database/factories` e **migrações** — não inventar colunas.
+
+## Boas práticas
+
+- Seeders **reexecutáveis** quando o projeto usa `firstOrCreate`, `updateOrCreate` ou equivalente.
+- Não hardcodar passwords reais ou segredos; usar valores de exemplo seguros.
+
+## Evitar
+
+- `truncate` / `delete()` em tabelas críticas sem pedido explícito.
+- Dependências de ordem implícitas sem comentário ou chamada explícita no `DatabaseSeeder`.

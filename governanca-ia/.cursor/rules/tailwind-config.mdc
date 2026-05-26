@@ -1,0 +1,25 @@
+---
+description: tailwind.config — tema, content paths e plugins
+globs: tailwind.config.*
+alwaysApply: false
+---
+
+# Tailwind (`tailwind.config.*`)
+
+Seguir `AGENTS.md`; `content` deve listar **caminhos reais** onde há classes (Blade, JS, Vue) — builds vazios se os paths estiverem errados.
+
+## Content
+
+- Incluir `resources/views`, `resources/js`, `app/Filament` ou equivalentes **só se existirem** no repo; verificar disco antes de adicionar globs.
+
+## Tema
+
+- `theme.extend` **incremental**; não sobrescrever escala inteira (`colors`, `spacing`) sem alinhar design system existente.
+
+## Plugins
+
+- Plugins Tailwind **listados em `package.json`**; não adicionar `@tailwindcss/typography` (etc.) sem dependência instalada.
+
+## Evitar
+
+- Classes arbitrárias em `safelist` em massa — preferir padrões documentados ou purge consciente.

@@ -1,0 +1,22 @@
+---
+description: PHP em public/ — entrada mínima e sem lógica de negócio
+globs: public/**/*.php
+alwaysApply: false
+---
+
+# `public/**/*.php`
+
+Seguir `AGENTS.md`; a pasta **public** é a raiz web — ficheiros PHP aqui devem ser **mínimos** (tipicamente `index.php` do Laravel).
+
+## Front controller
+
+- Não substituir ou desfigurar o bootstrap do Laravel (`index.php`) salvo pedido explícito e conhecimento do impacto em **XAMPP**/servidor.
+
+## Boas práticas
+
+- **Não** colocar lógica de negócio, credenciais ou includes ad hoc com SQL em `public/`.
+- Novos scripts PHP em `public/` são **exceção** — preferir rotas Laravel e controladores.
+
+## Segurança
+
+- Qualquer ficheiro PHP adicional em `public/` é **executável** pela web; validar risco antes de criar.

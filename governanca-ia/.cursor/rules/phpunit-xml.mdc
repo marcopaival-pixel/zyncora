@@ -1,0 +1,25 @@
+---
+description: phpunit.xml — suites, ambiente e cobertura
+globs: phpunit.xml
+alwaysApply: false
+---
+
+# `phpunit.xml`
+
+Seguir `AGENTS.md`; alterações afetam **como e onde** os testes correm (CI incluído).
+
+## Consistência
+
+- `<testsuite>`, `bootstrap`, `php` `env` — espelhar o que o projeto já define; não apagar suites usadas no pipeline.
+
+## Ambiente
+
+- Variáveis `APP_ENV`, `DB_*`, `CACHE_DRIVER` para testes **isolados** (SQLite em memória, etc.) como já documentado ou usado em CI.
+
+## Cobertura
+
+- Diretórios em `<coverage>` / `<include>` alinhados ao código-fonte real; não excluir arbitrariamente pastas críticas sem pedido.
+
+## Anti-alucinação
+
+- Versão PHPUnit compatível com `composer.json`; não misturar sintaxe de schema de versões diferentes.

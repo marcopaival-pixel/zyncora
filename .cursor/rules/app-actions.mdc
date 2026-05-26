@@ -1,0 +1,23 @@
+---
+description: Actions (única responsabilidade) — alinhamento com invocações
+globs: app/Actions/**/*.php
+alwaysApply: false
+---
+
+# Actions (`app/Actions`)
+
+Seguir `AGENTS.md`; padrão **uma classe / um caso de uso** (ou convenção já usada no repositório).
+
+## Contrato
+
+- Assinatura `__invoke` ou `execute` **consistente** com controladores, jobs ou commands que invocam a action — procurar referências antes de alterar.
+- Entrada tipada (DTO, array validado, model) como nos outros ficheiros desta pasta.
+
+## Boas práticas
+
+- **Transações** de BD quando a action faz múltiplas escritas e o projeto usa `DB::transaction` em casos similares.
+- Autorização: delegar a Policy/Gate **antes** ou **dentro** da action conforme o padrão local.
+
+## Evitar
+
+- Actions “Deus” com dezenas de responsabilidades; preferir composição ou services se o projeto assim estrutura.

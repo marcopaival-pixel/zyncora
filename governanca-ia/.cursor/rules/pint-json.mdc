@@ -1,0 +1,25 @@
+---
+description: pint.json — Laravel Pint (estilo PHP)
+globs: pint.json
+alwaysApply: false
+---
+
+# `pint.json`
+
+Seguir `AGENTS.md`; **Laravel Pint** define estilo PHP — alterações afetam `vendor/bin/pint` e CI.
+
+## Preset
+
+- `preset` (`laravel`, `psr12`, etc.) **consistente** com o resto do projeto; não misturar regras incompatíveis.
+
+## Exclusões
+
+- `exclude` alinhado a pastas geradas (`bootstrap/cache`, `storage`, `vendor`) como no projeto; não excluir `app/` salvo padrão explícito.
+
+## Anti-alucinação
+
+- Regras e nomes de fixers **válidos** para a versão do `laravel/pint` em `composer.lock` / `composer.json`.
+
+## Evitar
+
+- Desativar regras de segurança ou qualidade sem pedido explícito.

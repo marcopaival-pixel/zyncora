@@ -1,0 +1,28 @@
+---
+description: Comandos Artisan — CLI seguro e idempotência
+globs: app/Console/Commands/**/*.php
+alwaysApply: false
+---
+
+# Comandos Artisan (`app/Console/Commands`)
+
+Seguir `AGENTS.md`; comandos podem correr em **CI, deploy ou cron** — tratar com cuidado.
+
+## Assinatura
+
+- `$signature`, `$description`, opções e argumentos **claros**; espelhar estilo dos comandos existentes.
+- Registo: `routes/console.php` (Laravel 11+) ou `$this->commands()` no `ConsoleServiceProvider` / `Kernel` — verificar onde o projeto regista.
+
+## Segurança e dados
+
+- Operações **destrutivas** (`migrate:fresh`, `truncate`, deletes em massa): exigir `--force` ou confirmação interativa como nos comandos similares do repo.
+- Não embutir segredos; usar `config()` / env já carregado.
+
+## Boas práticas
+
+- Saída com `info`, `warn`, `error`, barra de progresso — consistente com outros comandos.
+- **Idempotência** quando o comando pode ser reexecutado.
+
+## Anti-alucinação
+
+- Não assumir models, serviços ou caminhos inexistentes; reutilizar código de domínio já existente.

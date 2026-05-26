@@ -1,0 +1,21 @@
+---
+description: GitLab CI — .gitlab-ci.yml
+globs: .gitlab-ci.yml
+alwaysApply: false
+---
+
+# `.gitlab-ci.yml`
+
+Seguir `AGENTS.md`; mesmo espírito que GitHub Actions — **segredos** em variáveis protegidas / CI/CD settings, não em claro no ficheiro.
+
+## Jobs
+
+- `image`, `script`, `artifacts` **alinhados** à stack real; caches (`composer`, `npm`) quando o runner suporta.
+
+## Segurança
+
+- `only/except` ou `rules` para não expor jobs perigosos em forks públicos sem revisão.
+
+## Evitar
+
+- `curl | bash` ou downloads não fixados sem checksum quando o projeto exige supply-chain rigor.

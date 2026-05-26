@@ -1,0 +1,25 @@
+---
+description: postcss.config — pipeline CSS (Tailwind, autoprefixer)
+globs: postcss.config.*
+alwaysApply: false
+---
+
+# PostCSS (`postcss.config.*`)
+
+Seguir `AGENTS.md`; plugins devem bater certo com **`package.json`** e entrada CSS em `resources/css` (ou `resources/sass`).
+
+## Plugins
+
+- `tailwindcss`, `autoprefixer`, `postcss-nesting` — **só** se instalados e usados no projeto; ordem típica: Tailwind antes de transforms finais.
+
+## Formato
+
+- CJS vs ESM (`.cjs` / `.mjs`) **igual** ao resto do tooling Node do repositório.
+
+## Anti-alucinação
+
+- Não referenciar plugins **não** presentes em dependências.
+
+## Evitar
+
+- Alterar PostCSS de forma a quebrar `npm run build` / `vite build` sem verificação.

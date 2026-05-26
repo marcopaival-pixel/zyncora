@@ -1,0 +1,25 @@
+---
+description: tsconfig*.json — TypeScript do front-end
+globs: tsconfig*.json
+alwaysApply: false
+---
+
+# `tsconfig*.json`
+
+Seguir `AGENTS.md`; opções devem alinhar a **Vite**, `resources/js` e versão **TypeScript** em `package.json`.
+
+## Consistência
+
+- `compilerOptions.paths` **iguais** aos aliases do `vite.config.*`; `include` / `exclude` cobrindo só o que o projeto compila.
+
+## Rigor
+
+- Não desativar `strict` ou `noImplicitAny` em massa sem pedido explícito e revisão de impacto.
+
+## Referências
+
+- `references` em monorepos: não apontar para projetos **inexistentes**.
+
+## Anti-alucinação
+
+- `target` e `module` compatíveis com o bundler; não copiar presets de outra stack sem validar.

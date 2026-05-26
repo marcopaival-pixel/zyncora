@@ -1,0 +1,29 @@
+---
+description: GitHub Actions — CI/CD
+globs: .github/workflows/**/*
+alwaysApply: false
+---
+
+# `.github/workflows/`
+
+Seguir `AGENTS.md`; pipelines executam com **credenciais** e afetam **main/releases** — mudanças de alto risco.
+
+## Segredos
+
+- Usar `secrets.*` ou OIDC; **nunca** embutir tokens, SSH keys ou passwords em YAML versionado.
+
+## Permissões
+
+- `permissions:` **mínimas** (princípio do menor privilégio); evitar `contents: write` sem necessidade.
+
+## Reprodutibilidade
+
+- Versões de actions (`uses: actions/checkout@v4`) **pinadas** (hash ou tag estável); não `@main` flutuante em fluxos críticos.
+
+## Logs
+
+- Não imprimir `.env`, chaves ou dumps de BD nos steps; mascarar outputs sensíveis.
+
+## Anti-alucinação
+
+- Comandos e caminhos **existentes** no repo (`composer.json`, `package.json`, scripts de teste).
