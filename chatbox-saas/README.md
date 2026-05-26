@@ -101,6 +101,7 @@ No repositório-mãe, ver **`AGENTS.md`** na raiz do workspace para regras de se
 | [docs/DEPLOY_PRODUCAO.md](docs/DEPLOY_PRODUCAO.md) | Redis, Supervisor, cron, pagamentos |
 | [CHANGELOG.md](CHANGELOG.md) | Alterações do plano go-live |
 | `scripts/go-live-xampp.ps1` | Setup automatizado para XAMPP |
+| `scripts/install-xampp-vhost.ps1` | Virtual host chatbox.local + hosts |
 | `scripts/post-go-live.ps1` | Verificação pós-deploy (migrate, smoke, health, backup) |
 | [docs/XAMPP_DEPLOY.md](docs/XAMPP_DEPLOY.md) | Virtual host, scheduler, worker Windows |
 | [docs/MONITORING.md](docs/MONITORING.md) | Health check, Sentry, alertas, API token |

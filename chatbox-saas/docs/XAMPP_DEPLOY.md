@@ -23,15 +23,24 @@ Opções: `-SkipNpm`, `-SkipTests`, `-Strict`.
 
 ## 3. Virtual Host (recomendado)
 
-1. Copie `scripts/xampp-vhost.example.conf` para `C:\xampp\apache\conf\extra\httpd-vhosts.conf` (ou inclua com `Include`).
-2. Edite `DocumentRoot` para o caminho real de **`public/`**.
-3. Em `hosts`: `127.0.0.1 chatbox.local`
-4. Reinicie Apache.
-5. No `.env`:
+```powershell
+.\scripts\install-xampp-vhost.ps1
+```
+
+O script adiciona o vhost em `C:\xampp\apache\conf\extra\httpd-vhosts.conf` e tenta actualizar o ficheiro **hosts**. Se falhar por permissões, execute PowerShell **como Administrador** ou adicione manualmente:
+
+```
+127.0.0.1    chatbox.local
+```
+
+Reinicie **Apache** no XAMPP Control Panel e defina no `.env`:
 
 ```env
 APP_URL=http://chatbox.local
+MYSQL_DUMP_BINARY_PATH=C:/xampp/mysql/bin
 ```
+
+Alternativa manual: copie `scripts/xampp-vhost.example.conf`.
 
 Alternativa sem vhost: `http://localhost/chatbox-saas/public` — ajuste `APP_URL` em conformidade.
 
