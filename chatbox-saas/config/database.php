@@ -64,6 +64,8 @@ return [
                 'dump_binary_path' => env('MYSQL_DUMP_BINARY_PATH', ''),
             ],
         ],
+
+        'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
