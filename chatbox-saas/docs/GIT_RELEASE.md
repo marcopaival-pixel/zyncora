@@ -1,46 +1,40 @@
-# Git e release v1.0.0
+## Criar release no GitHub (sem `gh` CLI)
 
-O repositório Git foi inicializado na raiz `ProjetoChatbot` em 2026-05-26 com tag **`v1.0.0`**.
+1. Abra: https://github.com/marcopaival-pixel/zyncora/releases/new?tag=v1.0.0
+2. **Title:** `Chatbox SaaS 1.0.0`
+3. Cole o corpo abaixo (ou use [RELEASE_v1.0.0.md](./RELEASE_v1.0.0.md))
+4. Marque **Set as the latest release** → **Publish release**
 
-## 1. Estado actual
+### Corpo sugerido
 
-```powershell
-cd c:\Projetos\ProjetoChatbot
-& "C:\Program Files\Git\bin\git.exe" log -1 --oneline
-& "C:\Program Files\Git\bin\git.exe" tag -l
+```markdown
+## Chatbox SaaS 1.0.0 — go-live
+
+Primeiro release production-ready (planos P0–P12).
+
+### Destaques
+- Multi-tenant + Filament + widget + WhatsApp
+- Billing Stripe e Mercado Pago
+- Período de graça, avisos e expiração de assinaturas
+- RBAC, Policies, OpenAPI/Swagger
+- Backup Spatie, `go-live:verify`, `go-live:smoke`, `system:health-check`
+- Alertas Sentry + Slack + webhook
+- 82 testes PHPUnit
+
+### Setup
+Ver `chatbox-saas/README.md` e `chatbox-saas/scripts/go-live-xampp.ps1`.
+
+### Documentação
+- `chatbox-saas/docs/GO_LIVE_CHECKLIST.md`
+- `chatbox-saas/docs/DEPLOY_PRODUCAO.md`
+- `chatbox-saas/docs/MONITORING.md`
+- `chatbox-saas/docs/XAMPP_DEPLOY.md`
 ```
 
-Commit inicial e tag **`v1.0.0`** já criados localmente. Para republicar noutra máquina ou após clone:
+## Branch default `main`
 
-## 2. Inicializar repositório (se ainda não existir)
-
-```powershell
-& "C:\Program Files\Git\bin\git.exe" commit -m "$( @'
-Release Chatbox SaaS 1.0.0 — go-live P0-P12.
-
-Inclui billing Stripe/MP, RBAC, monitorização, grace period, testes e docs operacionais.
-'@ )"
-```
-
-## 3. Tag anotada
+Após `git push origin main`, em **Settings → General → Default branch**, seleccione **`main`** e apague `master` remoto se desejar:
 
 ```powershell
-& "C:\Program Files\Git\bin\git.exe" tag -a v1.0.0 -m "Chatbox SaaS 1.0.0 — go-live"
-& "C:\Program Files\Git\bin\git.exe" tag -l
+git push origin --delete master
 ```
-
-## 4. Remote (quando existir)
-
-```powershell
-& "C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/SUA-ORG/ProjetoChatbot.git
-& "C:\Program Files\Git\bin\git.exe" push -u origin main
-& "C:\Program Files\Git\bin\git.exe" push origin v1.0.0
-```
-
-## 5. GitHub Release
-
-Crie release a partir da tag `v1.0.0` e copie o conteúdo de [RELEASE_v1.0.0.md](./RELEASE_v1.0.0.md).
-
----
-
-**Nota:** Git deve estar no PATH ou use o caminho completo `C:\Program Files\Git\bin\git.exe` como acima.

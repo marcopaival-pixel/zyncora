@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'chatbox-saas/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'chatbox-saas/**'
+      - '.github/workflows/ci.yml'
+
+defaults:
+  run:
+    working-directory: chatbox-saas
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('chatbox-saas/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Copy environment
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run Pint (dry-run)
+        run: vendor/bin/pint --test
+
+      - name: Composer audit
+        run: composer audit
+
+      - name: Go-live verify
+        run: php artisan go-live:verify
+
+      - name: System health check
+        run: php artisan system:health-check
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test
