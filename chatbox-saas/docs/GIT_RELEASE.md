@@ -1,19 +1,18 @@
 # Git e release v1.0.0
 
-O workspace **não tinha repositório Git** na verificação de 2026-05-26. Use este guia para versionar e publicar a tag.
+O repositório Git foi inicializado na raiz `ProjetoChatbot` em 2026-05-26 com tag **`v1.0.0`**.
 
-## 1. Inicializar repositório (raiz do monorepo)
+## 1. Estado actual
 
 ```powershell
 cd c:\Projetos\ProjetoChatbot
-& "C:\Program Files\Git\bin\git.exe" init
-& "C:\Program Files\Git\bin\git.exe" add .
-& "C:\Program Files\Git\bin\git.exe" status
+& "C:\Program Files\Git\bin\git.exe" log -1 --oneline
+& "C:\Program Files\Git\bin\git.exe" tag -l
 ```
 
-Confirme que `.env`, `vendor/`, `node_modules/` estão no `.gitignore` antes de commitar.
+Commit inicial e tag **`v1.0.0`** já criados localmente. Para republicar noutra máquina ou após clone:
 
-## 2. Primeiro commit (release 1.0.0)
+## 2. Inicializar repositório (se ainda não existir)
 
 ```powershell
 & "C:\Program Files\Git\bin\git.exe" commit -m "$( @'
