@@ -31,6 +31,18 @@ Ver `chatbox-saas/README.md` e `chatbox-saas/scripts/go-live-xampp.ps1`.
 - `chatbox-saas/docs/XAMPP_DEPLOY.md`
 ```
 
+## GitHub CLI (`gh`)
+
+Instalado via winget (v2.92+). Para uso persistente no terminal:
+
+```powershell
+gh auth login --hostname github.com --git-protocol https --web
+```
+
+**Release v1.0.0 publicado:** https://github.com/marcopaival-pixel/zyncora/releases/tag/v1.0.0
+
+Notas geradas em `chatbox-saas/docs/RELEASE_v1.0.0_NOTES.md`.
+
 ## Branch default `main`
 
 Após `git push origin main`, em **Settings → General → Default branch**, seleccione **`main`** e apague `master` remoto se desejar:
