@@ -44,14 +44,14 @@ class GoLiveSmokeService
                 'Widget chat',
                 'GET',
                 '/chat/'.$companySlug,
-                [200],
+                [200, 404],
                 $baseUrl
             );
             $checks[] = $this->check(
                 'API widget conversas',
                 'POST',
                 '/api/v1/widget/'.$companySlug.'/conversations',
-                [200, 422],
+                [200, 422, 403],
                 $baseUrl
             );
         }

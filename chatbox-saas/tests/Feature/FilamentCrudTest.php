@@ -33,6 +33,8 @@ class FilamentCrudTest extends TestCase
         ]);
 
         $this->actingAs($admin);
+        
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('super-admin'));
 
         Livewire::test(CreateCompany::class)
             ->fillForm([
