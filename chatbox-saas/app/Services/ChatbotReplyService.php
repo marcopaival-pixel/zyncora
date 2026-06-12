@@ -15,7 +15,8 @@ class ChatbotReplyService
         protected AIService $aiService,
         protected PlanService $planService,
         protected FlowEngineService $flowEngine,
-        protected AgentDistributionService $distributionService
+        protected AgentDistributionService $distributionService,
+        protected \App\Services\Chatbot\MessageOrchestratorService $orchestrator
     ) {}
 
     public function maybeAutoReply(Conversation $conversation, string $inboundText): ?Message
@@ -33,6 +34,9 @@ class ChatbotReplyService
         if ($conversation->assignee_id !== null) {
             return null;
         }
+
+        // Executar a análise de Lead/Oportunidade ANTES de responder (CRM - Fase 1)
+        $this->aiService->analyzeConversation($conversation);
         
         $text = mb_strtolower(trim($inboundText));
         
@@ -74,7 +78,15 @@ class ChatbotReplyService
                 return null;
             }
 
-            $aiResponse = $this->aiService->generateResponse($chatbot, $inboundText);
+            // Verifica saldo de créditos de IA
+            if ($company->ai_credits_balance <= 0) {
+                $this->pushBotMessage($conversation, "Nossos assistentes virtuais estão temporariamente indisponíveis. Vou transferir você para nossa equipe humana.");
+                $this->markAsWaitingAndDistribute($conversation);
+                return null;
+            }
+
+            // Usar o Orquestrador Central para gerenciar intenção e agentes
+            $aiResponse = $this->orchestrator->handleIncomingMessage($conversation, $chatbot, $inboundText);
             return $this->pushBotMessage($conversation, $aiResponse);
         }
 

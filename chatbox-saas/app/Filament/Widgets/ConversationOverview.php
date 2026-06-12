@@ -10,6 +10,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ConversationOverview extends StatsOverviewWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static ?int $sort = 4;
@@ -53,3 +55,4 @@ class ConversationOverview extends StatsOverviewWidget
         ];
     }
 }
+

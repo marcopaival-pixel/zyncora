@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ExecutiveGrowthSnapshot extends Widget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static string $view = 'filament.widgets.executive-growth-snapshot';
@@ -195,3 +197,4 @@ class ExecutiveGrowthSnapshot extends Widget
             ->count();
     }
 }
+

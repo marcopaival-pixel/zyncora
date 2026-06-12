@@ -170,47 +170,54 @@
         </section>
 
         <!-- Features Section -->
-        <section id="features" class="container reveal">
+        <section id="features" class="container reveal position-relative">
+            <div class="features-glow-bg"></div>
             <div class="section-header">
                 <span class="section-tag">Recursos Elite</span>
                 <h2 class="section-title">Tudo que você precisa para crescer</h2>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
+            <div class="features-bento-grid">
+                <div class="feature-card bento-span-2">
                     <div class="feature-icon"><i data-lucide="message-square"></i></div>
-                    <h3 class="feature-name">Multicanal</h3>
-                    <p class="feature-desc">Integração nativa com WhatsApp, Telegram e Chat Web em uma única plataforma.
-                    </p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">Multicanal</h3>
+                        <p class="feature-desc">Integração nativa com WhatsApp, Telegram e Chat Web em uma única plataforma.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card bento-span-1">
                     <div class="feature-icon"><i data-lucide="cpu"></i></div>
-                    <h3 class="feature-name">IA Inteligente</h3>
-                    <p class="feature-desc">Utilize GPT-4 e outras tecnologias para criar fluxos de conversa naturais e
-                        eficientes.</p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">IA Inteligente</h3>
+                        <p class="feature-desc">Utilize GPT-4 para criar fluxos de conversa naturais e eficientes 24/7.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card bento-span-1">
                     <div class="feature-icon"><i data-lucide="pie-chart"></i></div>
-                    <h3 class="feature-name">Dashboard Geral</h3>
-                    <p class="feature-desc">Acompanhe métricas em tempo real, volume de mensagens e taxa de conversão.
-                    </p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">Dashboard Geral</h3>
+                        <p class="feature-desc">Acompanhe métricas em tempo real e taxa de conversão.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card bento-span-2">
                     <div class="feature-icon"><i data-lucide="users"></i></div>
-                    <h3 class="feature-name">Multi-atendente</h3>
-                    <p class="feature-desc">Sua equipe pode assumir a conversa a qualquer momento com o transbordo
-                        humano.</p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">Multi-atendente</h3>
+                        <p class="feature-desc">Sua equipe pode assumir a conversa a qualquer momento com o transbordo humano de forma perfeitamente sincronizada.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card bento-span-2">
                     <div class="feature-icon"><i data-lucide="shield-check"></i></div>
-                    <h3 class="feature-name">LGPD Compliance</h3>
-                    <p class="feature-desc">Segurança de dados e conformidade total com a Lei Geral de Proteção de
-                        Dados.</p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">LGPD Compliance</h3>
+                        <p class="feature-desc">Segurança de dados avançada e conformidade total com a Lei Geral de Proteção de Dados para sua tranquilidade.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card bento-span-1">
                     <div class="feature-icon"><i data-lucide="workflow"></i></div>
-                    <h3 class="feature-name">Flow Builder</h3>
-                    <p class="feature-desc">Crie fluxos complexos visualmente sem precisar escrever uma única linha de
-                        código.</p>
+                    <div class="feature-content">
+                        <h3 class="feature-name">Flow Builder</h3>
+                        <p class="feature-desc">Crie fluxos complexos visualmente.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -258,36 +265,41 @@
             </div>
             <div class="pricing-grid">
                 <div class="pricing-card">
-                    <div class="pricing-name">Startup</div>
-                    <div class="pricing-price">R$ 97<span>/mês</span></div>
+                    <div class="featured-label" style="background-color: #10b981; color: white;">14 DIAS GRÁTIS</div>
+                    <div class="pricing-name">Start</div>
+                    <div class="pricing-price">R$ 79,90<span>/mês</span></div>
+                    <p style="text-align: center; font-size: 0.85rem; color: #10b981; font-weight: bold; margin-top: -10px; margin-bottom: 20px;">500 Conversas IA / mês</p>
                     <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> 1 Chatbot</li>
-                        <li><i data-lucide="check-circle"></i> 1.000 mensagens/mês</li>
-                        <li><i data-lucide="check-circle"></i> Suporte por Email</li>
-                        <li><i data-lucide="check-circle"></i> Integração Web</li>
+                        <li><i data-lucide="check-circle"></i> 1 Canal de atendimento</li>
+                        <li><i data-lucide="check-circle"></i> 1 Atendente</li>
+                        <li><i data-lucide="check-circle"></i> 1 Chatbot + FAQ</li>
+                        <li><i data-lucide="check-circle"></i> Widget para Site</li>
                     </ul>
-                    <a href="#" class="btn-login" style="width: 100%;">Assinar Agora</a>
+                    <a href="/admin/register" class="btn-login" style="width: 100%;">Teste sem cartão</a>
                 </div>
                 <div class="pricing-card featured">
-                    <div class="featured-label">MAIS POPULAR</div>
-                    <div class="pricing-name">Business Pro</div>
-                    <div class="pricing-price">R$ 297<span>/mês</span></div>
+                    <div class="featured-label">⭐ MAIS ESCOLHIDO</div>
+                    <div class="pricing-name">Professional</div>
+                    <div class="pricing-price">R$ 199,90<span>/mês</span></div>
+                    <p style="text-align: center; font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-top: -10px; margin-bottom: 20px;">3.000 Conversas IA / mês</p>
                     <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> 5 Chatbots</li>
-                        <li><i data-lucide="check-circle"></i> Mensagens Ilimitadas</li>
-                        <li><i data-lucide="check-circle"></i> Suporte Prioritário</li>
-                        <li><i data-lucide="check-circle"></i> WhatsApp & Telegram</li>
+                        <li><i data-lucide="check-circle"></i> 3 Canais de atendimento</li>
+                        <li><i data-lucide="check-circle"></i> 5 Atendentes</li>
+                        <li><i data-lucide="check-circle"></i> 3 Chatbots Inteligentes</li>
+                        <li><i data-lucide="check-circle"></i> Base de Conhecimento</li>
+                        <li><i data-lucide="check-circle"></i> 14 Dias Grátis</li>
                     </ul>
-                    <a href="#" class="btn-primary" style="width: 100%;">Assinar Agora</a>
+                    <a href="/admin/register" class="btn-primary" style="width: 100%;">Começar Agora</a>
                 </div>
                 <div class="pricing-card">
                     <div class="pricing-name">Enterprise</div>
-                    <div class="pricing-price">Custom</div>
+                    <div class="pricing-price" style="font-size: 2rem;">A partir de R$ 999</div>
+                    <p style="text-align: center; font-size: 0.85rem; color: #f59e0b; font-weight: bold; margin-bottom: 20px;">10.000+ Conversas IA</p>
                     <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> Chatbots Ilimitados</li>
-                        <li><i data-lucide="check-circle"></i> API Dedicada</li>
+                        <li><i data-lucide="check-circle"></i> 10 Canais & 20 Atendentes</li>
+                        <li><i data-lucide="check-circle"></i> Integração via API & SLA</li>
                         <li><i data-lucide="check-circle"></i> White Label</li>
-                        <li><i data-lucide="check-circle"></i> SLA Garantido</li>
+                        <li><i data-lucide="check-circle"></i> Gerente de conta dedicado</li>
                     </ul>
                     <a href="#contact" class="btn-login" style="width: 100%;">Falar com Vendas</a>
                 </div>
@@ -382,14 +394,15 @@
                 <ul class="footer-links">
                     <li><a href="#">Sobre Nós</a></li>
                     <li><a href="#contact">Contato</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="{{ route('legal.lgpd-central') }}">Central LGPD</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Legal</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ route('privacy') }}">Privacidade</a></li>
-                    <li><a href="{{ route('terms') }}">Termos de Uso</a></li>
+                    <li><a href="{{ route('legal.privacy') }}">Privacidade</a></li>
+                    <li><a href="{{ route('legal.terms') }}">Termos de Uso</a></li>
+                    <li><a href="{{ route('legal.cookies') }}">Política de Cookies</a></li>
                 </ul>
             </div>
         </div>

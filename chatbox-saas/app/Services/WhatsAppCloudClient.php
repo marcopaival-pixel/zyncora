@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Models\SystemErrorLog;
 
 /**
  * Cliente mínimo para a WhatsApp Cloud API (Meta Graph).
@@ -23,6 +25,11 @@ class WhatsAppCloudClient
             ->acceptJson()
             ->asJson()
             ->timeout(30)
+            ->retry(3, 1000, function (\Exception $exception, $request) {
+                // Tenta novamente caso seja erro de servidor ou rate limit (429)
+                return $exception instanceof \Illuminate\Http\Client\RequestException &&
+                       ($exception->response->status() >= 500 || $exception->response->status() === 429);
+            })
             ->post($url, [
                 'messaging_product' => 'whatsapp',
                 'recipient_type' => 'individual',
@@ -35,7 +42,23 @@ class WhatsAppCloudClient
             ]);
 
         if ($response->failed()) {
-            throw new \RuntimeException(sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body()));
+            $errorMessage = sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body());
+            Log::error($errorMessage);
+            
+            SystemErrorLog::create([
+                'category' => 'whatsapp_api',
+                'error_message' => $errorMessage,
+                'context' => [
+                    'phone_number_id' => $phoneNumberId,
+                    'to' => $toDigits,
+                    'type' => 'text',
+                    'status_code' => $response->status(),
+                ],
+                'severity' => $response->status() === 429 ? 'high' : 'medium',
+                'occurred_at' => now(),
+            ]);
+
+            throw new \RuntimeException($errorMessage);
         }
 
         /** @var array<string, mixed> */
@@ -56,6 +79,10 @@ class WhatsAppCloudClient
             ->acceptJson()
             ->asJson()
             ->timeout(30)
+            ->retry(3, 1000, function (\Exception $exception, $request) {
+                return $exception instanceof \Illuminate\Http\Client\RequestException &&
+                       ($exception->response->status() >= 500 || $exception->response->status() === 429);
+            })
             ->post($url, [
                 'messaging_product' => 'whatsapp',
                 'recipient_type' => 'individual',
@@ -65,7 +92,23 @@ class WhatsAppCloudClient
             ]);
 
         if ($response->failed()) {
-            throw new \RuntimeException(sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body()));
+            $errorMessage = sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body());
+            Log::error($errorMessage);
+            
+            SystemErrorLog::create([
+                'category' => 'whatsapp_api',
+                'error_message' => $errorMessage,
+                'context' => [
+                    'phone_number_id' => $phoneNumberId,
+                    'to' => $toDigits,
+                    'type' => 'interactive',
+                    'status_code' => $response->status(),
+                ],
+                'severity' => $response->status() === 429 ? 'high' : 'medium',
+                'occurred_at' => now(),
+            ]);
+
+            throw new \RuntimeException($errorMessage);
         }
 
         /** @var array<string, mixed> */

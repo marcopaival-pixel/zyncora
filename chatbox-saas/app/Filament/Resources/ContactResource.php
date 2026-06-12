@@ -31,7 +31,9 @@ class ContactResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->canChat() ?? false;
+        $user = auth()->user();
+        if ($user && $user->isPlatformAdmin()) return false;
+        return $user?->canChat() ?? false;
     }
 
     public static function canViewAny(): bool
@@ -238,3 +240,4 @@ class ContactResource extends Resource
         ];
     }
 }
+

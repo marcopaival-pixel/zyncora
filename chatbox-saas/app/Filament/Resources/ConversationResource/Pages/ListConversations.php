@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ConversationResource\Pages;
 
 use App\Filament\Resources\ConversationResource;
+use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
 class ListConversations extends ListRecords
@@ -12,7 +13,13 @@ class ListConversations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('status_online')
+            Actions\Action::make('inbox')
+                ->label('Abrir Inbox Omnichannel')
+                ->icon('heroicon-o-chat-bubble-left-right')
+                ->color('primary')
+                ->url(fn (): string => ConversationResource::getUrl('inbox')),
+
+            Actions\Action::make('status_online')
                 ->label('Ficar Online')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')

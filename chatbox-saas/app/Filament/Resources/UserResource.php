@@ -26,6 +26,28 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'phone', 'company.name'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->name . ' (' . ucfirst($record->role) . ')';
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'Empresa' => $record->company?->name ?? 'N/A',
+            'Email' => $record->email,
+            'Status' => $record->status === 'active' ? 'Ativo' : 'Inativo',
+        ];
+    }
+
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()?->hasPermission('view_usuários') ?? false;
@@ -68,9 +90,96 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Segurança e perfil profissional')
-                    ->description('Acesso, cargo e vínculo à organização.')
-                    ->icon('heroicon-o-user-circle')
+                Forms\Components\Section::make('Informações Pessoais')
+                    ->description('Dados básicos do membro da equipa.')
+                    ->icon('heroicon-o-user')
+                    ->aside()
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nome Completo')
+                                    ->placeholder('Ex: João Silva')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->prefixIcon('heroicon-m-user'),
+
+                                Forms\Components\TextInput::make('email')
+                                    ->label('Endereço de E-mail')
+                                    ->placeholder('atendente@empresa.com')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->prefixIcon('heroicon-m-envelope'),
+                                    
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Telefone / WhatsApp')
+                                    ->placeholder('5511999999999')
+                                    ->tel()
+                                    ->maxLength(64)
+                                    ->prefixIcon('heroicon-m-phone'),
+                                    
+                                Forms\Components\TextInput::make('password')
+                                    ->label('Nova Senha')
+                                    ->helperText('Deixe em branco para manter a senha atual.')
+                                    ->password()
+                                    ->revealable()
+                                    ->dehydrated(fn ($state) => filled($state))
+                                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                                    ->prefixIcon('heroicon-m-lock-closed'),
+                            ]),
+                    ]),
+
+                Forms\Components\Section::make('Configurações de Atendimento')
+                    ->description('Defina como este utilizador atua no atendimento.')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->aside()
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('presence_status')
+                                    ->label('Disponibilidade do Agente')
+                                    ->options([
+                                        'online' => 'Disponível (Online)',
+                                        'busy' => 'Ocupado',
+                                        'offline' => 'Indisponível (Offline)',
+                                    ])
+                                    ->default('offline')
+                                    ->required()
+                                    ->prefixIcon('heroicon-m-signal'),
+
+                                Forms\Components\TextInput::make('max_simultaneous_chats')
+                                    ->label('Limite de Chats Sims.')
+                                    ->numeric()
+                                    ->default(10)
+                                    ->required()
+                                    ->prefixIcon('heroicon-m-squares-2x2'),
+                                    
+                                Forms\Components\Select::make('sectors')
+                                    ->relationship(
+                                        name: 'sectors',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Builder $query, Forms\Get $get) => 
+                                            $query->when(
+                                                $get('company_id'),
+                                                fn ($q, $companyId) => $q->where('company_id', $companyId),
+                                                fn ($q) => auth()->user() && !auth()->user()->isPlatformAdmin() 
+                                                    ? $q->where('company_id', auth()->user()->company_id) 
+                                                    : $q
+                                            )
+                                    )
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable()
+                                    ->label('Setores de Atendimento')
+                                    ->placeholder('Selecione os setores...')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
+
+                Forms\Components\Section::make('Acesso e Permissões')
+                    ->description('Defina o nível de acesso e o estado da conta.')
+                    ->icon('heroicon-o-shield-check')
                     ->aside()
                     ->schema([
                         Forms\Components\Select::make('company_id')
@@ -81,32 +190,46 @@ class UserResource extends Resource
                             ->preload()
                             ->required()
                             ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->prefixIcon('heroicon-m-building-office')
+                            ->live(),
 
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Nome Completo')
-                                    ->placeholder('Ex: João Silva')
+                                Forms\Components\Select::make('role')
+                                    ->label('Cargo / Perfil')
+                                    ->options([
+                                        User::ROLE_COMPANY_ADMIN => 'Administrador da empresa',
+                                        User::ROLE_SUPERVISOR => 'Supervisor',
+                                        User::ROLE_AGENT => 'Agente de atendimento',
+                                        User::ROLE_MANAGER => 'Gestor',
+                                        User::ROLE_FINANCIAL => 'Financeiro',
+                                        User::ROLE_TECHNICAL_SUPPORT => 'Suporte técnico',
+                                        User::ROLE_CLIENT => 'Cliente',
+                                    ])
+                                    ->default(User::ROLE_AGENT)
                                     ->required()
-                                    ->maxLength(255),
+                                    ->native(false)
+                                    ->visible(fn () => ! (auth()->user()?->isPlatformAdmin() ?? false))
+                                    ->disabled(fn () => ! (auth()->user()?->canManageUsers() ?? false))
+                                    ->prefixIcon('heroicon-m-identification'),
 
-                                Forms\Components\TextInput::make('email')
-                                    ->label('Endereço de E-mail')
-                                    ->placeholder('atendente@empresa.com')
-                                    ->email()
+                                Forms\Components\Select::make('role')
+                                    ->label('Cargo / Perfil (plataforma)')
+                                    ->options([
+                                        User::ROLE_PLATFORM_ADMIN => 'Administrador da plataforma',
+                                        User::ROLE_COMPANY_ADMIN => 'Administrador da empresa',
+                                        User::ROLE_SUPERVISOR => 'Supervisor',
+                                        User::ROLE_AGENT => 'Agente de atendimento',
+                                        User::ROLE_MANAGER => 'Gestor',
+                                        User::ROLE_FINANCIAL => 'Financeiro',
+                                        User::ROLE_TECHNICAL_SUPPORT => 'Suporte técnico',
+                                        User::ROLE_CLIENT => 'Cliente',
+                                    ])
                                     ->required()
-                                    ->maxLength(255),
-                            ]),
-
-                        Forms\Components\Grid::make(3)
-                            ->schema([
-                                Forms\Components\TextInput::make('phone')
-                                    ->label('Telefone / WhatsApp')
-                                    ->placeholder('5511999999999')
-                                    ->tel()
-                                    ->maxLength(64),
-
+                                    ->native(false)
+                                    ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false)
+                                    ->prefixIcon('heroicon-m-star'),
 
                                 Forms\Components\Select::make('status')
                                     ->label('Estado da Conta')
@@ -115,74 +238,9 @@ class UserResource extends Resource
                                         'inactive' => 'Inativo',
                                     ])
                                     ->default('active')
-                                    ->required(),
-
-                                Forms\Components\Select::make('presence_status')
-                                    ->label('Disponibilidade do Agente')
-                                    ->options([
-                                        'online' => 'Disponível (Online)',
-                                        'busy' => 'Ocupado',
-                                        'offline' => 'Indisponível (Offline)',
-                                    ])
-                                    ->default('offline')
-                                    ->required(),
-
-                                Forms\Components\TextInput::make('max_simultaneous_chats')
-                                    ->label('Limite de Chats Sims.')
-                                    ->numeric()
-                                    ->default(10)
-                                    ->required(),
+                                    ->required()
+                                    ->prefixIcon('heroicon-m-check-circle'),
                             ]),
-
-                        Forms\Components\Select::make('role')
-                            ->label('Cargo / Perfil')
-                            ->options([
-                                User::ROLE_COMPANY_ADMIN => 'Administrador da empresa',
-                                User::ROLE_SUPERVISOR => 'Supervisor',
-                                User::ROLE_AGENT => 'Agente de atendimento',
-                                User::ROLE_MANAGER => 'Gestor',
-                                User::ROLE_FINANCIAL => 'Financeiro',
-                                User::ROLE_TECHNICAL_SUPPORT => 'Suporte técnico',
-                                User::ROLE_CLIENT => 'Cliente',
-                            ])
-                            ->default(User::ROLE_AGENT)
-                            ->required()
-                            ->native(false)
-                            ->visible(fn () => ! (auth()->user()?->isPlatformAdmin() ?? false))
-                            ->disabled(fn () => ! (auth()->user()?->canManageUsers() ?? false)),
-
-                        Forms\Components\Select::make('role')
-                            ->label('Cargo / Perfil (plataforma)')
-                            ->options([
-                                User::ROLE_PLATFORM_ADMIN => 'Administrador da plataforma',
-                                User::ROLE_COMPANY_ADMIN => 'Administrador da empresa',
-                                User::ROLE_SUPERVISOR => 'Supervisor',
-                                User::ROLE_AGENT => 'Agente de atendimento',
-                                User::ROLE_MANAGER => 'Gestor',
-                                User::ROLE_FINANCIAL => 'Financeiro',
-                                User::ROLE_TECHNICAL_SUPPORT => 'Suporte técnico',
-                                User::ROLE_CLIENT => 'Cliente',
-                            ])
-                            ->required()
-                            ->native(false)
-                            ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false),
-
-                        Forms\Components\Select::make('sectors')
-                            ->relationship('sectors', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->label('Setores de Atendimento')
-                            ->placeholder('Selecione os setores...'),
-
-                        Forms\Components\TextInput::make('password')
-                            ->label('Nova Senha')
-                            ->helperText('Deixe em branco para manter a senha atual.')
-                            ->password()
-                            ->revealable()
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->columnSpanFull(),
                     ]),
             ]);
     }
@@ -292,6 +350,14 @@ class UserResource extends Resource
                         'inactive' => 'Inativo',
                     ])
                     ->native(false),
+                Tables\Filters\SelectFilter::make('company_id')
+                    ->label('Organização / Conta')
+                    ->indicator('Empresa')
+                    ->relationship('company', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false),
             ])
             ->filtersTriggerAction(fn ($action) => $action->label('Filtros Avançados'))
             ->persistFiltersInSession()
@@ -325,3 +391,4 @@ class UserResource extends Resource
         ];
     }
 }
+

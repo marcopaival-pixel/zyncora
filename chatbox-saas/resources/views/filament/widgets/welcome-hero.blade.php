@@ -101,7 +101,7 @@
 
         <div class="relative z-10 mt-8 pt-6 border-t border-white/5 flex flex-wrap items-center gap-4">
             @if($isPlatform)
-                <a href="{{ \App\Filament\Resources\CompanyResource::getUrl('index') }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
+                <a href="{{ \App\Filament\SuperAdmin\Resources\CompanyResource::getUrl('index') }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
                     <x-heroicon-o-building-office class="h-4 w-4" />
                     Empresas
                 </a>

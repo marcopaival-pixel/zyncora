@@ -117,3 +117,4 @@ class CRMBoard extends Page
             ->send();
     }
 }
+

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class AiResolutionChart extends ChartWidget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static bool $isLazy = true;
 
     protected static ?string $heading = 'Eficiência: IA vs Atendimento Humano';
@@ -77,3 +79,4 @@ class AiResolutionChart extends ChartWidget
         ];
     }
 }
+

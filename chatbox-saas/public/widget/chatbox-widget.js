@@ -1,20 +1,23 @@
 /**
- * Zynkora Chatbox Widget — Premium Real-time Version
+ * Zynkora Chatbox Widget — Premium Real-time Version (Secured)
  * Inclua no site com:
- * <script src="https://SEU_DOMINIO/widget/chatbox-widget.js" data-slug="SEU_SLUG" data-api="https://SEU_DOMINIO/api" defer></script>
+ * <script src="https://SEU_DOMINIO/widget/chatbox-widget.js" data-token="SEU_TOKEN_PUBLICO" data-api="https://SEU_DOMINIO/api" defer></script>
  */
 (function () {
     const el = document.currentScript;
     if (!el) return;
 
-    const slug = el.getAttribute('data-slug');
+    // Aceita data-token ou fallback para data-slug por retrocompatibilidade
+    const token = el.getAttribute('data-token') || el.getAttribute('data-slug');
     const apiBase = (el.getAttribute('data-api') || '').replace(/\/$/, '');
-    if (!slug || !apiBase) return;
+    if (!token || !apiBase) return;
 
     // --- State ---
     let config = null;
-    let visitorToken = localStorage.getItem('cb_visitor_' + slug) || '';
-    let conversationId = localStorage.getItem('cb_conv_' + slug) || '';
+    let sessionJwt = null;
+    let widgetSessionId = localStorage.getItem('cb_session_' + token) || null;
+    let visitorToken = localStorage.getItem('cb_visitor_' + token) || '';
+    let conversationId = localStorage.getItem('cb_conv_' + token) || '';
     let isOpen = false;
     let pusher = null;
     let channel = null;
@@ -121,16 +124,35 @@
     const input = panel.querySelector('#cb-input');
     const sendBtn = panel.querySelector('#cb-send');
 
+    // Branding Element (White Label Control)
+    const branding = document.createElement('div');
+    branding.className = 'cb-branding';
+    branding.style.cssText = 'text-align: center; font-size: 11px; padding: 4px; color: #94a3b8; background: #f8fafc; border-top: 1px solid #f1f5f9; display: none;';
+    branding.innerHTML = '⚡ Powered by <strong>Zynkora</strong>';
+    panel.appendChild(branding);
+
     // --- Logic ---
     async function apiFetch(path, opts = {}) {
         const headers = Object.assign({
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'X-Visitor-Token': visitorToken
+            'X-Visitor-Token': visitorToken,
         }, opts.headers || {});
 
+        if (sessionJwt) {
+            headers['Authorization'] = 'Bearer ' + sessionJwt;
+        }
+        if (widgetSessionId) {
+            headers['X-Widget-Session-Id'] = widgetSessionId;
+        }
+
         const res = await fetch(apiBase + path, { ...opts, headers });
-        if (!res.ok) throw new Error('API Error');
+        if (!res.ok) {
+            if (res.status === 403 || res.status === 429) {
+                console.error('Widget Blocked/Rate Limited by Security Engine');
+            }
+            throw new Error('API Error');
+        }
         return res.json();
     }
 
@@ -145,7 +167,7 @@
     async function loadMessages() {
         if (!conversationId) return;
         try {
-            const data = await apiFetch(\`/v1/widget/\${slug}/conversations/\${conversationId}/messages\`);
+            const data = await apiFetch(`/v1/widget/${token}/conversations/${conversationId}/messages`);
             msgsContainer.innerHTML = '';
             const messages = data.data || data; // handle pagination object or array
             (Array.isArray(messages) ? messages : []).forEach(addMessage);
@@ -160,15 +182,15 @@
         try {
             // Se não tem conversa, inicia uma
             if (!conversationId) {
-                const conv = await apiFetch(\`/v1/widget/\${slug}/conversations\`, { method: 'POST', body: JSON.stringify({}) });
+                const conv = await apiFetch(`/v1/widget/${token}/conversations`, { method: 'POST', body: JSON.stringify({}) });
                 conversationId = conv.id;
                 visitorToken = conv.visitor_token;
-                localStorage.setItem('cb_visitor_' + slug, visitorToken);
-                localStorage.setItem('cb_conv_' + slug, conversationId);
+                localStorage.setItem('cb_visitor_' + token, visitorToken);
+                localStorage.setItem('cb_conv_' + token, conversationId);
                 initRealtime();
             }
 
-            await apiFetch(\`/v1/widget/\${slug}/conversations/\${conversationId}/messages\`, {
+            await apiFetch(`/v1/widget/${token}/conversations/${conversationId}/messages`, {
                 method: 'POST',
                 body: JSON.stringify({ body })
             });
@@ -208,7 +230,7 @@
         });
 
         // Canal seguro gerado no backend: conversation.v2.{id}.{token}
-        const channelName = \`conversation.v2.\${conversationId}.\${visitorToken}\`;
+        const channelName = `conversation.v2.${conversationId}.${visitorToken}`;
         channel = pusher.subscribe(channelName);
         channel.bind('message.created', function(data) {
             if (data.message && data.message.sender_type !== 'visitor') {
@@ -221,24 +243,50 @@
     }
 
     fab.onclick = async () => {
-        isOpen = !isOpen;
-        panel.classList.toggle('visible', isOpen);
-        fab.classList.toggle('open', isOpen);
-        
-        if (isOpen && !config) {
-            config = await apiFetch(\`/v1/widget/\${slug}/config\`);
-            if (config.chat_color) {
-                root.style.setProperty('--cb-primary', config.chat_color);
+        try {
+            if (!isOpen && !config) {
+                // Realiza o Bootstrap de Segurança e Obtém Configurações com Graceful Degradation
+                fab.style.opacity = '0.5'; // Loading state
+                config = await apiFetch(`/v1/widget/bootstrap/${token}`);
+                fab.style.opacity = '1';
+                
+                // Salva os dados de sessão retornados pelo backend para manter o fingerprint
+                sessionJwt = config.jwt;
+                if (config.session_id) {
+                    widgetSessionId = config.session_id;
+                    localStorage.setItem('cb_session_' + token, widgetSessionId);
+                }
+
+                if (config.theme && config.theme.color) {
+                    root.style.setProperty('--cb-primary', config.theme.color);
+                }
+                if (config.name) panel.querySelector('#cb-name').textContent = config.name;
+                if (config.theme && config.theme.logo) {
+                    const logo = panel.querySelector('#cb-logo');
+                    logo.src = config.theme.logo;
+                    logo.style.display = 'block';
+                }
+
+                // Controle de White Label (Monetização)
+                if (config.white_label === false) {
+                    branding.style.display = 'block';
+                }
+                
+                await loadMessages();
+                initRealtime();
             }
-            if (config.name) panel.querySelector('#cb-name').textContent = config.name;
-            if (config.logo_url) {
-                const logo = panel.querySelector('#cb-logo');
-                logo.src = config.logo_url;
-                logo.style.display = 'block';
+
+            // Apenas abre se o config estiver carregado com sucesso
+            if (config) {
+                isOpen = !isOpen;
+                panel.classList.toggle('visible', isOpen);
+                fab.classList.toggle('open', isOpen);
             }
-            
-            await loadMessages();
-            initRealtime();
+
+        } catch (error) {
+            console.warn("Zynkora Widget: Indisponível no momento ou bloqueado por segurança.");
+            fab.style.opacity = '1';
+            // Graceful degradation: não quebra o site, apenas não abre o painel.
         }
     };
 

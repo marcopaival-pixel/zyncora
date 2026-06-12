@@ -9,8 +9,16 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
-class Billing extends Page
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables;
+use Filament\Tables\Table;
+use App\Models\Invoice;
+
+class Billing extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     protected static ?string $navigationGroup = 'Plataforma';
@@ -69,8 +77,7 @@ class Billing extends Page
 
         if (app(BillingCheckoutService::class)->supportsCheckout()) {
             try {
-                $checkoutUrl = app(BillingCheckoutService::class)->checkoutUrl($company, $plan, $user);
-                $this->redirect($checkoutUrl, navigate: false);
+                $this->redirect(CheckoutWizard::getUrl(['plan' => $plan->id]), navigate: false);
             } catch (\Throwable $e) {
                 Notification::make()
                     ->title('Erro no checkout')
@@ -102,4 +109,39 @@ class Billing extends Page
             ->success()
             ->send();
     }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(Invoice::query()->where('company_id', auth()->user()?->company_id))
+            ->columns([
+                Tables\Columns\TextColumn::make('external_id')
+                    ->label('Nº Fatura')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('amount')
+                    ->label('Valor')
+                    ->money('BRL'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'paid' => 'success',
+                        'pending' => 'warning',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('issued_at')
+                    ->label('Data de Emissão')
+                    ->dateTime('d/m/Y H:i'),
+            ])
+            ->actions([
+                Tables\Actions\Action::make('pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document')
+                    ->url(fn (Invoice $record): string => $record->pdf_url ?? '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (Invoice $record): bool => filled($record->pdf_url)),
+            ]);
+    }
 }
+

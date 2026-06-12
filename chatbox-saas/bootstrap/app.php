@@ -28,10 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ],
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(\App\Http\Middleware\LogPerformanceMiddleware::class);
         $middleware->appendToGroup('web', [
             SecurityHeadersMiddleware::class,
             SessionTimeoutMiddleware::class,
             EnsureSingleSession::class,
+            \App\Http\Middleware\WhiteLabelMiddleware::class,
         ]);
         $middleware->appendToGroup('api', TenantMiddleware::class);
         $middleware->alias([
@@ -40,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.docs' => \App\Http\Middleware\EnsureApiDocsEnabled::class,
             'api.docs.auth' => \App\Http\Middleware\EnsureApiDocsBasicAuth::class,
             'health.token' => \App\Http\Middleware\EnsureHealthCheckToken::class,
+            'white_label' => \App\Http\Middleware\WhiteLabelMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

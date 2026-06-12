@@ -25,6 +25,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(\App\Services\TenantService::class);
+
+        $this->app->bind(\App\Contracts\Fiscal\IFiscalProvider::class, function ($app) {
+            $provider = config('fiscal.default_provider', 'enotas');
+            return match($provider) {
+                'focus' => new \App\Services\Fiscal\Providers\FocusNFeProvider(),
+                'asaas' => new \App\Services\Fiscal\Providers\AsaasFiscalProvider(),
+                default => new \App\Services\Fiscal\Providers\ENotasProvider(),
+            };
+        });
     }
 
     /**
@@ -32,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading(! app()->isProduction());
+
         $this->maybeSeedDemoUsersInLocalDev();
         $this->registerFilamentNavigationGroups();
 
@@ -58,6 +69,21 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(\Illuminate\Auth\Events\Login::class, \App\Listeners\LogSuccessfulLogin::class);
         Event::listen(\Illuminate\Auth\Events\Failed::class, \App\Listeners\LogFailedLoginAttempt::class);
         Event::listen(\Illuminate\Auth\Events\Logout::class, \App\Listeners\HandleLogoutSession::class);
+
+        \Filament\Forms\Components\Field::macro('withHelp', function (string $title, string $description, ?array $examples = null) {
+            /** @var \Filament\Forms\Components\Field $this */
+            return $this->hintAction(
+                \Filament\Forms\Components\Actions\Action::make('help')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->modalHeading($title)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fechar')
+                    ->modalContent(fn () => view('filament.components.field-help-content', [
+                        'description' => $description,
+                        'examples' => $examples
+                    ]))
+            );
+        });
     }
 
     /**
@@ -99,6 +125,11 @@ class AppServiceProvider extends ServiceProvider
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ]);
+
+            \Filament\Support\Facades\FilamentView::registerRenderHook(
+                \Filament\View\PanelsRenderHook::BODY_END,
+                fn (): string => \Illuminate\Support\Facades\Blade::render('@livewire(\'global-help-button\')')
+            );
         });
     }
 

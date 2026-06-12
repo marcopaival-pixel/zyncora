@@ -10,6 +10,8 @@ use Filament\Widgets\Widget;
  */
 class PlanEditSummaryWidget extends Widget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static string $view = 'filament.widgets.plan-edit-summary';
 
     protected static bool $isDiscovered = false;
@@ -33,3 +35,4 @@ class PlanEditSummaryWidget extends Widget
         ];
     }
 }
+

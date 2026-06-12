@@ -23,6 +23,7 @@ class ListChatbots extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            \App\Filament\Actions\HelpAction::make()->module('Chatbots'),
             Actions\CreateAction::make()
                 ->label('Novo chatbot')
                 ->icon('heroicon-o-plus-circle'),

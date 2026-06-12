@@ -18,3 +18,6 @@ Schedule::command('backup:run')->dailyAt('03:00');
 Schedule::command('backup:clean')->dailyAt('04:00');
 Schedule::command('backup:monitor')->dailyAt('04:30');
 Schedule::command('system:health-check --alert')->dailyAt('05:00');
+Schedule::command('saas:check-trials')->dailyAt('08:00');
+Schedule::command('system:clean-logs --days=30')->dailyAt('03:30');
+Schedule::command('saas:check-ai-consumption')->everyFourHours();

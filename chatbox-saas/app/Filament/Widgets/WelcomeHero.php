@@ -6,6 +6,8 @@ use Filament\Widgets\Widget;
 
 class WelcomeHero extends Widget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static string $view = 'filament.widgets.welcome-hero';
 
     protected static bool $isLazy = false;
@@ -112,3 +114,4 @@ class WelcomeHero extends Widget
         ];
     }
 }
+

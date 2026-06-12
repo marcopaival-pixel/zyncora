@@ -17,7 +17,7 @@ class LgpdRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
-    protected static ?string $navigationGroup = 'LGPD';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Solicitação LGPD';
     
@@ -158,3 +158,4 @@ class LgpdRequestResource extends Resource
         ];
     }
 }
+

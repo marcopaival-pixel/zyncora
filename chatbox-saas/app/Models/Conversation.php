@@ -14,6 +14,7 @@ class Conversation extends Model
 
     protected $fillable = [
         'company_id',
+        'department_id',
         'channel_id',
         'attendance_queue_id',
         'visitor_token',
@@ -37,7 +38,10 @@ class Conversation extends Model
         ];
     }
 
-    // A relação company() já é fornecida pelo trait BelongsToCompany
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function channel(): BelongsTo
     {

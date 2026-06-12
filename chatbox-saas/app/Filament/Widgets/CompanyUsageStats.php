@@ -10,6 +10,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class CompanyUsageStats extends BaseWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -79,10 +81,11 @@ class CompanyUsageStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-puzzle-piece')
                 ->color($channelsCount >= $company->max_channels ? 'warning' : 'primary'),
 
-            Stat::make('Chatbots', "{$chatbotsCount} / {$company->max_chatbots}")
-                ->description('Robôs configurados')
-                ->descriptionIcon('heroicon-m-sparkles')
-                ->color($chatbotsCount >= $company->max_chatbots ? 'danger' : 'info'),
+            Stat::make('Créditos de IA', "{$company->ai_credits_used} / {$company->ai_credits_balance}")
+                ->description($company->ai_credits_used >= $company->ai_credits_balance ? 'Sem créditos de IA' : 'Respostas com Inteligência Artificial')
+                ->descriptionIcon('heroicon-m-cpu-chip')
+                ->color($company->ai_credits_used >= $company->ai_credits_balance ? 'danger' : 'info'),
         ];
     }
 }
+

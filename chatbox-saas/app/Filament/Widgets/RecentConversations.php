@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RecentConversations extends BaseWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -91,3 +93,4 @@ class RecentConversations extends BaseWidget
             ]);
     }
 }
+

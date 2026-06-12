@@ -26,7 +26,7 @@ class UserSessionLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-device-phone-mobile';
 
-    protected static ?string $navigationGroup = 'Segurança';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Sessão';
     
@@ -161,3 +161,4 @@ class UserSessionLogResource extends Resource
         ];
     }
 }
+

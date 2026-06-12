@@ -64,5 +64,14 @@
                 @endforeach
             </div>
         </div>
+
+        <div class="max-w-7xl mx-auto px-6 mt-16 relative z-10">
+            <h3 class="text-2xl font-black text-white sm:text-3xl uppercase italic tracking-tighter mb-6">
+                Histórico Financeiro
+            </h3>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+                {{ $this->table }}
+            </div>
+        </div>
     </div>
 </x-filament-panels::page>

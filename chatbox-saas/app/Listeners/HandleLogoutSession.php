@@ -29,6 +29,12 @@ class HandleLogoutSession
                 $event->user->current_session_id = null;
                 $event->user->save();
             }
+
+            // Garante o isolamento completo esquecendo dados do tenant na sessão
+            Session::forget('impersonated_company_id');
+            Session::forget('impersonation_started_at');
+            Session::forget('impersonation_reason');
+            Session::forget('company_id');
         }
     }
 }

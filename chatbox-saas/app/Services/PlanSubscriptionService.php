@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\Plan;
+use App\Models\AiConsumptionHistory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -129,6 +130,28 @@ class PlanSubscriptionService
         $company->update([
             'expires_at' => $expiresAt,
             'subscription_status' => 'active',
+        ]);
+        
+        $this->resetAiFranchise($company, $base, $expiresAt, $plan);
+    }
+    
+    public function resetAiFranchise(Company $company, Carbon $periodStart, Carbon $periodEnd, ?Plan $plan = null): void
+    {
+        $planModel = $plan ?? ($company->plan_id ? Plan::find($company->plan_id) : Plan::where('slug', $company->plan)->first());
+
+        if ($company->ai_conversations_used > 0 || ($planModel?->max_ai_conversations > 0)) {
+            AiConsumptionHistory::create([
+                'company_id' => $company->id,
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
+                'conversations_contracted' => $planModel?->max_ai_conversations ?? 0,
+                'conversations_used' => $company->ai_conversations_used ?? 0,
+                'credits_purchased' => 0, // This could be queried from AiCreditPurchase in the period
+            ]);
+        }
+        
+        $company->update([
+            'ai_conversations_used' => 0
         ]);
     }
 

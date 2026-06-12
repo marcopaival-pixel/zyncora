@@ -49,6 +49,10 @@ class User extends Authenticatable implements FilamentUser
         'current_session_id',
     ];
 
+    public bool $is_impersonating = false;
+    public ?string $impersonation_level = null;
+    public ?int $original_company_id = null;
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -70,8 +74,24 @@ class User extends Authenticatable implements FilamentUser
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->isPlatformAdmin()) {
+        if ($this->role === self::ROLE_PLATFORM_ADMIN && !$this->is_impersonating) {
             return true;
+        }
+
+        if ($this->is_impersonating) {
+            if ($this->impersonation_level === 'view_only') {
+                return str_starts_with($permission, 'view_');
+            }
+            if ($this->impersonation_level === 'view_edit') {
+                return !str_starts_with($permission, 'delete_') && !str_starts_with($permission, 'manage_financeiro');
+            }
+            if ($this->impersonation_level === 'view_fix') {
+                // Allows edit but not delete, allows managing settings
+                return !str_starts_with($permission, 'delete_');
+            }
+            if ($this->impersonation_level === 'full_access') {
+                return true;
+            }
         }
 
         if ($this->roles()->whereHas('permissions', function ($query) use ($permission) {
@@ -91,7 +111,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function hasAnyPermission(array $permissions): bool
     {
-        if ($this->isPlatformAdmin()) {
+        if ($this->role === self::ROLE_PLATFORM_ADMIN && !$this->is_impersonating) {
             return true;
         }
 
@@ -131,6 +151,9 @@ class User extends Authenticatable implements FilamentUser
 
     public function isPlatformAdmin(): bool
     {
+        if ($this->is_impersonating) {
+            return false;
+        }
         return $this->role === self::ROLE_PLATFORM_ADMIN;
     }
 
@@ -226,6 +249,11 @@ class User extends Authenticatable implements FilamentUser
     public function sectors(): BelongsToMany
     {
         return $this->belongsToMany(Sector::class);
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class);
     }
 
     public function sessionLogs(): HasMany

@@ -9,6 +9,40 @@ use Illuminate\Support\Facades\Log;
 class KnowledgeBaseService
 {
     /**
+     * Busca contexto relevante garantindo isolamento por tenant.
+     */
+    public function searchRelevantContext(int $companyId, string $query): string
+    {
+        // Simple search for now. In a real scenario, use Vector Search (Pinecone, pgvector, etc.)
+        $cleanMessage = preg_replace('/[^\p{L}\p{N}\s]/u', '', mb_strtolower($query));
+        $words = array_filter(explode(' ', $cleanMessage), fn($w) => mb_strlen($w) > 3);
+
+        $snippetsQuery = KnowledgeBase::where('company_id', $companyId)->where('is_active', true);
+
+        if (!empty($words)) {
+            $snippetsQuery->where(function ($q) use ($words) {
+                foreach (array_slice($words, 0, 8) as $word) {
+                    $q->orWhere('content', 'like', "%{$word}%")
+                      ->orWhere('title', 'like', "%{$word}%");
+                }
+            });
+        }
+
+        $snippets = $snippetsQuery->limit(5)->get();
+
+        if ($snippets->isEmpty()) {
+            return "Nenhuma informação extra disponível.";
+        }
+
+        $context = "";
+        foreach ($snippets as $snippet) {
+            $context .= "### " . $snippet->title . "\n" . strip_tags($snippet->content) . "\n\n";
+        }
+
+        return $context;
+    }
+
+    /**
      * Search for context in the knowledge base and return a formatted string.
      */
     public function getContextForChatbot(Chatbot $chatbot, string $query): string

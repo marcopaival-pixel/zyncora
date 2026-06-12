@@ -12,11 +12,14 @@ use App\Observers\CompanyObserver;
 #[ObservedBy(CompanyObserver::class)]
 class Company extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasHealthScore;
 
     protected $fillable = [
         'name',
+        'legal_name',
+        'responsible_name',
         'slug',
+        'custom_domain',
         'cnpj',
         'email',
         'phone',
@@ -30,6 +33,7 @@ class Company extends Model
         'business_hours',
         'auto_reply_enabled',
         'status',
+        'is_onboarding_completed',
         'plan_id',
         'plan',
         'max_users',
@@ -43,6 +47,21 @@ class Company extends Model
         'mercadopago_preapproval_id',
         'expiry_warning_sent_at',
         'grace_period_notified_at',
+        'segment',
+        'ai_credits_balance',
+        'ai_credits_used',
+        'ai_conversations_used',
+        'ai_limit_action',
+        'auto_buy_package',
+        'trial_start_at',
+        'trial_end_at',
+        'has_advanced_customization',
+        'has_quick_replies',
+        'has_contextual_ai',
+        'has_chatbot_faq',
+        'whatsapp',
+        'address',
+        'social_networks',
     ];
 
     protected function casts(): array
@@ -50,13 +69,24 @@ class Company extends Model
         return [
             'business_hours' => 'array',
             'auto_reply_enabled' => 'boolean',
+            'is_onboarding_completed' => 'boolean',
             'expires_at' => 'datetime',
             'expiry_warning_sent_at' => 'datetime',
             'grace_period_notified_at' => 'datetime',
+            'trial_start_at' => 'datetime',
+            'trial_end_at' => 'datetime',
             'max_users' => 'integer',
             'max_attendants' => 'integer',
             'max_channels' => 'integer',
             'max_chatbots' => 'integer',
+            'ai_credits_balance' => 'integer',
+            'ai_credits_used' => 'integer',
+            'ai_conversations_used' => 'integer',
+            'has_advanced_customization' => 'boolean',
+            'has_quick_replies' => 'boolean',
+            'has_contextual_ai' => 'boolean',
+            'has_chatbot_faq' => 'boolean',
+            'social_networks' => 'array',
         ];
     }
 
@@ -95,13 +125,80 @@ class Company extends Model
         return $this->hasMany(AttendanceQueue::class);
     }
 
-    public function chatLogs(): HasMany
+    public function chatLogs()
     {
         return $this->hasMany(ChatLog::class);
+    }
+
+    public function webhookDeliveries()
+    {
+        return $this->hasMany(WebhookDelivery::class);
+    }
+
+    public function paymentHistories()
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function receipts()
+    {
+        return $this->hasMany(Receipt::class);
+    }
+
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class);
     }
 
     public function chatbotFlows(): HasMany
     {
         return $this->hasMany(ChatbotFlow::class);
+    }
+
+    public function knowledgeBases(): HasMany
+    {
+        return $this->hasMany(KnowledgeBase::class);
+    }
+
+    /**
+     * Calcula os dias restantes do Trial com base na data do servidor
+     */
+    public function calcularDiasRestantes(): int
+    {
+        if (!$this->trial_end_at || $this->subscription_status !== 'trial') {
+            return 0;
+        }
+
+        $diasRestantes = now()->diffInDays($this->trial_end_at, false);
+        return max(0, (int) $diasRestantes);
+    }
+
+    /**
+     * Verifica o status do Trial. Se expirou, atualiza o banco e registra o log.
+     */
+    public function verificarStatusAssinatura(): string
+    {
+        if ($this->subscription_status === 'trial' && $this->trial_end_at && now()->greaterThanOrEqualTo($this->trial_end_at)) {
+            $this->update(['subscription_status' => 'expired']);
+
+            SubscriptionAuditLog::create([
+                'company_id' => $this->id,
+                'action' => 'trial_expired',
+                'old_status' => 'trial',
+                'new_status' => 'expired',
+                'trial_start_at' => $this->trial_start_at,
+                'trial_end_at' => $this->trial_end_at,
+                'notes' => 'Trial expirou automaticamente.',
+            ]);
+
+            return 'expired';
+        }
+
+        return $this->subscription_status ?? 'active';
     }
 }

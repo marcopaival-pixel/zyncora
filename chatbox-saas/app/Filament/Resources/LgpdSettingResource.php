@@ -17,7 +17,7 @@ class LgpdSettingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $navigationGroup = 'LGPD';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $navigationLabel = 'Configurações LGPD';
 
@@ -127,3 +127,4 @@ class LgpdSettingResource extends Resource
         return $query;
     }
 }
+

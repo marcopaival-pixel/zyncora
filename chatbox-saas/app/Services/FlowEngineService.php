@@ -35,10 +35,30 @@ class FlowEngineService
                 ->first();
 
             if (!$execution) {
-                // Iniciar do "start"
-                $startNode = collect($flowData)->firstWhere('name', 'start');
+                // Verificar se a mensagem inicial aciona algum nó "trigger"
+                $startNode = null;
+                if ($userInput) {
+                    $startNode = collect($flowData)->first(function($node) use ($userInput) {
+                        if (($node['name'] ?? '') === 'trigger') {
+                            $keywords = explode(',', $node['data']['params']['keywords'] ?? '');
+                            foreach ($keywords as $kw) {
+                                $k = trim($kw);
+                                if ($k !== '' && str_contains(mb_strtolower($userInput), mb_strtolower($k))) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    });
+                }
+
+                // Se não acionou gatilho, inicia do "start"
                 if (!$startNode) {
-                    Log::warning("Fluxo sem nó de 'start' para Empresa #{$conversation->company_id}");
+                    $startNode = collect($flowData)->firstWhere('name', 'start');
+                }
+
+                if (!$startNode) {
+                    Log::warning("Fluxo sem nó de 'start' nem 'trigger' para Empresa #{$conversation->company_id}");
                     return null;
                 }
 
@@ -101,6 +121,8 @@ class FlowEngineService
 
     protected function handleNode($execution, $node, $flowData, $conversation): ?Message
     {
+        $this->recordNodeStat($conversation, $node['id']);
+
         switch ($node['name']) {
             case 'message':
                 $text = $this->replaceVariables($node['data']['params']['text'] ?? '', $execution->variables);
@@ -161,6 +183,7 @@ class FlowEngineService
             case 'action':
                 $type = $node['data']['params']['type'] ?? null;
                 if ($type === 'transfer') {
+                    $this->recordNodeStat($conversation, $node['id'], 'transfer');
                     $conversation->update([
                         'assignee_id' => null,
                         'status' => 'waiting',
@@ -173,6 +196,7 @@ class FlowEngineService
                 return $this->executeNext($execution, $flowData, $conversation);
 
             case 'end':
+                $this->recordNodeStat($conversation, $node['id'], 'dropoff');
                 $execution->update(['is_completed' => true]);
                 return $this->sendBotMessage($conversation, "Atendimento encerrado automaticamente pelo sistema.");
 
@@ -256,5 +280,30 @@ class FlowEngineService
             'message_type' => 'text',
             'sent_at' => now(),
         ]);
+    }
+
+    protected function recordNodeStat(Conversation $conversation, $nodeId, $action = 'view')
+    {
+        try {
+            $chatbot = Chatbot::resolveForConversation($conversation);
+            if (!$chatbot) return;
+
+            $stat = \App\Models\ChatbotFlowNodeStat::firstOrCreate([
+                'company_id' => $conversation->company_id,
+                'chatbot_id' => $chatbot->id,
+                'node_id' => $nodeId,
+                'date' => now()->toDateString(),
+            ]);
+
+            if ($action === 'view') {
+                $stat->increment('views');
+            } elseif ($action === 'transfer') {
+                $stat->increment('transfers');
+            } elseif ($action === 'dropoff') {
+                $stat->increment('dropoffs');
+            }
+        } catch (\Exception $e) {
+            Log::error('Erro ao registrar estatística de nó: ' . $e->getMessage());
+        }
     }
 }

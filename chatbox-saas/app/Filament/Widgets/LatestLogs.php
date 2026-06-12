@@ -10,6 +10,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestLogs extends BaseWidget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static ?int $sort = 50;
 
     protected int | string | array $columnSpan = 'full';
@@ -43,3 +45,4 @@ class LatestLogs extends BaseWidget
             ->paginated([5]);
     }
 }
+

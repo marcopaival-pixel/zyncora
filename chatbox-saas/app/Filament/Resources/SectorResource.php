@@ -18,7 +18,7 @@ class SectorResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
-    protected static ?string $navigationGroup = 'CRM';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Setor';
 
@@ -137,3 +137,4 @@ class SectorResource extends Resource
         ];
     }
 }
+

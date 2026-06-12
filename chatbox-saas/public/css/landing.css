@@ -402,6 +402,23 @@ section {
     padding: 6rem 0;
 }
 
+.position-relative {
+    position: relative;
+}
+
+.features-glow-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(14, 165, 233, 0.05) 40%, transparent 70%);
+    z-index: -1;
+    filter: blur(60px);
+    pointer-events: none;
+}
+
 .section-header {
     text-align: center;
     margin-bottom: 4rem;
@@ -423,57 +440,115 @@ section {
     color: white;
 }
 
-.features-grid {
+.features-bento-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .features-bento-grid {
+        grid-template-columns: 1fr;
+    }
+    .bento-span-2, .bento-span-1 {
+        grid-column: span 1 !important;
+    }
+}
+
+.bento-span-2 {
+    grid-column: span 2;
+}
+
+.bento-span-1 {
+    grid-column: span 1;
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 2.5rem;
     border-radius: 24px;
-    transition: all 0.3s;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
 }
 
 .feature-card:hover {
-    background: rgba(255, 255, 255, 0.07);
-    transform: translateY(-10px);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    transform: translateY(-8px);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
 }
 
 .feature-icon {
     width: 65px;
     height: 65px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(14, 165, 233, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(14, 165, 233, 0.15));
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 2rem;
-    color: #818cf8;
+    color: #a5b4fc;
     font-size: 1.75rem;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.feature-icon::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 25px;
+    background: inherit;
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: -1;
 }
 
 .feature-card:hover .feature-icon {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
     transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    border-color: transparent;
+}
+
+.feature-card:hover .feature-icon::after {
+    opacity: 0.7;
 }
 
 .feature-name {
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
-    margin-bottom: 1rem;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
 }
 
 .feature-desc {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
 /* Why Us */
@@ -684,6 +759,7 @@ section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
+    padding-bottom: 3rem;
 }
 
 .pricing-card {

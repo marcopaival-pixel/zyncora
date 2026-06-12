@@ -41,7 +41,7 @@ function senderRole(senderType) {
  * }} config
  */
 export function bootChatboxWidget(config) {
-    const { apiBase, welcomeMessage } = config;
+    const { apiBase, welcomeMessage, actions } = config;
     const messagesContainer = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
@@ -223,6 +223,24 @@ export function bootChatboxWidget(config) {
         }
     }
 
+    let typingIndicatorElement = null;
+
+    function showTypingIndicator() {
+        if (typingIndicatorElement) return;
+        typingIndicatorElement = document.createElement('div');
+        typingIndicatorElement.className = 'message bot typing-indicator';
+        typingIndicatorElement.innerHTML = '<span></span><span></span><span></span>';
+        messagesContainer.appendChild(typingIndicatorElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        if (typingIndicatorElement) {
+            typingIndicatorElement.remove();
+            typingIndicatorElement = null;
+        }
+    }
+
     async function sendMessage() {
         if (!ready || !conversationId || !visitorToken) {
             return;
@@ -238,6 +256,8 @@ export function bootChatboxWidget(config) {
 
         sendBtn.disabled = true;
         messageInput.disabled = true;
+
+        showTypingIndicator();
 
         try {
             const res = await fetch(`${apiBase}/conversations/${conversationId}/messages`, {
@@ -255,10 +275,12 @@ export function bootChatboxWidget(config) {
             }
 
             const data = await res.json();
+            removeTypingIndicator();
             if (data.bot_message && data.bot_message.body) {
                 addMessage(String(data.bot_message.body), senderRole(data.bot_message.sender_type || 'bot'), data.bot_message.id, data.bot_message.message_type || 'text');
             }
         } catch (e) {
+            removeTypingIndicator();
             addMessage('Não foi possível enviar a mensagem. Tente novamente.', 'bot');
         } finally {
             sendBtn.disabled = false;
@@ -283,6 +305,35 @@ export function bootChatboxWidget(config) {
             sendMessage();
         }
     });
+
+    // Handle Mascot click
+    const mascotContainer = document.getElementById('chatbox-mascot-container');
+    if (mascotContainer) {
+        mascotContainer.addEventListener('click', () => {
+            const bubble = mascotContainer.querySelector('.mascot-bubble');
+            if (bubble) bubble.style.display = 'none';
+            messageInput.focus();
+        });
+    }
+
+    // Render Action Cards
+    const actionCardsContainer = document.getElementById('chat-action-cards');
+    if (actionCardsContainer && Array.isArray(actions) && actions.length > 0) {
+        actions.forEach(action => {
+            const btn = document.createElement('button');
+            btn.className = 'action-card-btn';
+            btn.innerHTML = (action.icon ? `<span>${action.icon}</span>` : '') + `<span>${action.title}</span>`;
+            btn.addEventListener('click', () => {
+                if (action.action_type === 'link' && action.action_payload) {
+                    window.open(action.action_payload, '_blank');
+                } else {
+                    messageInput.value = action.action_payload || action.title;
+                    sendMessage();
+                }
+            });
+            actionCardsContainer.appendChild(btn);
+        });
+    }
 }
 
 const root = document.getElementById('chatbox-widget-root');
@@ -295,5 +346,6 @@ if (root && root.dataset.apiBase) {
         echoKey: root.dataset.echoKey ?? '',
         echoPort: root.dataset.echoPort ?? '8080',
         echoScheme: root.dataset.echoScheme ?? 'http',
+        actions: root.dataset.actions ? JSON.parse(root.dataset.actions) : [],
     });
 }

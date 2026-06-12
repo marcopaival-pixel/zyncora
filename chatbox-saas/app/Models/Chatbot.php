@@ -13,6 +13,13 @@ class Chatbot extends Model
 {
     use BelongsToCompany;
 
+    public const STATUS_INCOMPLETE = 'config_incompleta';
+    public const STATUS_CONFIGURING = 'em_configuracao';
+    public const STATUS_READY = 'pronto_publicar';
+    public const STATUS_PUBLISHED = 'publicado';
+    public const STATUS_ACTIVE = 'active'; // Keeping 'active' for backwards compatibility
+    public const STATUS_PAUSED = 'pausado';
+
     protected $fillable = [
         'company_id',
         'channel_id',
@@ -27,6 +34,16 @@ class Chatbot extends Model
         'ai_instruction',
         'flow_data',
         'published_flow_data',
+        'avatar_path',
+        'avatar_type',
+        'primary_color',
+        'secondary_color',
+        'header_color',
+        'message_color',
+        'out_of_office_message',
+        'is_menu_enabled',
+        'mascot_type',
+        'mascot_greeting',
     ];
 
     // company() relation is provided by BelongsToCompany trait
@@ -37,6 +54,7 @@ class Chatbot extends Model
             'use_ai' => 'boolean',
             'flow_data' => 'array',
             'published_flow_data' => 'array',
+            'is_menu_enabled' => 'boolean',
         ];
     }
 
@@ -45,9 +63,19 @@ class Chatbot extends Model
         return $this->belongsTo(Channel::class);
     }
 
+    public function aiAuditLogs(): HasMany
+    {
+        return $this->hasMany(AiAuditLog::class);
+    }
+
     public function scriptSteps(): HasMany
     {
         return $this->hasMany(ChatbotScriptStep::class)->orderBy('step_order');
+    }
+
+    public function actionCards(): HasMany
+    {
+        return $this->hasMany(ChatbotActionCard::class)->orderBy('order_column');
     }
 
     /**

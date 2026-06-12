@@ -13,8 +13,10 @@ trait RequiresCompanyOrPlatformAdmin
         if (! $user) {
             return false;
         }
+
+        // Esconder do Platform Admin na visão global (mostra só quando está impersonando)
         if ($user->isPlatformAdmin()) {
-            return true;
+            return false;
         }
 
         return $user->company_id !== null;

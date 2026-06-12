@@ -53,9 +53,9 @@ class RoleSyncService
         return $count;
     }
 
-    public function resolvePermissionsForUserRole(string $userRole): ?Role
+    public function resolvePermissionsForUserRole(?string $userRole): ?Role
     {
-        if ($userRole === User::ROLE_PLATFORM_ADMIN) {
+        if ($userRole === null || $userRole === User::ROLE_PLATFORM_ADMIN) {
             return null;
         }
 

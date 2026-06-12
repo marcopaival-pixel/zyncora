@@ -28,7 +28,7 @@ class ScrapeUrlForKnowledgeBase implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(RagScraperService $scraperService): void
+    public function handle(RagScraperService $scraperService, \App\Services\AiService $aiService): void
     {
         if ($this->knowledgeBase->source_type !== 'url' || empty($this->knowledgeBase->source_path)) {
             return;
@@ -40,11 +40,13 @@ class ScrapeUrlForKnowledgeBase implements ShouldQueue
         $textContent = $scraperService->scrapeUrl($url);
 
         if ($textContent) {
+            $embedding = $aiService->generateEmbeddings($textContent);
+
             $this->knowledgeBase->update([
                 'content' => $textContent,
-                // Opcional: registrar a última data de sincronização se o model tiver o campo
+                'embedding' => $embedding,
             ]);
-            Log::info("ScrapeUrlForKnowledgeBase: Extração concluída. Snippet ID {$this->knowledgeBase->id} atualizado.");
+            Log::info("ScrapeUrlForKnowledgeBase: Extração concluída. Snippet ID {$this->knowledgeBase->id} atualizado com " . ($embedding ? 'Embedding gerado' : 'Sem embedding') . ".");
         } else {
             Log::warning("ScrapeUrlForKnowledgeBase: Nenhum conteúdo extraído da URL: {$url}");
         }

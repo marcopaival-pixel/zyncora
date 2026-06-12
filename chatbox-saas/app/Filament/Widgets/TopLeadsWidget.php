@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TopLeadsWidget extends BaseWidget
 {
+    use \App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
+
+    protected static ?string $pollingInterval = null;
+
     protected static bool $isLazy = true;
 
     protected static ?int $sort = 3;
@@ -65,3 +69,4 @@ class TopLeadsWidget extends BaseWidget
             ]);
     }
 }
+

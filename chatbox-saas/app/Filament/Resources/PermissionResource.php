@@ -17,7 +17,7 @@ class PermissionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
-    protected static ?string $navigationGroup = 'Configurações de Acesso';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $navigationLabel = 'Permissões';
 
@@ -167,3 +167,4 @@ class PermissionResource extends Resource
         ];
     }
 }
+

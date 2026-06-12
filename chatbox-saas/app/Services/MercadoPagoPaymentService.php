@@ -144,6 +144,7 @@ class MercadoPagoPaymentService
 
             if ($company !== null) {
                 $this->subscriptions->renewCompanySubscription($company);
+                $this->createPaymentHistoryAndDispatch($company, $payment, 'subscription');
 
                 return;
             }
@@ -162,6 +163,26 @@ class MercadoPagoPaymentService
         }
 
         $this->subscriptions->renewCompanySubscription($company);
+        $this->createPaymentHistoryAndDispatch($company, $payment, 'subscription');
+    }
+
+    protected function createPaymentHistoryAndDispatch(Company $company, array $payment, string $type): void
+    {
+        $amount = (float) ($payment['transaction_amount'] ?? 0);
+
+        if ($amount <= 0) return;
+
+        $paymentHistory = \App\Models\PaymentHistory::create([
+            'company_id' => $company->id,
+            'type' => $type,
+            'amount' => $amount,
+            'status' => 'paid',
+            'gateway' => 'mercadopago',
+            'external_id' => (string) ($payment['id'] ?? ''),
+            'paid_at' => now(),
+        ]);
+
+        event(new \App\Events\PaymentApproved($paymentHistory));
     }
 
     public function buildExternalReference(Company $company, Plan $plan): string

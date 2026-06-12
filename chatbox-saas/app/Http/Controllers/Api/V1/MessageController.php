@@ -61,12 +61,13 @@ class MessageController extends Controller
             'sent_at' => now(),
         ]);
 
-        $bot = $this->chatbots->maybeAutoReply($conversation, $data['body']);
+        // Processamento da resposta do bot assincronamente
+        \App\Jobs\ProcessWebhookMessage::dispatch($conversation, $data['body']);
 
         return response()->json([
             'visitor_message' => $visitor,
-            'bot_message' => $bot,
-        ]);
+            'bot_processing' => true,
+        ], 202);
     }
 
     public function storeAgent(Request $request, Conversation $conversation): JsonResponse
