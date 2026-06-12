@@ -13,15 +13,19 @@ use App\Models\Conversation;
 
 class SystemHealthWidget extends BaseWidget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static bool $isLazy = true;
 
     protected static ?int $sort = -1; // Top of the page
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->isPlatformAdmin() ?? false;
+    }
+
     protected function getStats(): array
     {
-        if (! auth()->user()?->isPlatformAdmin()) {
-            return [];
-        }
 
         return [
             $this->getDatabaseStat(),
@@ -128,3 +132,4 @@ class SystemHealthWidget extends BaseWidget
             ->color('primary');
     }
 }
+

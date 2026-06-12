@@ -29,7 +29,9 @@ class PipelineResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasPermission('view_clientes') ?? false;
+        $user = auth()->user();
+        if ($user && $user->isPlatformAdmin()) return false;
+        return $user?->hasPermission('view_clientes') ?? false;
     }
 
     public static function canViewAny(): bool
@@ -139,3 +141,4 @@ class PipelineResource extends Resource
         ];
     }
 }
+

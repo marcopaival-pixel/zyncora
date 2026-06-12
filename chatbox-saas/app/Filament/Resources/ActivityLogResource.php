@@ -16,7 +16,7 @@ class ActivityLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
 
-    protected static ?string $navigationGroup = 'Segurança';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Log de Atividade';
     
@@ -99,3 +99,4 @@ class ActivityLogResource extends Resource
         ];
     }
 }
+

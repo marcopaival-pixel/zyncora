@@ -18,7 +18,7 @@ class ListChatbotFlows extends ListRecords
     {
         return [
             Actions\Action::make('back_to_premium')
-                ->label('Área Premium')
+                ->label('Recursos Avançados')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(\App\Filament\Pages\PremiumArea::getUrl()),

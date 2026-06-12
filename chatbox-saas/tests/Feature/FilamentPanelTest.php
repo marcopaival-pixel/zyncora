@@ -29,7 +29,7 @@ class FilamentPanelTest extends TestCase
 
     public function test_agent_can_authenticate_via_filament_login(): void
     {
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $user = User::factory()->create([
             'company_id' => $company->id,
             'email' => 'agente@test.local',
@@ -53,7 +53,7 @@ class FilamentPanelTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $user = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_FINANCIAL,
@@ -71,7 +71,7 @@ class FilamentPanelTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $user = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_AGENT,
@@ -89,7 +89,7 @@ class FilamentPanelTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $user = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_AGENT,

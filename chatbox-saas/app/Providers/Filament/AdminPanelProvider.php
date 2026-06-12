@@ -6,18 +6,10 @@ use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\Auth\CustomResetPassword;
-use App\Filament\Widgets\AdvancedMetrics;
 use App\Filament\Widgets\CompanyUsageStats;
-use App\Filament\Widgets\ConversationChart;
-use App\Filament\Widgets\ConversationOverview;
-use App\Filament\Widgets\CrmMetrics;
-use App\Filament\Widgets\ExecutiveGrowthSnapshot;
 use App\Filament\Widgets\LatestLogs;
 use App\Filament\Widgets\QuickActions;
-use App\Filament\Widgets\RecentConversations;
-use App\Filament\Widgets\RecentDeals;
 use App\Filament\Widgets\SystemHealthWidget;
-use App\Filament\Widgets\TopLeadsWidget;
 use App\Filament\Widgets\WelcomeHero;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -38,6 +30,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Http\Middleware\ImpersonateCompanyMiddleware;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,12 +52,12 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('5rem')
             ->favicon(asset('images/logo.png'))
             ->colors([
-                'primary' => '#10b981', // Neon Emerald
-                'gray' => Color::Zinc,  // Darker, sleeker than Slate
-                'danger' => Color::Rose,
-                'success' => '#10b981',
-                'warning' => Color::Amber,
-                'info' => Color::Cyan, // Cyan instead of Blue
+                'primary' => '#3B82F6', // Premium Blue
+                'gray' => Color::Slate, // Matches #0F172A to #F8FAFC scale
+                'danger' => '#EF4444',
+                'success' => '#10B981',
+                'warning' => '#F59E0B',
+                'info' => '#8B5CF6', // Purple for AI/Info
             ])
             ->font('Inter')
             ->sidebarCollapsibleOnDesktop()
@@ -78,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(fn () => Auth::user()?->company?->name ?? 'Zynkora')
             ->defaultThemeMode(ThemeMode::Dark)
             ->viteTheme('resources/css/app.css')
+            ->spa()
             ->globalSearch(true)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->userMenuItems([
@@ -97,23 +91,21 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Plataforma')
                     ->label('Gestão & Cobrança')
                     ->collapsed(true),
+                NavigationGroup::make('Configurações & Auditoria')
+                    ->label('Configurações & Auditoria')
+                    ->collapsed(true),
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 SystemHealthWidget::class,
                 WelcomeHero::class,
-                ExecutiveGrowthSnapshot::class,
-                TopLeadsWidget::class,
+                \App\Filament\Widgets\CompanyTrialWidget::class,
+                \App\Filament\Widgets\WelcomeAgentWidget::class,
                 QuickActions::class,
                 CompanyUsageStats::class,
-                AdvancedMetrics::class,
-                CrmMetrics::class,
-                ConversationOverview::class,
-                ConversationChart::class,
-                RecentConversations::class,
-                RecentDeals::class,
                 LatestLogs::class,
             ])
             ->middleware([
@@ -129,9 +121,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\NoCacheMiddleware::class,
+                ImpersonateCompanyMiddleware::class,
+                \App\Http\Middleware\CheckLegalDocumentsAcceptance::class,
+                \App\Http\Middleware\CheckOnboardingStatus::class,
+                \App\Http\Middleware\CheckTrialStatus::class,
             ])
             ->renderHook(
-                PanelsRenderHook::HEAD_START,
+                PanelsRenderHook::HEAD_END,
                 function (): string {
                     $user = Auth::user();
                     if (!$user || !$user->company_id) return '';
@@ -139,7 +136,7 @@ class AdminPanelProvider extends PanelProvider
                     $data = cache()->remember("company_head_assets_{$user->company_id}", 3600, function() use ($user) {
                         $company = $user->company;
                         return [
-                            'color' => $company->brand_color ?? '#10b981',
+                            'color' => $company->brand_color ?? '#3B82F6',
                             'favicon' => $company->favicon_path ? asset('storage/'.$company->favicon_path) : null,
                         ];
                     });
@@ -147,13 +144,7 @@ class AdminPanelProvider extends PanelProvider
                     $brandColor = $data['color'];
                     $favicon = $data['favicon'];
 
-                    // Premium Background (Linear/Vercel inspired: deep zinc/black with very subtle neon mesh)
                     $html = "
-                    <div class='fixed inset-0 -z-10 bg-[#09090b] overflow-hidden pointer-events-none'>
-                        <div class='absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] animate-pulse'></div>
-                        <div class='absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-500/5 blur-[120px] animate-pulse' style='animation-delay: 2s;'></div>
-                        <div class='absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-500/5 blur-[100px] animate-pulse' style='animation-delay: 1s;'></div>
-                    </div>
                     <style>
                         :root {
                             --primary-brand-color: {$brandColor};
@@ -189,7 +180,7 @@ class AdminPanelProvider extends PanelProvider
                             font-style: normal !important;
                             text-transform: uppercase !important;
                             letter-spacing: 0.05em !important;
-                            color: #71717a !important; /* Zinc 400 */
+                            color: #94a3b8 !important; /* Slate 400 */
                         }
 
                         /* Hide Theme Switcher as we are locked in Dark Premium */
@@ -208,17 +199,71 @@ class AdminPanelProvider extends PanelProvider
                         /* Global Focus Style */
                         *:focus { outline: none !important; }
                         *:focus-visible { 
-                            outline: 2px solid rgba(16, 185, 129, 0.5) !important; 
+                            outline: 2px solid rgba(59, 130, 246, 0.5) !important; 
                             outline-offset: 2px !important; 
+                        }
+
+                        /* SPA Navigation and Multiple Click Prevention */
+                        html.nprogress-busy {
+                            pointer-events: none !important;
+                            cursor: wait !important;
                         }
                     </style>";
 
-                    $html .= "<script>
-                        document.documentElement.classList.add('dark');
-                    </script>";
-
                     if ($favicon) {
                         $html .= "<link rel='icon' type='image/x-icon' href='{$favicon}'>";
+                    }
+
+                    return $html;
+                }
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                function (): string {
+                    $html = "
+                    <div class='fixed inset-0 -z-10 bg-[#0B1220] overflow-hidden pointer-events-none'>
+                        <div class='absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] animate-pulse'></div>
+                        <div class='absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-purple-500/5 blur-[120px] animate-pulse' style='animation-delay: 2s;'></div>
+                        <div class='absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-indigo-500/5 blur-[100px] animate-pulse' style='animation-delay: 1s;'></div>
+                    </div>";
+
+                    if (session()->has('impersonated_company_id') && Auth::check() && Auth::user()->is_impersonating) {
+                        $companyName = app(\App\Services\TenantService::class)->getCompany()?->name ?? 'Empresa';
+                        $adminName = Auth::user()->name;
+                        $startedAt = session('impersonation_started_at', now())->format('d/m/Y H:i');
+                        $reason = session('impersonation_reason', 'Auditoria');
+                        
+                        $html .= "
+                        <div class='fixed top-0 inset-x-0 z-[100] bg-rose-600 text-white shadow-lg border-b border-rose-700 animate-in slide-in-from-top'>
+                            <div class='max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-2'>
+                                <div class='flex items-center gap-3'>
+                                    <span class='flex p-2 rounded-lg bg-rose-800/50'>
+                                        <svg class='h-5 w-5 text-white' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'>
+                                            <path stroke-linecap='round' stroke-linejoin='round' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+                                        </svg>
+                                    </span>
+                                    <div class='flex flex-col'>
+                                        <span class='font-bold text-sm'>Modo Auditoria: {$companyName}</span>
+                                        <span class='text-xs text-rose-200'>Admin: {$adminName} | Entrada: {$startedAt} | Motivo: {$reason}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <form action='" . route('admin.impersonation.leave') . "' method='POST'>
+                                        " . csrf_field() . "
+                                        <button type='submit' style='color: #e11d48;' class='rounded-md bg-white px-3.5 py-2 text-sm font-semibold shadow-sm hover:opacity-90 transition-all'>
+                                            Encerrar Sessão
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                            /* Ajusta o painel para não ficar escondido pelo banner de auditoria */
+                            html { padding-top: 64px !important; }
+                            .fi-topbar { top: 64px !important; }
+                            .fi-sidebar { top: 64px !important; height: calc(100vh - 64px) !important; }
+                        </style>
+                        ";
                     }
 
                     return $html;
@@ -263,7 +308,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_END,
                 fn (): string => Blade::render('
-                    <form action="{{ filament()->getLogoutUrl() }}" method="post" class="mt-auto p-4 w-full">
+                    <form action="{{ filament()->getLogoutUrl() }}" method="post" class="mt-auto p-4 w-full" onsubmit="try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}">
                         @csrf
                         <button type="submit" class="w-full flex items-center gap-3 py-2 px-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 hover:border-zinc-700 transition-all text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -278,3 +323,5 @@ class AdminPanelProvider extends PanelProvider
             );
     }
 }
+
+

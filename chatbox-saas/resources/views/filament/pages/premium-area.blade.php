@@ -10,7 +10,7 @@
                         <x-heroicon-o-lock-closed class="w-12 h-12 text-primary-400" />
                     </div>
                     
-                    <h2 class="text-3xl font-black text-white uppercase italic tracking-tight mb-4">Acesso Exclusivo Premium</h2>
+                    <h2 class="text-3xl font-black text-white uppercase italic tracking-tight mb-4">Acesso a Recursos Avançados</h2>
                     <p class="text-slate-400 max-w-lg mb-8 text-sm font-medium leading-relaxed">
                         Desbloqueie ferramentas avançadas, como integrações ilimitadas, IA Generativa e relatórios aprofundados para escalar o seu negócio.
                     </p>
@@ -32,7 +32,11 @@
                     </div>
                     <h3 class="text-lg font-bold text-white mb-2">Treinamento de IA</h3>
                     <p class="text-slate-400 text-sm mb-4">Configure o cérebro da sua IA com documentos e o histórico da sua empresa.</p>
-                    <x-filament::button tag="a" href="{{ \App\Filament\Resources\KnowledgeBaseResource::getUrl() }}" color="primary" class="mt-auto w-full italic uppercase tracking-wider text-xs">Configurar</x-filament::button>
+                    @if(auth()->user()?->canManageIntegrations())
+                        <x-filament::button tag="a" href="{{ \App\Filament\Pages\KnowledgeSourcesPage::getUrl() }}" color="primary" class="mt-auto w-full italic uppercase tracking-wider text-xs">Configurar</x-filament::button>
+                    @else
+                        <x-filament::button disabled color="gray" class="mt-auto w-full italic uppercase tracking-wider text-xs opacity-50 cursor-not-allowed">Sem Permissão</x-filament::button>
+                    @endif
                 </div>
 
                 <!-- Card 2 -->
@@ -43,7 +47,11 @@
                     </div>
                     <h3 class="text-lg font-bold text-white mb-2">Relatórios Avançados</h3>
                     <p class="text-slate-400 text-sm mb-4">Exportações massivas, mapa de calor e análise de sentimentos dos contactos.</p>
-                    <x-filament::button tag="a" href="{{ \App\Filament\Pages\Reports::getUrl() }}" color="success" class="mt-auto w-full italic uppercase tracking-wider text-xs">Acessar</x-filament::button>
+                    @if(auth()->user()?->canViewReports())
+                        <x-filament::button tag="a" href="{{ \App\Filament\Pages\Reports::getUrl() }}" color="success" class="mt-auto w-full italic uppercase tracking-wider text-xs">Acessar</x-filament::button>
+                    @else
+                        <x-filament::button disabled color="gray" class="mt-auto w-full italic uppercase tracking-wider text-xs opacity-50 cursor-not-allowed">Sem Permissão</x-filament::button>
+                    @endif
                 </div>
 
                 <!-- Card 3 -->
@@ -54,7 +62,11 @@
                     </div>
                     <h3 class="text-lg font-bold text-white mb-2">Automação Customizada</h3>
                     <p class="text-slate-400 text-sm mb-4">Crie fluxos de mensagens via webhooks para o seu sistema.</p>
-                    <x-filament::button tag="a" href="{{ \App\Filament\Resources\ChatbotFlowResource::getUrl() }}" color="warning" class="mt-auto w-full italic uppercase tracking-wider text-xs">Criar Fluxo</x-filament::button>
+                    @if(auth()->user()?->canManageIntegrations())
+                        <x-filament::button tag="a" href="{{ \App\Filament\Resources\ChatbotFlowResource::getUrl() }}" color="warning" class="mt-auto w-full italic uppercase tracking-wider text-xs">Criar Fluxo</x-filament::button>
+                    @else
+                        <x-filament::button disabled color="gray" class="mt-auto w-full italic uppercase tracking-wider text-xs opacity-50 cursor-not-allowed">Sem Permissão</x-filament::button>
+                    @endif
                 </div>
             </div>
         @endif

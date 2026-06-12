@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 class AgentPerformanceChart extends ChartWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -161,3 +163,4 @@ class AgentPerformanceChart extends ChartWidget
         ];
     }
 }
+

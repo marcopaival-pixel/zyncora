@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ChannelResource\Pages;
 use App\Filament\Resources\ChannelResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Pages\ChannelOnboardingWizard;
 
 class ListChannels extends ListRecords
 {
@@ -13,7 +14,10 @@ class ListChannels extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\Action::make('add_channel')
+                ->label('Adicionar Canal')
+                ->icon('heroicon-o-plus')
+                ->url(ChannelOnboardingWizard::getUrl()),
         ];
     }
 }

@@ -8,7 +8,7 @@ use App\Filament\Pages\CRMBoard;
 use App\Filament\Pages\Reports;
 use App\Filament\Resources\ChatbotResource;
 use App\Filament\Resources\CompanyIntegrationResource;
-use App\Filament\Resources\CompanyResource;
+use App\Filament\SuperAdmin\Resources\CompanyResource;
 use App\Filament\Resources\ContactResource;
 use App\Filament\Resources\ConversationResource;
 use App\Filament\Resources\DealResource;
@@ -18,6 +18,8 @@ use Filament\Widgets\Widget;
 
 class QuickActions extends Widget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static string $view = 'filament.widgets.quick-actions';
@@ -91,10 +93,10 @@ class QuickActions extends Widget
                 'icon' => 'heroicon-o-chart-bar',
             ],
             [
-                'label' => 'Chatbots',
-                'description' => 'Fluxos, regras e publicação',
+                'label' => 'Robôs / Chatbots',
+                'description' => 'Configurar e testar assistentes IA',
                 'url' => ChatbotResource::getUrl('index'),
-                'icon' => 'heroicon-o-cpu-chip',
+                'icon' => 'heroicon-o-sparkles',
             ],
             [
                 'label' => 'Integrações',
@@ -122,3 +124,4 @@ class QuickActions extends Widget
         return $actions;
     }
 }
+

@@ -11,9 +11,9 @@ class PremiumArea extends Page
 
     protected static ?string $navigationGroup = 'Ferramentas';
 
-    protected static ?string $title = 'Área Premium';
+    protected static ?string $title = 'Recursos Avançados';
 
-    protected static ?string $navigationLabel = 'Premium';
+    protected static ?string $navigationLabel = 'Recursos Avançados';
 
     protected static string $view = 'filament.pages.premium-area';
 

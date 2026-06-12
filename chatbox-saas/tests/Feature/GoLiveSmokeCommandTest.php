@@ -25,7 +25,7 @@ class GoLiveSmokeCommandTest extends TestCase
 
     public function test_go_live_smoke_with_company_slug(): void
     {
-        $company = Company::factory()->create(['slug' => 'smoke-test-co']);
+        $company = Company::factory()->create(['slug' => 'smoke-test-co', 'is_onboarding_completed' => true]);
 
         $this->artisan('go-live:smoke', ['--company-slug' => $company->slug])
             ->assertSuccessful();

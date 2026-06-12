@@ -30,7 +30,7 @@ class KnowledgeBaseResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->canManageIntegrations() ?? false;
+        return false;
     }
 
     public static function canViewAny(): bool
@@ -102,9 +102,15 @@ class KnowledgeBaseResource extends Resource
                             ->live()
                             ->native(false),
                         Forms\Components\TextInput::make('source_path')
-                            ->label('URL ou caminho')
+                            ->label('URL')
                             ->maxLength(2048)
-                            ->placeholder('https://… ou caminho do documento')
+                            ->placeholder('https://...')
+                            ->visible(fn (Forms\Get $get) => in_array($get('source_type'), ['url']))
+                            ->columnSpanFull(),
+                        Forms\Components\FileUpload::make('source_file')
+                            ->label('Upload de Documento (TXT, PDF, DOCX)')
+                            ->acceptedFileTypes(['text/plain', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                            ->visible(fn (Forms\Get $get) => $get('source_type') === 'file')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
@@ -158,6 +164,18 @@ class KnowledgeBaseResource extends Resource
                     ->falseColor('gray')
                     ->alignCenter(),
 
+                Tables\Columns\TextColumn::make('tokens_count')
+                    ->label('Tokens (Custo)')
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state > 2000 => 'danger',
+                        $state > 500 => 'warning',
+                        default => 'success',
+                    })
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado')
                     ->since()
@@ -198,6 +216,13 @@ class KnowledgeBaseResource extends Resource
                             ->success()
                             ->send();
                     }),
+                Tables\Actions\Action::make('preview')
+                    ->label('Conteúdo Bruto')
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading(fn (KnowledgeBase $record) => 'Conteúdo: ' . $record->title)
+                    ->modalContent(fn (KnowledgeBase $record) => view('filament.components.html-preview', ['html' => $record->content]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fechar'),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -224,3 +249,4 @@ class KnowledgeBaseResource extends Resource
         ];
     }
 }
+

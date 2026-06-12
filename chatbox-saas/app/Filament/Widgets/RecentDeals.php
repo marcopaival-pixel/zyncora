@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RecentDeals extends BaseWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -82,3 +84,4 @@ class RecentDeals extends BaseWidget
             ]);
     }
 }
+

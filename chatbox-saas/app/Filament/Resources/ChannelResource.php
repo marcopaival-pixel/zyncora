@@ -103,10 +103,11 @@ class ChannelResource extends Resource
                         Forms\Components\Select::make('status')
                             ->label('Estado do canal')
                             ->options([
-                                'active' => 'Ativo',
-                                'inactive' => 'Inativo',
+                                'connected' => 'Conectado',
+                                'failed' => 'Falha',
+                                'disconnected' => 'Desconectado',
                             ])
-                            ->default('active')
+                            ->default('connected')
                             ->required()
                             ->native(false),
                     ]),
@@ -135,8 +136,18 @@ class ChannelResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (string $state): string => $state === 'active' ? 'success' : 'gray')
-                    ->formatStateUsing(fn (string $state): string => $state === 'active' ? 'Ativo' : 'Inativo'),
+                    ->color(fn (string $state): string => match ($state) {
+                        'connected' => 'success',
+                        'failed' => 'danger',
+                        'disconnected' => 'gray',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'connected' => 'Conectado',
+                        'failed' => 'Falha',
+                        'disconnected' => 'Desconectado',
+                        default => 'Desconhecido',
+                    }),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado')
@@ -150,8 +161,9 @@ class ChannelResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Estado')
                     ->options([
-                        'active' => 'Ativo',
-                        'inactive' => 'Inativo',
+                        'connected' => 'Conectado',
+                        'failed' => 'Falha',
+                        'disconnected' => 'Desconectado',
                     ]),
             ])
             ->actions([
@@ -176,3 +188,4 @@ class ChannelResource extends Resource
         ];
     }
 }
+

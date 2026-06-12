@@ -54,7 +54,9 @@ class ConversationResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasPermission('view_conversas') ?? false;
+        $user = auth()->user();
+        if ($user && $user->isPlatformAdmin()) return false;
+        return $user?->hasPermission('view_conversas') ?? false;
     }
 
     public static function canViewAny(): bool
@@ -351,8 +353,10 @@ class ConversationResource extends Resource
     {
         return [
             'index' => Pages\ListConversations::route('/'),
+            'inbox' => Pages\OmnichannelInbox::route('/inbox'),
             'view' => Pages\ViewConversation::route('/{record}'),
             'edit' => Pages\EditConversation::route('/{record}/edit'),
         ];
     }
 }
+

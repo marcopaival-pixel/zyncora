@@ -43,7 +43,7 @@ class Reports extends Page
     {
         return [
             \Filament\Actions\Action::make('back_to_premium')
-                ->label('Área Premium')
+                ->label('Recursos Avançados')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(\App\Filament\Pages\PremiumArea::getUrl()),

@@ -58,6 +58,57 @@ class StripePaymentService
         return $session->url;
     }
 
+    public function createOneOffCheckoutSession(Company $company, User $user, string $package, int $price, int $conversationsAdded): string
+    {
+        if (! $this->isConfigured()) {
+            throw new RuntimeException('Stripe não configurado (STRIPE_SECRET em falta).');
+        }
+
+        Stripe::setApiKey(config('chatbox.stripe.secret'));
+
+        $params = [
+            'mode' => 'payment',
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => config('chatbox.stripe.currency', 'brl'),
+                    'product_data' => [
+                        'name' => 'Pacote de Créditos IA - ' . ucfirst($package),
+                        'description' => '+ ' . number_format($conversationsAdded, 0, ',', '.') . ' Conversas de IA',
+                    ],
+                    'unit_amount' => (int) round((float) $price * 100),
+                ],
+                'quantity' => 1,
+            ]],
+            'metadata' => [
+                'company_id' => (string) $company->id,
+                'package_name' => $package,
+                'user_id' => (string) $user->id,
+                'conversations_added' => (string) $conversationsAdded,
+                'price' => (string) $price,
+                'payment_type' => 'ai_credit_purchase'
+            ],
+            'payment_intent_data' => [
+                'metadata' => [
+                    'company_id' => (string) $company->id,
+                    'package_name' => $package,
+                    'payment_type' => 'ai_credit_purchase'
+                ],
+            ],
+            'success_url' => url('/admin/my-plan').'?checkout=success&session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => url('/admin/my-plan').'?checkout=cancelled',
+        ];
+
+        if (filled($company->stripe_customer_id)) {
+            $params['customer'] = $company->stripe_customer_id;
+        } else {
+            $params['customer_email'] = $user->email;
+        }
+
+        $session = Session::create($params);
+
+        return $session->url;
+    }
+
     public function handleWebhookEvent(object $event): void
     {
         match ($event->type) {
@@ -99,6 +150,44 @@ class StripePaymentService
 
     protected function handleCheckoutCompleted(object $session): void
     {
+        $paymentType = $session->metadata->payment_type ?? 'plan_subscription';
+        
+        if ($paymentType === 'ai_credit_purchase') {
+            $companyId = (int) ($session->metadata->company_id ?? 0);
+            $company = Company::query()->find($companyId);
+            
+            if (!$company) return;
+            
+            $added = (int) ($session->metadata->conversations_added ?? 0);
+            $price = (float) ($session->metadata->price ?? 0);
+            $package = $session->metadata->package_name ?? 'avulso';
+            
+            \App\Models\AiCreditPurchase::create([
+                'company_id' => $company->id,
+                'package_name' => $package,
+                'conversations_added' => $added,
+                'price' => $price,
+                'payment_method' => 'stripe',
+                'status' => 'completed'
+            ]);
+
+            $company->increment('ai_credits_balance', $added);
+
+            $paymentHistory = \App\Models\PaymentHistory::create([
+                'company_id' => $company->id,
+                'type' => 'credit',
+                'amount' => $price,
+                'status' => 'paid',
+                'gateway' => 'stripe',
+                'external_id' => $session->id,
+                'paid_at' => now(),
+            ]);
+
+            event(new \App\Events\PaymentApproved($paymentHistory));
+
+            return;
+        }
+
         $companyId = (int) ($session->metadata->company_id ?? 0);
         $planId = (int) ($session->metadata->plan_id ?? 0);
 
@@ -188,10 +277,32 @@ class StripePaymentService
                 'subscription_status' => 'active',
             ]);
 
+            $this->createPaymentHistoryAndDispatch($company, $invoice, 'subscription');
+
             return;
         }
 
         $this->subscriptions->renewCompanySubscription($company);
+        $this->createPaymentHistoryAndDispatch($company, $invoice, 'subscription');
+    }
+
+    protected function createPaymentHistoryAndDispatch(Company $company, object $invoice, string $type): void
+    {
+        $amount = ($invoice->amount_paid ?? 0) / 100;
+
+        if ($amount <= 0) return;
+
+        $paymentHistory = \App\Models\PaymentHistory::create([
+            'company_id' => $company->id,
+            'type' => $type,
+            'amount' => $amount,
+            'status' => 'paid',
+            'gateway' => 'stripe',
+            'external_id' => $invoice->id ?? null,
+            'paid_at' => now(),
+        ]);
+
+        event(new \App\Events\PaymentApproved($paymentHistory));
     }
 
     protected function resolveInvoicePeriodEnd(object $invoice): ?Carbon

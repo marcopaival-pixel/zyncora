@@ -85,10 +85,31 @@ class PlanService
     }
 
     /**
-     * Atalho para verificar uso de IA.
+     * Atalho para verificar uso de IA (Feature habilitada + Créditos Disponíveis).
      */
     public function canUseAi(Company $company): bool
     {
-        return $this->hasFeature($company, 'ai_automation');
+        return $this->hasFeature($company, 'ai_automation') && $this->hasAiCredits($company);
+    }
+
+    /**
+     * Verifica se há saldo de créditos de IA.
+     */
+    public function hasAiCredits(Company $company): bool
+    {
+        return $company->ai_credits_balance > $company->ai_credits_used;
+    }
+
+    /**
+     * Consome créditos de IA.
+     */
+    public function consumeAiCredit(Company $company, int $amount = 1): bool
+    {
+        if (!$this->hasAiCredits($company)) {
+            return false;
+        }
+
+        $company->increment('ai_credits_used', $amount);
+        return true;
     }
 }

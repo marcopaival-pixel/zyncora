@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class AdvancedMetrics extends StatsOverviewWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -92,3 +94,4 @@ class AdvancedMetrics extends StatsOverviewWidget
         ];
     }
 }
+

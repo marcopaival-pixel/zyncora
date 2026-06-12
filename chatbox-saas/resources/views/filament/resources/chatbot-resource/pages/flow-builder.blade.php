@@ -49,6 +49,7 @@
                         <div class="grid grid-cols-1 gap-2">
                             @php
                                 $nodes = [
+                                    ['type' => 'trigger', 'label' => 'Gatilho / Frase', 'icon' => 'chat-bubble-oval-left-ellipsis', 'desc' => 'Inicia fluxo por palavra', 'border' => 'hover:border-pink-500', 'iconWrap' => 'bg-pink-500 shadow-lg shadow-pink-500/20'],
                                     ['type' => 'message', 'label' => 'Mensagem', 'icon' => 'chat-bubble-left-right', 'desc' => 'Enviar texto simples', 'border' => 'hover:border-blue-500', 'iconWrap' => 'bg-blue-500 shadow-lg shadow-blue-500/20'],
                                     ['type' => 'input', 'label' => 'Pergunta', 'icon' => 'pencil-square', 'desc' => 'Esperar resposta', 'border' => 'hover:border-purple-500', 'iconWrap' => 'bg-purple-500 shadow-lg shadow-purple-500/20'],
                                     ['type' => 'condition', 'label' => 'Condição', 'icon' => 'arrows-right-left', 'desc' => 'Desvios lógicos', 'border' => 'hover:border-amber-500', 'iconWrap' => 'bg-amber-500 shadow-lg shadow-amber-500/20'],
@@ -342,16 +343,18 @@
     </style>
 
     <script>
-        const drawflowContainer = document.getElementById("drawflow");
-        const editor = new Drawflow(drawflowContainer);
+        var drawflowContainer = document.getElementById("drawflow");
+        if (window.editor) { window.editor.clear(); }
+        var editor = new Drawflow(drawflowContainer);
+        window.editor = editor;
         
         editor.reroute = true;
         editor.start();
 
-        let selectedNodeId = null;
-        let flowVariables = {};
+        var selectedNodeId = null;
+        var flowVariables = {};
 
-        const icons = {
+        var icons = {
             'chat-bubble-left-right': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>`,
             'pencil-square': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`,
             'arrows-right-left': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>`,
@@ -359,10 +362,11 @@
             'list-bullet': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>`,
             'bolt': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"></path></svg>`,
             'clock': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-            'no-symbol': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>`
+            'no-symbol': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>`,
+            'chat-bubble-oval-left-ellipsis': `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"></path></svg>`
         };
 
-        const nodeConfigs = {
+        var nodeConfigs = {
             'start': { title: 'Início do fluxo', icon: icons['bolt'], color: '#000' },
             'message': { title: 'Enviar mensagem', icon: icons['chat-bubble-left-right'], color: '#3b82f6' },
             'input': { title: 'Pedir resposta', icon: icons['pencil-square'], color: '#a855f7' },
@@ -371,21 +375,51 @@
             'list': { title: 'Lista (WhatsApp)', icon: icons['list-bullet'], color: '#059669' },
             'action': { title: 'Executar ação', icon: icons['bolt'], color: '#f43f5e' },
             'wait': { title: 'Espera', icon: icons['clock'], color: '#64748b' },
-            'end': { title: 'Fim do fluxo', icon: icons['no-symbol'], color: '#1e293b' }
+            'end': { title: 'Fim do fluxo', icon: icons['no-symbol'], color: '#1e293b' },
+            'trigger': { title: 'Gatilho', icon: icons['chat-bubble-oval-left-ellipsis'], color: '#ec4899' }
         };
 
-        let initialData = @json($this->record->flow_data);
-        if (initialData && initialData.drawflow) {
-            editor.import(initialData);
-        } else {
-            setTimeout(() => addNodeToEditor('start', 300, 200), 100);
+        var initialData = @json($this->record->flow_data);
+        var nodeStats = @json($this->nodeStats) || {};
+
+        function renderNodeStats() {
+            if (!editor.drawflow.drawflow.Home.data) return;
+            Object.keys(editor.drawflow.drawflow.Home.data).forEach(id => {
+                const stat = nodeStats[id];
+                if (stat) {
+                    const nodeEl = document.getElementById('node-' + id);
+                    if (nodeEl && !nodeEl.querySelector('.node-stats-badge')) {
+                        const badge = document.createElement('div');
+                        badge.className = 'node-stats-badge absolute -top-3 -right-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-2 py-1 text-[9px] font-bold text-gray-600 dark:text-gray-300 flex items-center gap-2 z-50';
+                        badge.innerHTML = `<span class="flex items-center gap-1 text-blue-500" title="Acessos/Visualizações"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> ${stat.total_views || 0}</span>
+                        <span class="flex items-center gap-1 text-rose-500" title="Transferências (Humanas)"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${stat.total_transfers || 0}</span>`;
+                        nodeEl.appendChild(badge);
+                    }
+                }
+            });
+            document.querySelectorAll('.drawflow .drawflow-node').forEach(el => {
+                el.style.overflow = 'visible';
+            });
         }
 
-        let saveTimeout;
-        const debouncedSave = () => {
+        if (initialData && initialData.drawflow) {
+            editor.import(initialData);
+            setTimeout(renderNodeStats, 100);
+        } else {
+            setTimeout(() => { addNodeToEditor('start', 300, 200); renderNodeStats(); }, 100);
+        }
+
+        var saveTimeout;
+        var debouncedSave = () => {
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
                 document.querySelector('[x-data]').__x.$data.autoSave();
+                
+                // Live preview do simulador
+                const simOverlay = document.getElementById('simulator-overlay');
+                if (simOverlay && !simOverlay.classList.contains('hidden')) {
+                    simulateFlow();
+                }
             }, 3000);
         };
 
@@ -416,7 +450,7 @@
             pos_y = (pos_y - rect.top) * (drawflowContainer.clientHeight / (drawflowContainer.clientHeight * editor.zoom));
 
             const config = nodeConfigs[name];
-            const inputs = (name === 'start') ? 0 : 1;
+            const inputs = (name === 'start' || name === 'trigger') ? 0 : 1;
             let outputs = 1;
             if (name === 'end') outputs = 0;
             if (name === 'condition') outputs = 2;
@@ -452,6 +486,11 @@
             let html = '';
 
             switch(node.name) {
+                case 'trigger':
+                    html = `<label class="prop-label">Frases ou Palavras-chave</label>
+                            <textarea id="p-keywords" class="prop-input" rows="3" placeholder="ex.: quero agendar, marcar consulta, agendamento (separado por vírgula)">${p.keywords || ''}</textarea>
+                            <p class="mt-3 text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">Se o usuário enviar alguma destas frases, a conversa pula direto para cá, ignorando o Início do fluxo.</p>`;
+                    break;
                 case 'message':
                     html = `<label class="prop-label">Texto da mensagem</label>
                             <textarea id="p-text" class="prop-input" rows="5">${p.text || ''}</textarea>`;
@@ -538,6 +577,7 @@
             if (!el) return;
             const p = node.data.params;
             if (node.name === 'message') el.innerText = p.text || '…';
+            else if (node.name === 'trigger') el.innerText = p.keywords || '…';
             else if (node.name === 'input') el.innerText = p.label || '…';
             else if (node.name === 'buttons' || node.name === 'list') el.innerText = p.text || '…';
             else if (node.name === 'condition') el.innerText = (p.var ? 'Se «' + p.var + '»' : 'Condição');

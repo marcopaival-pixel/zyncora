@@ -8,6 +8,8 @@ use Filament\Widgets\ChartWidget;
 
 class ConversationChart extends ChartWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static bool $isLazy = true;
@@ -78,3 +80,4 @@ class ConversationChart extends ChartWidget
         return 'line';
     }
 }
+

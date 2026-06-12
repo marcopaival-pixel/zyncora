@@ -312,3 +312,4 @@ class AtendimentoProfissional extends Page
         $this->isInternal = false;
     }
 }
+

@@ -53,9 +53,10 @@ class CompanyIntegrationResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Empresa e canal')
+                Forms\Components\Section::make('Canal de Comunicação')
                     ->description('Defina a que empresa pertence esta integração e qual o tipo de conexão.')
                     ->icon('heroicon-o-building-office-2')
+                    ->aside()
                     ->schema([
                         Forms\Components\Select::make('company_id')
                             ->relationship('company', 'name')
@@ -90,12 +91,13 @@ class CompanyIntegrationResource extends Resource
                 Forms\Components\Section::make('Webhook e verificação')
                     ->description('O mesmo URL recebe GET (verificação) e POST (eventos). O token abaixo deve coincidir com o da consola Meta.')
                     ->icon('heroicon-o-link')
+                    ->aside()
                     ->schema([
                         Forms\Components\TextInput::make('webhook_verify_token')
                             ->label('Token de verificação do webhook')
                             ->maxLength(255)
                             ->placeholder('ex.: um token seguro definido por si na Meta')
-                            ->helperText('Copie este valor para o campo de verificação ao subscrever o webhook na Meta.'),
+                            ->helperText('Passo 1: Crie uma palavra-passe única abaixo. Passo 2: Copie esse valor. Passo 3: Cole no painel da Meta no campo "Verify Token".'),
                         Forms\Components\Placeholder::make('webhook_url_preview')
                             ->label('URL público do webhook')
                             ->content(function (Get $get, $livewire): HtmlString {
@@ -115,11 +117,11 @@ class CompanyIntegrationResource extends Resource
 
                                 return new HtmlString(
                                     '<div class="space-y-2">'
-                                    .'<code class="fi-input block w-full break-all rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs leading-relaxed text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-100">'
+                                    .'<code class="fi-input block w-full break-all rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs leading-relaxed text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 select-all">'
                                     .e($url)
                                     .'</code>'
                                     .'<p class="text-xs text-gray-500 dark:text-gray-400">'
-                                    .'Deve usar o mesmo host que <strong>APP_URL</strong> na sua instalação.'
+                                    .'Copie o URL acima. Deve usar o mesmo host que <strong>APP_URL</strong> na sua instalação.'
                                     .'</p>'
                                     .'</div>'
                                 );
@@ -131,6 +133,7 @@ class CompanyIntegrationResource extends Resource
                 Forms\Components\Section::make('Credenciais WhatsApp Cloud API')
                     ->description('Valores da aplicação e do número na Meta (developers.facebook.com). O App Secret valida a assinatura X-Hub-Signature-256 dos POST.')
                     ->icon('heroicon-o-key')
+                    ->aside()
                     ->schema([
                         Forms\Components\TextInput::make('credentials.phone_number_id')
                             ->label('Phone number ID')
@@ -161,6 +164,7 @@ class CompanyIntegrationResource extends Resource
                 Forms\Components\Section::make('Gateway genérico')
                     ->description('Fluxo em evolução.')
                     ->icon('heroicon-o-cog-6-tooth')
+                    ->aside()
                     ->schema([
                         Forms\Components\Placeholder::make('gateway_placeholder')
                             ->label('')
@@ -174,7 +178,9 @@ class CompanyIntegrationResource extends Resource
                     ->visible(fn (Get $get) => $get('driver') === 'gateway_generic'),
 
                 Forms\Components\Section::make('Estado')
+                    ->description('Controle o status operacional desta integração no sistema.')
                     ->icon('heroicon-o-signal')
+                    ->aside()
                     ->schema([
                         Forms\Components\Select::make('status')
                             ->label('Estado da integração')
@@ -185,7 +191,14 @@ class CompanyIntegrationResource extends Resource
                             ])
                             ->default('pending')
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->live()
+                            ->helperText(fn (\Filament\Forms\Get $get) => match ($get('status')) {
+                                'pending' => 'A integração está salva, mas aguarda configuração ou verificação no painel externo.',
+                                'connected' => 'Integração estabelecida com sucesso. O sistema está pronto para enviar e receber mensagens.',
+                                'error' => 'Houve uma falha na integração. Verifique as credenciais da Meta ou o status do webhook.',
+                                default => null,
+                            }),
                     ]),
             ]);
     }
@@ -285,3 +298,4 @@ class CompanyIntegrationResource extends Resource
         ];
     }
 }
+

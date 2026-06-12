@@ -16,7 +16,7 @@ class LgpdAuditResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-finger-print';
 
-    protected static ?string $navigationGroup = 'LGPD';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Log de Auditoria';
     
@@ -114,3 +114,4 @@ class LgpdAuditResource extends Resource
         ];
     }
 }
+

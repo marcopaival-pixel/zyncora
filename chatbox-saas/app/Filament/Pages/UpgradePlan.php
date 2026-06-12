@@ -53,8 +53,8 @@ class UpgradePlan extends Page
 
             if ($plan && $user) {
                 try {
-                    $checkoutUrl = app(BillingCheckoutService::class)->checkoutUrl($this->company, $plan, $user);
-                    $this->redirect($checkoutUrl, navigate: false);
+                    // Redireciona para o CheckoutWizard passando o plano
+                    $this->redirect(CheckoutWizard::getUrl(['plan' => $plan->id]), navigate: false);
                 } catch (\Throwable $e) {
                     Notification::make()
                         ->title('Erro no checkout')
@@ -79,16 +79,18 @@ class UpgradePlan extends Page
 
         // Mocking payment success. In a real world, redirect to Stripe/MercadoPago.
         $limits = [
-            'basic' => ['users' => 1, 'channels' => 1, 'bots' => 1],
-            'pro' => ['users' => 5, 'channels' => 3, 'bots' => 5],
-            'enterprise' => ['users' => 20, 'channels' => 10, 'bots' => 20],
+            'start' => ['users' => 1, 'attendants' => 1, 'channels' => 1, 'bots' => 1, 'ai' => 500],
+            'professional' => ['users' => 5, 'attendants' => 5, 'channels' => 3, 'bots' => 3, 'ai' => 3000],
+            'enterprise' => ['users' => 20, 'attendants' => 20, 'channels' => 10, 'bots' => 10, 'ai' => 10000],
         ];
 
         $this->company->update([
             'plan' => $newPlan,
             'max_users' => $limits[$newPlan]['users'],
+            'max_attendants' => $limits[$newPlan]['attendants'],
             'max_channels' => $limits[$newPlan]['channels'],
             'max_chatbots' => $limits[$newPlan]['bots'],
+            'ai_credits_balance' => $limits[$newPlan]['ai'], // Atribuir limite básico como saldo renovado no mock
             'expires_at' => now()->addMonth(),
         ]);
 
@@ -101,3 +103,4 @@ class UpgradePlan extends Page
         $this->redirect(static::getUrl());
     }
 }
+

@@ -9,6 +9,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\Computed;
 
 class FlowBuilder extends Page
 {
@@ -104,5 +105,17 @@ class FlowBuilder extends Page
             ->body('As conversas passam a usar esta versão do fluxo.')
             ->success()
             ->send();
+    }
+
+    #[Computed]
+    public function getNodeStatsProperty()
+    {
+        return \App\Models\ChatbotFlowNodeStat::query()
+            ->where('chatbot_id', $this->record->id)
+            ->selectRaw('node_id, sum(views) as total_views, sum(transfers) as total_transfers, sum(dropoffs) as total_dropoffs')
+            ->groupBy('node_id')
+            ->get()
+            ->keyBy('node_id')
+            ->toArray();
     }
 }

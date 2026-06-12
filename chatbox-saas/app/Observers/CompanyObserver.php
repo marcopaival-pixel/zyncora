@@ -25,6 +25,16 @@ class CompanyObserver
         if ($company->wasChanged('slug')) {
             \Illuminate\Support\Facades\Cache::forget("widget_config_{$company->getOriginal('slug')}");
         }
+
+        if ($company->wasChanged(['plan_id', 'status', 'expires_at'])) {
+            \App\Models\SubscriptionAuditLog::create([
+                'company_id' => $company->id,
+                'action' => 'admin_update',
+                'old_status' => $company->getOriginal('status'),
+                'new_status' => $company->status,
+                'notes' => 'Plano/Status/Vencimento alterado via Painel Admin por: ' . (auth()->user()?->name ?? 'Sistema'),
+            ]);
+        }
     }
 
     /**

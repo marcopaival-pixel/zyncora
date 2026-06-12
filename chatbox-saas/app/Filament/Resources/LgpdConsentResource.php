@@ -17,7 +17,7 @@ class LgpdConsentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
-    protected static ?string $navigationGroup = 'LGPD';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Consentimento';
     
@@ -112,3 +112,4 @@ class LgpdConsentResource extends Resource
         ];
     }
 }
+

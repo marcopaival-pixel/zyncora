@@ -10,6 +10,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class CrmMetrics extends StatsOverviewWidget
 {
+    protected static ?string $pollingInterval = null;
+
     use RequiresCompanyOrPlatformAdmin;
 
     protected static ?int $sort = 5;
@@ -62,3 +64,4 @@ class CrmMetrics extends StatsOverviewWidget
         ];
     }
 }
+

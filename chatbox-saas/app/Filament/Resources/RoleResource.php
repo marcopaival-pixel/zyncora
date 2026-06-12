@@ -17,7 +17,7 @@ class RoleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static ?string $navigationGroup = 'Configurações de Acesso';
+    protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Perfil / Cargo';
 
@@ -121,3 +121,4 @@ class RoleResource extends Resource
         ];
     }
 }
+

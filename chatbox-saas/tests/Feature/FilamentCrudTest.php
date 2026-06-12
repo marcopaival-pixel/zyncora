@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\ChatbotResource;
 use App\Filament\Resources\ChatbotResource\Pages\CreateChatbot;
 use App\Filament\Resources\ChatbotResource\Pages\EditChatbot;
-use App\Filament\Resources\CompanyResource\Pages\CreateCompany;
+use App\Filament\SuperAdmin\Resources\CompanyResource\Pages\CreateCompany;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Models\Chatbot;
 use App\Models\Company;
@@ -33,6 +33,8 @@ class FilamentCrudTest extends TestCase
         ]);
 
         $this->actingAs($admin);
+        
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('super-admin'));
 
         Livewire::test(CreateCompany::class)
             ->fillForm([
@@ -54,7 +56,7 @@ class FilamentCrudTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $admin = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_COMPANY_ADMIN,
@@ -85,7 +87,7 @@ class FilamentCrudTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $admin = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_COMPANY_ADMIN,
@@ -120,7 +122,7 @@ class FilamentCrudTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $admin = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_COMPANY_ADMIN,
@@ -155,7 +157,7 @@ class FilamentCrudTest extends TestCase
     {
         $this->seedRbac();
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create(['is_onboarding_completed' => true]);
         $admin = User::factory()->create([
             'company_id' => $company->id,
             'role' => User::ROLE_COMPANY_ADMIN,
@@ -164,8 +166,13 @@ class FilamentCrudTest extends TestCase
 
         app(RoleSyncService::class)->syncUserRole($admin);
 
-        $this->actingAs($admin)
-            ->get(ChatbotResource::getUrl('index'))
-            ->assertOk();
+        $response = $this->actingAs($admin)
+            ->get(ChatbotResource::getUrl('index'));
+            
+        if ($response->status() === 302) {
+            dump($response->headers->get('Location'));
+        }
+        
+        $response->assertOk();
     }
 }
