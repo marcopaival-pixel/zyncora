@@ -2,15 +2,15 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Models\Conversation;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 class TopLeadsWidget extends BaseWidget
 {
-    use \App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
+    use RequiresCompanyOrPlatformAdmin;
 
     protected static ?string $pollingInterval = null;
 
@@ -18,7 +18,7 @@ class TopLeadsWidget extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Oportunidades de Ouro (IA Score)';
 
@@ -69,4 +69,3 @@ class TopLeadsWidget extends BaseWidget
             ]);
     }
 }
-

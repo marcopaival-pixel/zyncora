@@ -23,7 +23,7 @@ class ImpersonateCompanyMiddleware
 
             if ($user->role === User::ROLE_PLATFORM_ADMIN) {
                 $impersonatedCompanyId = session('impersonated_company_id');
-                
+
                 // Configurar o modelo para modo impersonação
                 $user->is_impersonating = true;
                 $user->impersonation_level = session('impersonation_level', 'view_only');

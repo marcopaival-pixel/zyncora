@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\KnowledgeBaseResource\Pages;
 
 use App\Filament\Resources\KnowledgeBaseResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use App\Jobs\ScrapeUrlForKnowledgeBase;
+use Filament\Actions;
+use Filament\Notifications\Notification;
 
 class EditKnowledgeBase extends BaseEditRecord
 {
@@ -26,8 +28,8 @@ class EditKnowledgeBase extends BaseEditRecord
                 ->color('info')
                 ->visible(fn (): bool => $this->getRecord()->source_type === 'url')
                 ->action(function () {
-                    \App\Jobs\ScrapeUrlForKnowledgeBase::dispatch($this->getRecord());
-                    \Filament\Notifications\Notification::make()
+                    ScrapeUrlForKnowledgeBase::dispatch($this->getRecord());
+                    Notification::make()
                         ->title('Sincronização iniciada')
                         ->body('A URL está sendo raspada em background.')
                         ->success()

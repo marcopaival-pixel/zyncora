@@ -12,10 +12,10 @@ class ImpersonationController extends Controller
     {
         if (session()->has('impersonated_company_id')) {
             $logId = session('impersonation_log_id');
-            
+
             if ($logId) {
                 ImpersonationLog::where('id', $logId)->update([
-                    'ended_at' => now()
+                    'ended_at' => now(),
                 ]);
             }
 
@@ -24,7 +24,7 @@ class ImpersonationController extends Controller
                 'impersonation_level',
                 'impersonation_started_at',
                 'impersonation_reason',
-                'impersonation_log_id'
+                'impersonation_log_id',
             ]);
         }
 

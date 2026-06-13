@@ -204,4 +204,3 @@ class ChatbotFlowResource extends Resource
         ];
     }
 }
-

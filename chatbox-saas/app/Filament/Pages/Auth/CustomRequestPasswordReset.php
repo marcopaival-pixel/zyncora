@@ -2,9 +2,14 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\PasswordRecoveryAudit;
+use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Pages\Auth\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 
 class CustomRequestPasswordReset extends BaseRequestPasswordReset
 {
@@ -32,9 +37,9 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
         $ip = request()->ip();
 
         // Rate Limit: 3 tentativas por hora por IP
-        $rateLimitKey = 'password_reset_request_' . $ip;
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
-            \App\Models\PasswordRecoveryAudit::create([
+        $rateLimitKey = 'password_reset_request_'.$ip;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            PasswordRecoveryAudit::create([
                 'email' => $email,
                 'ip_address' => $ip,
                 'user_agent' => request()->userAgent(),
@@ -42,7 +47,7 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
                 'status' => 'failed',
             ]);
 
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('Muitas tentativas')
                 ->body('Você realizou muitas solicitações recentemente. Tente novamente mais tarde.')
                 ->danger()
@@ -51,12 +56,12 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
             return;
         }
 
-        \Illuminate\Support\Facades\RateLimiter::hit($rateLimitKey, 3600);
+        RateLimiter::hit($rateLimitKey, 3600);
 
-        $user = \App\Models\User::where('email', $email)->first();
+        $user = User::where('email', $email)->first();
 
         // Sempre registramos a solicitação, quer o usuário exista ou não.
-        \App\Models\PasswordRecoveryAudit::create([
+        PasswordRecoveryAudit::create([
             'user_id' => $user?->id,
             'email' => $email,
             'ip_address' => $ip,
@@ -66,14 +71,14 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
         ]);
 
         if ($user) {
-            $status = \Illuminate\Support\Facades\Password::broker(Filament::auth()->getProvider()->name ?? config('auth.defaults.passwords'))
+            $status = Password::broker(Filament::auth()->getProvider()->name ?? config('auth.defaults.passwords'))
                 ->sendResetLink(['email' => $email]);
         }
 
         // Mensagem Genérica de Sucesso para prevenir enumeração de contas
         $this->form->fill();
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title('Solicitação Enviada')
             ->body('Se existir uma conta vinculada a este e-mail, enviaremos instruções para redefinição da senha em instantes.')
             ->success()

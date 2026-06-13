@@ -7,23 +7,27 @@ use App\Services\BillingCheckoutService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
-use Filament\Forms\Form;
 
 class CheckoutWizard extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+
     protected static ?string $title = 'Checkout';
+
     protected static ?string $slug = 'checkout/{plan}';
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string $view = 'filament.pages.checkout-wizard';
 
     public ?array $data = [];
+
     public Plan $plan;
 
     public function mount(Plan $plan): void
@@ -33,7 +37,7 @@ class CheckoutWizard extends Page implements HasForms
         $user = Auth::user();
         $company = $user?->company;
 
-        if (!$company) {
+        if (! $company) {
             abort(403, 'Empresa não encontrada.');
         }
 
@@ -119,6 +123,7 @@ class CheckoutWizard extends Page implements HasForms
 
         try {
             $checkoutUrl = app(BillingCheckoutService::class)->checkoutUrl($company, $this->plan, $user);
+
             return redirect($checkoutUrl);
         } catch (\Exception $e) {
             Notification::make()

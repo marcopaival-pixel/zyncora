@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\CustomLogin;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,12 +12,14 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class SuperAdminPanelProvider extends PanelProvider
@@ -25,8 +29,8 @@ class SuperAdminPanelProvider extends PanelProvider
         return $panel
             ->id('super-admin')
             ->path('super-admin')
-            ->login(\App\Filament\Pages\Auth\CustomLogin::class)
-            ->defaultThemeMode(\Filament\Enums\ThemeMode::Dark)
+            ->login(CustomLogin::class)
+            ->defaultThemeMode(ThemeMode::Dark)
             ->viteTheme('resources/css/app.css')
             ->spa(false)
             ->colors([
@@ -57,8 +61,8 @@ class SuperAdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook(
-                \Filament\View\PanelsRenderHook::SIDEBAR_NAV_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('
+                PanelsRenderHook::SIDEBAR_NAV_END,
+                fn (): string => Blade::render('
                     <div x-data="{ showLogoutModal: false }" class="mt-auto p-4 w-full">
                         <button @click="showLogoutModal = true" type="button" class="w-full flex items-center gap-3 py-2 px-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 hover:border-zinc-700 transition-all text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -89,7 +93,7 @@ class SuperAdminPanelProvider extends PanelProvider
                 ')
             )
             ->renderHook(
-                \Filament\View\PanelsRenderHook::BODY_END,
+                PanelsRenderHook::BODY_END,
                 fn (): string => "
                     <div id='session-expired-modal' class='fixed inset-0 z-[99999] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300'>
                         <div class='bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-200 dark:border-gray-800 p-8 max-w-sm w-full text-center space-y-6 transform animate-in zoom-in-95 duration-300'>

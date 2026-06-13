@@ -42,7 +42,7 @@ class DemoChatController extends Controller
 
         // Aqui poderíamos salvar no banco de dados
         // Por agora, apenas simulamos o sucesso
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Obrigado! Entraremos em contato em breve.',

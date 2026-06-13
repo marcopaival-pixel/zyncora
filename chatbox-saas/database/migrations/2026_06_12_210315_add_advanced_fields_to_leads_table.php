@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('whatsapp')->nullable();
             $table->integer('attendants_qty')->nullable();
             $table->string('segment')->nullable();
-            
+
             // Tracking fields
             $table->string('utm_source')->nullable();
             $table->string('utm_medium')->nullable();
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->dropColumn([
                 'company', 'role', 'whatsapp', 'attendants_qty', 'segment',
                 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
-                'referer', 'browser', 'device', 'os', 'country', 'city', 'ip', 'origin'
+                'referer', 'browser', 'device', 'os', 'country', 'city', 'ip', 'origin',
             ]);
         });
     }

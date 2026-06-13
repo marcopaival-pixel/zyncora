@@ -2,31 +2,35 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
+use App\Helpers\SegmentHelper;
+use App\Models\Chatbot;
+use App\Services\AgentPersonalizationService;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
+use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\ViewField;
-use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
-use App\Models\Chatbot;
-use App\Models\KnowledgeBase;
-use App\Services\AgentPersonalizationService;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 
 class OnboardingWizard extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
+
     protected static ?string $title = 'Vamos criar seu primeiro agente de IA';
+
     protected static ?string $navigationLabel = 'Assistente Inicial';
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string $view = 'filament.pages.onboarding-wizard';
@@ -59,7 +63,7 @@ class OnboardingWizard extends Page implements HasForms
 
                             Select::make('segment_secondary')
                                 ->label('Selecione o segmento específico')
-                                ->options(\App\Helpers\SegmentHelper::getSecondarySegments())
+                                ->options(SegmentHelper::getSecondarySegments())
                                 ->visible(fn (Get $get) => in_array($get('segment_primary'), ['Outro', 'Saúde', 'Fitness', 'Educação', 'Jurídico', 'Contabilidade', 'Imobiliário', 'Automotivo', 'Comércio', 'E-commerce', 'Alimentação', 'Beleza', 'Hotelaria', 'Serviços']))
                                 ->required(),
                         ]),
@@ -115,14 +119,14 @@ class OnboardingWizard extends Page implements HasForms
                                     'whatsapp' => 'WhatsApp',
                                     'instagram' => 'Instagram',
                                     'facebook' => 'Facebook Messenger',
-                                    'telegram' => 'Telegram'
+                                    'telegram' => 'Telegram',
                                 ])
                                 ->columns(2)
                                 ->required()
                                 ->default(['site'])
                                 ->hint('A linguagem será adaptada para os canais selecionados.'),
                         ]),
-                ])->submitAction(new \Illuminate\Support\HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-2 gap-1 font-medium rounded-lg border transition-colors outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-6 text-sm text-white shadow-md focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Criar Meu Agente &rarr;</button>')),
+                ])->submitAction(new HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-2 gap-1 font-medium rounded-lg border transition-colors outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-6 text-sm text-white shadow-md focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Criar Meu Agente &rarr;</button>')),
             ])
             ->statePath('data');
     }

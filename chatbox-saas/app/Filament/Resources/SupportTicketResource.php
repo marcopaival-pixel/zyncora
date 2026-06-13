@@ -15,13 +15,13 @@ class SupportTicketResource extends Resource
     protected static ?string $model = SupportTicket::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
-    
+
     protected static ?string $navigationGroup = 'Gestão Executiva';
-    
+
     protected static ?string $modelLabel = 'Chamado de Suporte';
-    
+
     protected static ?string $pluralModelLabel = 'Chamados de Suporte';
-    
+
     protected static ?int $navigationSort = 3;
 
     public static function shouldRegisterNavigation(): bool

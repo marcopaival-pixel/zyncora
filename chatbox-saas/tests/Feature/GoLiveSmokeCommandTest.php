@@ -9,6 +9,7 @@ use Tests\TestCase;
 class GoLiveSmokeCommandTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_go_live_smoke_passes_internally(): void
     {
         $this->artisan('go-live:smoke')
@@ -25,7 +26,7 @@ class GoLiveSmokeCommandTest extends TestCase
 
     public function test_go_live_smoke_with_company_slug(): void
     {
-        $company = Company::factory()->create(['slug' => 'smoke-test-co', 'is_onboarding_completed' => true]);
+        $company = Company::factory()->create(['slug' => 'smoke-test-co', 'is_onboarding_completed' => true, 'status' => 'active']);
 
         $this->artisan('go-live:smoke', ['--company-slug' => $company->slug])
             ->assertSuccessful();

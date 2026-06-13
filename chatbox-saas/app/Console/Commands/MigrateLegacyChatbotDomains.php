@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Chatbot;
 use App\Models\ChatbotLicense;
 use App\Models\ChatbotSecurityToken;
 use App\Services\WidgetSecurityService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
 class MigrateLegacyChatbotDomains extends Command
@@ -51,14 +51,14 @@ class MigrateLegacyChatbotDomains extends Command
             ]);
 
             // 2. Gerar Tokens de Segurança
-            if (!ChatbotSecurityToken::where('chatbot_id', $chatbot->id)->exists()) {
+            if (! ChatbotSecurityToken::where('chatbot_id', $chatbot->id)->exists()) {
                 $securityService->generateTokens($chatbot);
             }
 
             // O modo de aprendizado será automático:
             // Quando a API receber a primeira requisição sem domínio aprovado, se o domínio
             // do chatbot estiver vazio, ele auto-aprovará o primeiro domínio que chegar (via log listener ou middleware futuro).
-            
+
             $bar->advance();
         }
 

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class PlanResource extends Resource
@@ -24,7 +25,6 @@ class PlanResource extends Resource
     protected static ?string $pluralModelLabel = 'Planos de Assinatura';
 
     protected static ?int $navigationSort = 1;
-
 
     public static function form(Form $form): Form
     {
@@ -253,9 +253,9 @@ class PlanResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ReplicateAction::make()
-                    ->beforeReplicaSaved(function (\Illuminate\Database\Eloquent\Model $replica): void {
-                        $replica->name = $replica->name . ' (Cópia)';
-                        $replica->slug = $replica->slug . '-copia-' . time();
+                    ->beforeReplicaSaved(function (Model $replica): void {
+                        $replica->name = $replica->name.' (Cópia)';
+                        $replica->slug = $replica->slug.'-copia-'.time();
                     }),
             ])
             ->bulkActions([

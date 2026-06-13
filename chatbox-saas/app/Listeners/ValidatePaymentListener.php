@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\PaymentApproved;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Jobs\EmitInvoiceJob;
+use Illuminate\Support\Facades\Log;
 
 class ValidatePaymentListener
 {
@@ -25,10 +25,10 @@ class ValidatePaymentListener
 
         // Basic validation: amount must be > 0 and status must be paid
         if ($payment->amount > 0 && $payment->status === 'paid') {
-            \Illuminate\Support\Facades\Log::info("ValidatePaymentListener: Payment {$payment->id} is valid. Dispatching EmitInvoiceJob.");
-            \App\Jobs\EmitInvoiceJob::dispatch($payment);
+            Log::info("ValidatePaymentListener: Payment {$payment->id} is valid. Dispatching EmitInvoiceJob.");
+            EmitInvoiceJob::dispatch($payment);
         } else {
-            \Illuminate\Support\Facades\Log::warning("ValidatePaymentListener: Payment {$payment->id} validation failed.");
+            Log::warning("ValidatePaymentListener: Payment {$payment->id} validation failed.");
         }
     }
 }

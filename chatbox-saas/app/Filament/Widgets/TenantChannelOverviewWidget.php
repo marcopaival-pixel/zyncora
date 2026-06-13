@@ -4,18 +4,18 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use App\Models\Channel;
 
 class TenantChannelOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
+
     protected static ?string $pollingInterval = '30s';
 
     protected function getStats(): array
     {
         $company = filament()->auth()->user()->company;
-        
-        if (!$company) {
+
+        if (! $company) {
             return [];
         }
 
@@ -29,12 +29,12 @@ class TenantChannelOverviewWidget extends BaseWidget
                 ->description('Limite do plano atual')
                 ->descriptionIcon('heroicon-m-signal')
                 ->color($totalChannels >= $maxChannels ? 'warning' : 'success'),
-                
+
             Stat::make('Canais Online', $connectedChannels)
                 ->description('Conectados e operantes')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-                
+
             Stat::make('Falhas de Conexão', $failedChannels)
                 ->description($failedChannels > 0 ? 'Requer atenção imediata' : 'Tudo funcionando perfeitamente')
                 ->descriptionIcon($failedChannels > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-shield-check')

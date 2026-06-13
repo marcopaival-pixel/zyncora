@@ -2,9 +2,9 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Filament\Pages\CRMBoard;
 use App\Filament\Resources\DealResource;
+use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Models\Deal;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -22,7 +22,7 @@ class RecentDeals extends BaseWidget
 
     protected static ?int $sort = 9;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Negócios recentes';
 
@@ -84,4 +84,3 @@ class RecentDeals extends BaseWidget
             ]);
     }
 }
-

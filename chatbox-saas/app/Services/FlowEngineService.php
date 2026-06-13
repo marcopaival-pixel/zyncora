@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Chatbot;
+use App\Models\ChatbotFlowExecution;
+use App\Models\ChatbotFlowNodeStat;
 use App\Models\Conversation;
 use App\Models\Message;
-use App\Models\ChatbotFlowExecution;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
@@ -20,12 +22,12 @@ class FlowEngineService
             $conversation->loadMissing('channel');
             $chatbot = Chatbot::resolveForConversation($conversation);
 
-            if (!$chatbot || !$chatbot->published_flow_data) {
+            if (! $chatbot || ! $chatbot->published_flow_data) {
                 return null;
             }
 
             $flowData = $chatbot->published_flow_data['drawflow']['Home']['data'] ?? null;
-            if (!$flowData) {
+            if (! $flowData) {
                 return null;
             }
 
@@ -34,11 +36,11 @@ class FlowEngineService
                 ->where('is_completed', false)
                 ->first();
 
-            if (!$execution) {
+            if (! $execution) {
                 // Verificar se a mensagem inicial aciona algum nó "trigger"
                 $startNode = null;
                 if ($userInput) {
-                    $startNode = collect($flowData)->first(function($node) use ($userInput) {
+                    $startNode = collect($flowData)->first(function ($node) use ($userInput) {
                         if (($node['name'] ?? '') === 'trigger') {
                             $keywords = explode(',', $node['data']['params']['keywords'] ?? '');
                             foreach ($keywords as $kw) {
@@ -48,17 +50,19 @@ class FlowEngineService
                                 }
                             }
                         }
+
                         return false;
                     });
                 }
 
                 // Se não acionou gatilho, inicia do "start"
-                if (!$startNode) {
+                if (! $startNode) {
                     $startNode = collect($flowData)->firstWhere('name', 'start');
                 }
 
-                if (!$startNode) {
+                if (! $startNode) {
                     Log::warning("Fluxo sem nó de 'start' nem 'trigger' para Empresa #{$conversation->company_id}");
+
                     return null;
                 }
 
@@ -82,15 +86,16 @@ class FlowEngineService
                     $vars[$variable] = $userInput;
                     $execution->update(['variables' => $vars]);
                 }
-                
+
                 return $this->executeNext($execution, $flowData, $conversation);
             }
 
             return null;
         } catch (\Exception $e) {
-            Log::error("Erro no Motor de Fluxo (Conversa #{$conversation->id}): " . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+            Log::error("Erro no Motor de Fluxo (Conversa #{$conversation->id}): ".$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
@@ -98,19 +103,21 @@ class FlowEngineService
     protected function executeNext($execution, $flowData, $conversation): ?Message
     {
         $currentNode = $flowData[$execution->current_node_id];
-        
+
         // Encontrar conexão de saída (output_1)
         $connections = $currentNode['outputs']['output_1']['connections'] ?? [];
         if (empty($connections)) {
             $execution->update(['is_completed' => true]);
+
             return null;
         }
 
         $nextNodeId = $connections[0]['node'];
         $nextNode = $flowData[$nextNodeId] ?? null;
 
-        if (!$nextNode) {
+        if (! $nextNode) {
             $execution->update(['is_completed' => true]);
+
             return null;
         }
 
@@ -127,17 +134,20 @@ class FlowEngineService
             case 'message':
                 $text = $this->replaceVariables($node['data']['params']['text'] ?? '', $execution->variables);
                 $msg = $this->sendBotMessage($conversation, $text);
-                
+
                 // Nós de mensagem são passivos, pulam para o próximo automaticamente
                 $this->executeNext($execution, $flowData, $conversation);
+
                 return $msg;
 
             case 'input':
                 $text = $this->replaceVariables($node['data']['params']['label'] ?? 'Qual sua resposta?', $execution->variables);
+
                 return $this->sendBotMessage($conversation, $text);
 
             case 'buttons':
                 $text = $this->replaceVariables($node['data']['params']['text'] ?? 'Escolha uma opção:', $execution->variables);
+
                 return $this->sendBotMessage($conversation, $text); // To-do: Implementar botões reais no driver de saída
 
             case 'list':
@@ -148,6 +158,7 @@ class FlowEngineService
                 if ($section !== '') {
                     $body .= "\n\n".$section;
                 }
+
                 return $this->sendBotMessage($conversation, $body); // To-do: lista interativa no driver WhatsApp
 
             case 'condition':
@@ -189,19 +200,21 @@ class FlowEngineService
                         'status' => 'waiting',
                         'sector_id' => $node['data']['params']['sector_id'] ?? $conversation->sector_id,
                     ]);
-                    
+
                     // Trigger distribution
                     app(AgentDistributionService::class)->distribute($conversation->company_id);
                 }
+
                 return $this->executeNext($execution, $flowData, $conversation);
 
             case 'end':
                 $this->recordNodeStat($conversation, $node['id'], 'dropoff');
                 $execution->update(['is_completed' => true]);
-                return $this->sendBotMessage($conversation, "Atendimento encerrado automaticamente pelo sistema.");
+
+                return $this->sendBotMessage($conversation, 'Atendimento encerrado automaticamente pelo sistema.');
 
             case 'wait':
-                // Nota: Wait em tempo real precisaria de um Job agendado, 
+                // Nota: Wait em tempo real precisaria de um Job agendado,
                 // para este MVP simplificado vamos apenas pular
                 return $this->executeNext($execution, $flowData, $conversation);
 
@@ -210,27 +223,29 @@ class FlowEngineService
                 $url = $this->replaceVariables($params['url'] ?? '', $execution->variables ?? []);
                 $method = strtoupper($params['method'] ?? 'GET');
                 $storeIn = trim((string) ($params['store_in'] ?? 'api_response'));
-                
+
                 if ($url !== '') {
                     try {
-                        $response = \Illuminate\Support\Facades\Http::timeout(10)->send($method, $url);
+                        $response = Http::timeout(10)->send($method, $url);
                         $vars = $execution->variables ?? [];
-                        
+
                         if ($response->successful()) {
                             $vars[$storeIn] = $response->json() ?? $response->body();
                         } else {
                             $vars[$storeIn] = ['error' => true, 'status' => $response->status()];
                         }
-                        
+
                         $execution->update(['variables' => $vars]);
                     } catch (\Exception $e) {
-                        Log::error("Erro no n de HTTP_REQUEST (FlowBuilder): " . $e->getMessage());
+                        Log::error('Erro no n de HTTP_REQUEST (FlowBuilder): '.$e->getMessage());
                     }
                 }
+
                 return $this->executeNext($execution, $flowData, $conversation);
 
             case 'calendar':
                 $text = $this->replaceVariables($node['data']['params']['text'] ?? 'Selecione o melhor horário para nossa reunião:', $execution->variables);
+
                 return $conversation->messages()->create([
                     'sender_type' => 'bot',
                     'body' => $text,
@@ -243,23 +258,25 @@ class FlowEngineService
                 $params = $node['data']['params'] ?? [];
                 $script = trim((string) ($params['script'] ?? ''));
                 $storeIn = trim((string) ($params['store_in'] ?? ''));
-                
+
                 if ($script !== '' && $storeIn !== '') {
                     try {
-                        $el = new ExpressionLanguage();
+                        $el = new ExpressionLanguage;
                         $result = $el->evaluate($script, $execution->variables ?? []);
-                        
+
                         $vars = $execution->variables ?? [];
                         $vars[$storeIn] = $result;
                         $execution->update(['variables' => $vars]);
                     } catch (\Exception $e) {
-                        Log::error("Erro no n de Expression (FlowBuilder): " . $e->getMessage());
+                        Log::error('Erro no n de Expression (FlowBuilder): '.$e->getMessage());
                     }
                 }
+
                 return $this->executeNext($execution, $flowData, $conversation);
 
             default:
-                Log::debug("Nó desconhecido no fluxo: " . $node['name']);
+                Log::debug('Nó desconhecido no fluxo: '.$node['name']);
+
                 return null;
         }
     }
@@ -268,6 +285,7 @@ class FlowEngineService
     {
         return preg_replace_callback('/@{{(.*?)}}/', function ($matches) use ($variables) {
             $key = trim($matches[1]);
+
             return $variables[$key] ?? $matches[0];
         }, $text);
     }
@@ -286,9 +304,11 @@ class FlowEngineService
     {
         try {
             $chatbot = Chatbot::resolveForConversation($conversation);
-            if (!$chatbot) return;
+            if (! $chatbot) {
+                return;
+            }
 
-            $stat = \App\Models\ChatbotFlowNodeStat::firstOrCreate([
+            $stat = ChatbotFlowNodeStat::firstOrCreate([
                 'company_id' => $conversation->company_id,
                 'chatbot_id' => $chatbot->id,
                 'node_id' => $nodeId,
@@ -303,7 +323,7 @@ class FlowEngineService
                 $stat->increment('dropoffs');
             }
         } catch (\Exception $e) {
-            Log::error('Erro ao registrar estatística de nó: ' . $e->getMessage());
+            Log::error('Erro ao registrar estatística de nó: '.$e->getMessage());
         }
     }
 }

@@ -11,11 +11,17 @@ class IntentClassificationService
      * Intenções suportadas nativamente pelo sistema.
      */
     const INTENT_COMMERCIAL = 'commercial';
+
     const INTENT_SCHEDULING = 'scheduling';
+
     const INTENT_SUPPORT = 'support';
+
     const INTENT_FINANCIAL = 'financial';
+
     const INTENT_HUMAN_TRANSFER = 'human_transfer';
+
     const INTENT_SIMPLE_FAQ = 'simple_faq';
+
     const INTENT_UNKNOWN = 'unknown';
 
     /**
@@ -46,10 +52,18 @@ class IntentClassificationService
         $financialKeywords = ['boleto', 'fatura', 'pagar', 'pagamento', 'cobrança', 'segunda via'];
         $humanKeywords = ['falar com humano', 'atendente', 'humano', 'suporte', 'reclamação', 'reclamar'];
 
-        if ($this->containsAny($message, $humanKeywords)) return self::INTENT_HUMAN_TRANSFER;
-        if ($this->containsAny($message, $financialKeywords)) return self::INTENT_FINANCIAL;
-        if ($this->containsAny($message, $schedulingKeywords)) return self::INTENT_SCHEDULING;
-        if ($this->containsAny($message, $commercialKeywords)) return self::INTENT_COMMERCIAL;
+        if ($this->containsAny($message, $humanKeywords)) {
+            return self::INTENT_HUMAN_TRANSFER;
+        }
+        if ($this->containsAny($message, $financialKeywords)) {
+            return self::INTENT_FINANCIAL;
+        }
+        if ($this->containsAny($message, $schedulingKeywords)) {
+            return self::INTENT_SCHEDULING;
+        }
+        if ($this->containsAny($message, $commercialKeywords)) {
+            return self::INTENT_COMMERCIAL;
+        }
 
         return self::INTENT_UNKNOWN;
     }
@@ -61,6 +75,7 @@ class IntentClassificationService
                 return true;
             }
         }
+
         return false;
     }
 
@@ -70,8 +85,8 @@ class IntentClassificationService
     protected function aiClassification(string $message): string
     {
         $apiKey = config('chatbox.ai.gemini.api_key');
-        
-        if (!$apiKey) {
+
+        if (! $apiKey) {
             return self::INTENT_SUPPORT; // Fallback
         }
 
@@ -85,10 +100,10 @@ class IntentClassificationService
 
             if ($response->successful()) {
                 $intent = trim(strtolower($response->json('candidates.0.content.parts.0.text')));
-                
+
                 $validIntents = [
                     self::INTENT_COMMERCIAL, self::INTENT_SCHEDULING, self::INTENT_SUPPORT,
-                    self::INTENT_FINANCIAL, self::INTENT_HUMAN_TRANSFER, self::INTENT_SIMPLE_FAQ, self::INTENT_UNKNOWN
+                    self::INTENT_FINANCIAL, self::INTENT_HUMAN_TRANSFER, self::INTENT_SIMPLE_FAQ, self::INTENT_UNKNOWN,
                 ];
 
                 if (in_array($intent, $validIntents)) {

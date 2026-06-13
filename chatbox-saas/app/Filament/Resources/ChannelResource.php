@@ -188,4 +188,3 @@ class ChannelResource extends Resource
         ];
     }
 }
-

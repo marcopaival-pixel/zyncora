@@ -193,7 +193,7 @@ class CompanyIntegrationResource extends Resource
                             ->required()
                             ->native(false)
                             ->live()
-                            ->helperText(fn (\Filament\Forms\Get $get) => match ($get('status')) {
+                            ->helperText(fn (Get $get) => match ($get('status')) {
                                 'pending' => 'A integração está salva, mas aguarda configuração ou verificação no painel externo.',
                                 'connected' => 'Integração estabelecida com sucesso. O sistema está pronto para enviar e receber mensagens.',
                                 'error' => 'Houve uma falha na integração. Verifique as credenciais da Meta ou o status do webhook.',
@@ -298,4 +298,3 @@ class CompanyIntegrationResource extends Resource
         ];
     }
 }
-

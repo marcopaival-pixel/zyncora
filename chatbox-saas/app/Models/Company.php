@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Observers\CompanyObserver;
+use App\Traits\HasHealthScore;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Observers\CompanyObserver;
 
 #[ObservedBy(CompanyObserver::class)]
 class Company extends Model
 {
-    use HasFactory, \App\Traits\HasHealthScore;
+    use HasFactory, HasHealthScore;
 
     protected $fillable = [
         'name',
@@ -202,11 +203,12 @@ class Company extends Model
      */
     public function calcularDiasRestantes(): int
     {
-        if (!$this->trial_end_at || $this->subscription_status !== 'trial') {
+        if (! $this->trial_end_at || $this->subscription_status !== 'trial') {
             return 0;
         }
 
         $diasRestantes = now()->diffInDays($this->trial_end_at, false);
+
         return max(0, (int) $diasRestantes);
     }
 

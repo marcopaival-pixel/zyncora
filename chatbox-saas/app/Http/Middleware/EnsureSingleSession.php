@@ -14,7 +14,7 @@ class EnsureSingleSession
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -27,7 +27,7 @@ class EnsureSingleSession
                 // Se o login foi via "Remember Me", confiamos no dispositivo e sincronizamos a sessão
                 if (Auth::viaRemember()) {
                     $user->forceFill(['current_session_id' => $currentSessionId])->save();
-                    
+
                     // Registra no log de sessões (opcional)
                     DB::table('user_session_logs')->insert([
                         'user_id' => $user->id,
@@ -48,19 +48,19 @@ class EnsureSingleSession
                     if ($request->ajax() || $request->wantsJson()) {
                         return response()->json([
                             'message' => 'Sua sessão foi encerrada porque você entrou em outro dispositivo.',
-                            'redirect' => route('filament.admin.auth.login')
+                            'redirect' => route('filament.admin.auth.login'),
                         ], 401);
                     }
-                    
+
                     return redirect()->route('filament.admin.auth.login')->with('error', 'Sua sessão foi encerrada porque você entrou em outro dispositivo.');
                 }
             }
-            
+
             // Se o usuário não tem sessão registrada (ex: primeiro login ou limpou DB), sincroniza
-            if (!$user->current_session_id) {
+            if (! $user->current_session_id) {
                 $user->forceFill(['current_session_id' => $currentSessionId])->save();
             }
-            
+
             // Atualiza a última atividade no log
             DB::table('user_session_logs')
                 ->where('session_id', $currentSessionId)

@@ -3,13 +3,14 @@
 namespace App\Filament\SuperAdmin\Pages;
 
 use App\Models\Company;
+use App\Notifications\UpgradeSuggestionNotification;
 use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Notification;
 
 class BusinessIntelligenceDashboard extends Page implements HasTable
 {
@@ -53,16 +54,26 @@ class BusinessIntelligenceDashboard extends Page implements HasTable
                 TextColumn::make('percentage')
                     ->label('Uso (%)')
                     ->getStateUsing(function (Company $record) {
-                        if (!$record->ai_credits_balance) return '100%';
+                        if (! $record->ai_credits_balance) {
+                            return '100%';
+                        }
                         $pct = ($record->ai_credits_used / $record->ai_credits_balance) * 100;
-                        return number_format($pct, 1) . '%';
+
+                        return number_format($pct, 1).'%';
                     })
                     ->badge()
                     ->color(function (Company $record) {
-                        if (!$record->ai_credits_balance) return 'danger';
+                        if (! $record->ai_credits_balance) {
+                            return 'danger';
+                        }
                         $pct = ($record->ai_credits_used / $record->ai_credits_balance);
-                        if ($pct >= 0.95) return 'danger';
-                        if ($pct >= 0.8) return 'warning';
+                        if ($pct >= 0.95) {
+                            return 'danger';
+                        }
+                        if ($pct >= 0.8) {
+                            return 'warning';
+                        }
+
                         return 'success';
                     }),
             ])
@@ -70,7 +81,7 @@ class BusinessIntelligenceDashboard extends Page implements HasTable
                 Action::make('suggest_upgrade')
                     ->label('Sugerir Upgrade')
                     ->icon('heroicon-o-arrow-up-circle')
-                    ->action(fn (Company $record) => \Illuminate\Support\Facades\Notification::route('mail', $record->email)->notify(new \App\Notifications\UpgradeSuggestionNotification($record)))
+                    ->action(fn (Company $record) => Notification::route('mail', $record->email)->notify(new UpgradeSuggestionNotification($record)))
                     ->requiresConfirmation(),
             ]);
     }

@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Pages\CRMBoard;
-use App\Filament\Resources\ContactResource;
 use App\Filament\Resources\DealResource\Pages;
-use App\Filament\Resources\PipelineResource;
 use App\Models\Deal;
 use App\Models\Pipeline;
 use App\Models\PipelineStage;
@@ -37,7 +35,10 @@ class DealResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
-        if ($user && $user->isPlatformAdmin()) return false;
+        if ($user && $user->isPlatformAdmin()) {
+            return false;
+        }
+
         return $user?->canChat() ?? false;
     }
 
@@ -246,4 +247,3 @@ class DealResource extends Resource
         ];
     }
 }
-

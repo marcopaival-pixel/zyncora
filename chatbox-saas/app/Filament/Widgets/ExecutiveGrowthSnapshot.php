@@ -47,7 +47,7 @@ class ExecutiveGrowthSnapshot extends Widget
         $companyId = $isPlatform ? null : $user?->company_id;
 
         // Cache das métricas brutas por 10 minutos para escala SaaS
-        $cacheKey = "metrics_snapshot_" . ($companyId ?? 'platform');
+        $cacheKey = 'metrics_snapshot_'.($companyId ?? 'platform');
         $data = cache()->remember($cacheKey, now()->addMinutes(10), function () use ($companyId) {
             $conversations = $this->tenantConversationQuery($companyId);
             $messages = $this->tenantMessageQuery($companyId);
@@ -197,4 +197,3 @@ class ExecutiveGrowthSnapshot extends Widget
             ->count();
     }
 }
-

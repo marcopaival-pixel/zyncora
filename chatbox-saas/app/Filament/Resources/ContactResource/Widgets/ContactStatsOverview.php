@@ -18,12 +18,12 @@ class ContactStatsOverview extends BaseWidget
                 ->description('Todos os contactos registados')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('primary'),
-                
+
             Stat::make('Novos (7 dias)', Contact::where('created_at', '>=', Carbon::now()->subDays(7))->count())
                 ->description('Registados recentemente')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-                
+
             Stat::make('Com Interações', Contact::whereHas('conversations')->count())
                 ->description('Contactos que já conversaram')
                 ->descriptionIcon('heroicon-m-chat-bubble-left-right')

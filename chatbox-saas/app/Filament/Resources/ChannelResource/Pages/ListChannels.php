@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\ChannelResource\Pages;
 
+use App\Filament\Pages\ChannelOnboardingWizard;
 use App\Filament\Resources\ChannelResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Pages\ChannelOnboardingWizard;
 
 class ListChannels extends ListRecords
 {

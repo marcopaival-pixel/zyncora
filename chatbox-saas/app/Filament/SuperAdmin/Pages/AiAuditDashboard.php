@@ -2,28 +2,32 @@
 
 namespace App\Filament\SuperAdmin\Pages;
 
-use Filament\Pages\Page;
+use App\Filament\Widgets\AiChatbotRankingWidget;
+use App\Filament\Widgets\SuperAdminAiConsumptionWidget;
 use App\Models\AiAnswerAuditLog;
+use Filament\Pages\Page;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 
 class AiAuditDashboard extends Page implements HasTable
 {
     use InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+
     protected static ?string $navigationGroup = 'Relatórios';
+
     protected static ?string $title = 'Auditoria do Orquestrador';
-    
+
     protected static string $view = 'filament.pages.ai-audit-dashboard';
 
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Widgets\SuperAdminAiConsumptionWidget::class,
-            \App\Filament\Widgets\AiChatbotRankingWidget::class,
+            SuperAdminAiConsumptionWidget::class,
+            AiChatbotRankingWidget::class,
         ];
     }
 

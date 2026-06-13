@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\HelpCategory;
 use App\Models\HelpArticle;
+use App\Models\HelpCategory;
 use App\Models\Sector;
+use Illuminate\Database\Seeder;
 
 class HelpCenterSeeder extends Seeder
 {
@@ -30,7 +30,7 @@ class HelpCenterSeeder extends Seeder
                     'default' => 'Exemplo: "Você é um assistente de vendas da empresa X. Ajude os clientes a comprar produtos."',
                     ($clinica ? $clinica->id : 'clinica') => 'Exemplo: "Você é a recepcionista da Clínica X. Agende consultas e tire dúvidas sobre os exames disponíveis."',
                     ($imobiliaria ? $imobiliaria->id : 'imobiliaria') => 'Exemplo: "Você é o corretor da Imobiliária X. Mostre os imóveis disponíveis e agende visitas."',
-                ]
+                ],
             ]
         );
 
@@ -46,7 +46,7 @@ class HelpCenterSeeder extends Seeder
                     'default' => 'Exemplo: Mover cliente de "Novo Contato" para "Em Negociação".',
                     ($clinica ? $clinica->id : 'clinica') => 'Exemplo: Mover paciente de "Agendado" para "Atendido".',
                     ($imobiliaria ? $imobiliaria->id : 'imobiliaria') => 'Exemplo: Mover lead de "Visita Agendada" para "Contrato Assinado".',
-                ]
+                ],
             ]
         );
     }

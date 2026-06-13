@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use App\Filament\Resources\UserResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
-
+use App\Filament\Resources\UserResource;
 use App\Models\User;
 use App\Services\PlanService;
+use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class EditUser extends BaseEditRecord
@@ -25,7 +25,7 @@ class EditUser extends BaseEditRecord
         $targetRole = $data['role'] ?? $record->role;
 
         // Se tentou ativar ou mudar para Agente e não era Agente Ativo antes
-        $isBecameActiveAgent = ($targetStatus === 'active' && $targetRole === User::ROLE_AGENT) 
+        $isBecameActiveAgent = ($targetStatus === 'active' && $targetRole === User::ROLE_AGENT)
                                && (! ($record->status === 'active' && $record->role === User::ROLE_AGENT));
 
         if ($user && ! $user->isPlatformAdmin() && $isBecameActiveAgent) {
@@ -44,7 +44,7 @@ class EditUser extends BaseEditRecord
         }
     }
 
-    public function getTitle(): string 
+    public function getTitle(): string
     {
         return 'Editar Dados do Utilizador';
     }
@@ -62,13 +62,13 @@ class EditUser extends BaseEditRecord
         ];
     }
 
-    protected function getSaveFormAction(): \Filament\Actions\Action
+    protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
             ->label('Atualizar Dados');
     }
 
-    protected function getCancelFormAction(): \Filament\Actions\Action
+    protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()
             ->label('Cancelar');

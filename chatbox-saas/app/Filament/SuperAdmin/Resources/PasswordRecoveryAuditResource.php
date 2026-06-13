@@ -9,16 +9,20 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class PasswordRecoveryAuditResource extends Resource
 {
     protected static ?string $model = PasswordRecoveryAudit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+
     protected static ?string $navigationLabel = 'Auditoria de Senhas';
+
     protected static ?string $modelLabel = 'Log de Recuperação de Senha';
+
     protected static ?string $pluralModelLabel = 'Logs de Recuperação de Senha';
+
     protected static ?string $navigationGroup = 'Segurança & Auditoria';
 
     public static function canCreate(): bool
@@ -26,12 +30,12 @@ class PasswordRecoveryAuditResource extends Resource
         return false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

@@ -12,12 +12,12 @@ class Contact extends Model
     use BelongsToCompany;
 
     protected $fillable = [
-        'company_id', 
-        'name', 
-        'phone', 
-        'email', 
-        'avatar_url', 
-        'custom_fields'
+        'company_id',
+        'name',
+        'phone',
+        'email',
+        'avatar_url',
+        'custom_fields',
     ];
 
     protected $casts = [

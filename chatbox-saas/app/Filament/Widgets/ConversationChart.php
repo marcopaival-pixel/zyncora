@@ -18,7 +18,7 @@ class ConversationChart extends ChartWidget
 
     protected static ?int $sort = 7;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function getData(): array
     {
@@ -80,4 +80,3 @@ class ConversationChart extends ChartWidget
         return 'line';
     }
 }
-

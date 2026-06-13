@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentHistoryResource\Pages;
-use App\Filament\Resources\PaymentHistoryResource\RelationManagers;
 use App\Models\PaymentHistory;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,7 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PaymentHistoryResource extends Resource
 {
@@ -38,7 +36,7 @@ class PaymentHistoryResource extends Resource
                             ->label('Empresa')
                             ->searchable()
                             ->columnSpanFull()
-                            ->disabled(fn() => !auth()->user()->isPlatformAdmin()),
+                            ->disabled(fn () => ! auth()->user()->isPlatformAdmin()),
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('type')
@@ -69,7 +67,7 @@ class PaymentHistoryResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if (!auth()->user()->isPlatformAdmin()) {
+                if (! auth()->user()->isPlatformAdmin()) {
                     $query->where('company_id', auth()->user()->company_id);
                 }
             })
@@ -77,7 +75,7 @@ class PaymentHistoryResource extends Resource
                 Tables\Columns\TextColumn::make('company.name')
                     ->sortable()
                     ->searchable()
-                    ->visible(fn() => auth()->user()->isPlatformAdmin()),
+                    ->visible(fn () => auth()->user()->isPlatformAdmin()),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
@@ -120,4 +118,3 @@ class PaymentHistoryResource extends Resource
         ];
     }
 }
-

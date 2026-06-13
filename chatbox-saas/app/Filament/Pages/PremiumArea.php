@@ -24,7 +24,7 @@ class PremiumArea extends Page
     public function mount(): void
     {
         $user = auth()->user();
-        
+
         if ($user && $user->isPlatformAdmin()) {
             return; // Admin vê tudo liberado
         }

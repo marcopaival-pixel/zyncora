@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Conversation;
 use App\Services\AIService;
+use App\Services\TenantService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -38,7 +39,7 @@ class AnalyzeConversationWithAi implements ShouldQueue
 
         // Inicializa o contexto do inquilino para este Job
         if ($conversation->company_id) {
-            app(\App\Services\TenantService::class)->setCompany($conversation->company);
+            app(TenantService::class)->setCompany($conversation->company);
         }
 
         $aiService->analyzeConversation($conversation);

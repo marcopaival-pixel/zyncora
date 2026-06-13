@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KnowledgeSource extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
-    use \App\Traits\BelongsToCompany;
+    use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id',

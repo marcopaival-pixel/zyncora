@@ -5,12 +5,14 @@ namespace Tests\Feature;
 use App\Filament\Resources\ChatbotResource;
 use App\Filament\Resources\ChatbotResource\Pages\CreateChatbot;
 use App\Filament\Resources\ChatbotResource\Pages\EditChatbot;
-use App\Filament\SuperAdmin\Resources\CompanyResource\Pages\CreateCompany;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\SuperAdmin\Resources\CompanyResource\Pages\CreateCompany;
 use App\Models\Chatbot;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\RoleSyncService;
+use Database\Seeders\RBACSeeder;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -21,7 +23,7 @@ class FilamentCrudTest extends TestCase
 
     protected function seedRbac(): void
     {
-        $this->seed(\Database\Seeders\RBACSeeder::class);
+        $this->seed(RBACSeeder::class);
     }
 
     public function test_platform_admin_can_create_company(): void
@@ -33,8 +35,8 @@ class FilamentCrudTest extends TestCase
         ]);
 
         $this->actingAs($admin);
-        
-        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('super-admin'));
+
+        Filament::setCurrentPanel(Filament::getPanel('super-admin'));
 
         Livewire::test(CreateCompany::class)
             ->fillForm([
@@ -72,6 +74,7 @@ class FilamentCrudTest extends TestCase
                 'name' => 'Bot Comercial',
                 'default_channel' => 'site',
                 'status' => 'active',
+                'chatbot_segment' => 'Outro Segmento',
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -79,7 +82,7 @@ class FilamentCrudTest extends TestCase
         $this->assertDatabaseHas('chatbots', [
             'company_id' => $company->id,
             'name' => 'Bot Comercial',
-            'status' => 'active',
+            'status' => Chatbot::STATUS_READY,
         ]);
     }
 
@@ -168,11 +171,11 @@ class FilamentCrudTest extends TestCase
 
         $response = $this->actingAs($admin)
             ->get(ChatbotResource::getUrl('index'));
-            
+
         if ($response->status() === 302) {
             dump($response->headers->get('Location'));
         }
-        
+
         $response->assertOk();
     }
 }

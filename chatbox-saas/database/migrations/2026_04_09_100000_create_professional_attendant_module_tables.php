@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Setores (Sectors) - Substituindo ou complementando attendance_queues se necessário
-        if (!Schema::hasTable('sectors')) {
+        if (! Schema::hasTable('sectors')) {
             Schema::create('sectors', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('company_id')->constrained()->cascadeOnDelete();

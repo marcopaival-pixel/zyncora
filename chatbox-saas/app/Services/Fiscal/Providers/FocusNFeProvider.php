@@ -12,15 +12,16 @@ class FocusNFeProvider implements IFiscalProvider
     public function emitInvoice(PaymentHistory $payment, array $customerData): Invoice
     {
         Log::info("FocusNFeProvider: Emitting invoice for payment {$payment->id}");
-        
+
         // TODO: Implement Focus NFe API call
-        
-        return new Invoice();
+
+        return new Invoice;
     }
 
     public function cancelInvoice(Invoice $invoice, string $reason): bool
     {
         Log::info("FocusNFeProvider: Canceling invoice {$invoice->id}");
+
         return true;
     }
 

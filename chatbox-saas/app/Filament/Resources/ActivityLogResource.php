@@ -4,11 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ActivityLogResource\Pages;
 use App\Models\ActivityLog;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActivityLogResource extends Resource
 {
@@ -19,7 +18,7 @@ class ActivityLogResource extends Resource
     protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Log de Atividade';
-    
+
     protected static ?string $pluralModelLabel = 'Logs de Atividade';
 
     public static function shouldRegisterNavigation(): bool
@@ -32,7 +31,7 @@ class ActivityLogResource extends Resource
         return auth()->user()?->canViewLogs() ?? false;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with('user');
         $user = auth()->user();
@@ -99,4 +98,3 @@ class ActivityLogResource extends Resource
         ];
     }
 }
-

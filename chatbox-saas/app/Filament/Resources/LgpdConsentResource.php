@@ -20,7 +20,7 @@ class LgpdConsentResource extends Resource
     protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Consentimento';
-    
+
     protected static ?string $pluralModelLabel = 'Consentimentos';
 
     public static function shouldRegisterNavigation(): bool
@@ -112,4 +112,3 @@ class LgpdConsentResource extends Resource
         ];
     }
 }
-

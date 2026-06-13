@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Conversation;
 use App\Models\User;
 use App\Services\RoleSyncService;
+use Database\Seeders\RBACSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -17,7 +18,7 @@ class FilamentConversationReplyTest extends TestCase
 
     protected function seedRbac(): void
     {
-        $this->seed(\Database\Seeders\RBACSeeder::class);
+        $this->seed(RBACSeeder::class);
     }
 
     public function test_agent_can_send_reply_from_conversation_view(): void

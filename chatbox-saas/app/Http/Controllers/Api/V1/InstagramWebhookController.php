@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Services\WebhookIngestionService;
 use App\Jobs\IngestWebhookPayloadJob;
+use App\Services\WebhookIngestionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -20,6 +20,7 @@ class InstagramWebhookController extends Controller
     public function universalVerify(Request $request): Response
     {
         $expected = config('chatbox.instagram.universal_verify_token', 'zincora_ig_token');
+
         return $this->ingestionService->universalVerify($request, $expected);
     }
 
@@ -46,7 +47,7 @@ class InstagramWebhookController extends Controller
             $igAccountId = data_get($entry, 'id'); // The business Instagram Account ID receiving the message
             $messagings = data_get($entry, 'messaging', []);
 
-            if (!$igAccountId) {
+            if (! $igAccountId) {
                 continue;
             }
 

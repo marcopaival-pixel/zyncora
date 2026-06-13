@@ -4,11 +4,10 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Models\User;
-use Filament\Actions\Action;
-use Filament\Resources\Pages\CreateRecord;
-
 use App\Services\PlanService;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
 {
@@ -18,7 +17,7 @@ class CreateUser extends CreateRecord
     {
         $data = $this->data;
         $user = auth()->user();
-        
+
         // Se for administrador de empresa tentando criar um Agente
         // No UserResource, o Hidden field 'role' está como agente por padrão para não-admins
         // Mas vamos validar baseado no que está sendo enviado

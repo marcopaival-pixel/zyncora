@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\ConversationResource\Pages;
 
-use App\Models\ChatLog;
 use App\Filament\Resources\ConversationResource;
+use App\Models\ChatLog;
+use App\Services\AiService;
 use Filament\Actions;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -13,7 +14,7 @@ class ViewConversation extends ViewRecord
 {
     protected static string $resource = ConversationResource::class;
 
-    public function mount(int | string $record): void
+    public function mount(int|string $record): void
     {
         parent::mount($record);
 
@@ -21,7 +22,7 @@ class ViewConversation extends ViewRecord
         ChatLog::create([
             'company_id' => $this->record->company_id,
             'log_type' => 'chat_view',
-            'description' => "O atendente " . auth()->user()->name . " visualizou a conversa #{$this->record->id}.",
+            'description' => 'O atendente '.auth()->user()->name." visualizou a conversa #{$this->record->id}.",
             'context' => [
                 'user_id' => auth()->id(),
                 'conversation_id' => $this->record->id,
@@ -79,7 +80,7 @@ class ViewConversation extends ViewRecord
                         ->maxLength(8000)
                         ->columnSpanFull(),
                 ])
-                ->mountUsing(function (Filament\Forms\Form $form, \App\Services\AiService $aiService) {
+                ->mountUsing(function (Filament\Forms\Form $form, AiService $aiService) {
                     $suggestion = $aiService->generateAgentSuggestion($this->record);
                     $form->fill(['body' => $suggestion]);
                 })

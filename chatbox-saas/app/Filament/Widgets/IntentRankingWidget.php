@@ -2,14 +2,15 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use App\Models\Conversation;
+use Filament\Widgets\ChartWidget;
 
 class IntentRankingWidget extends ChartWidget
 {
     protected static ?string $pollingInterval = null;
 
     protected static ?string $heading = 'Ranking de Intenções Detectadas';
+
     protected static ?int $sort = 2;
 
     protected function getData(): array
@@ -39,4 +40,3 @@ class IntentRankingWidget extends ChartWidget
         return 'doughnut';
     }
 }
-

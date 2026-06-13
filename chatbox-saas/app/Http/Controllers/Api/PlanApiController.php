@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Plan;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,7 +18,7 @@ class PlanApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $plans
+            'data' => $plans,
         ]);
     }
 }

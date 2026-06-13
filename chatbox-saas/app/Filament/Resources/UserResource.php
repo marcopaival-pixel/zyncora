@@ -4,12 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use App\Services\PlanService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -33,12 +36,12 @@ class UserResource extends Resource
         return ['name', 'email', 'phone', 'company.name'];
     }
 
-    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->name . ' (' . ucfirst($record->role) . ')';
+        return $record->name.' ('.ucfirst($record->role).')';
     }
 
-    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             'Empresa' => $record->company?->name ?? 'N/A',
@@ -46,7 +49,6 @@ class UserResource extends Resource
             'Status' => $record->status === 'active' ? 'Ativo' : 'Inativo',
         ];
     }
-
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -111,14 +113,14 @@ class UserResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->prefixIcon('heroicon-m-envelope'),
-                                    
+
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Telefone / WhatsApp')
                                     ->placeholder('5511999999999')
                                     ->tel()
                                     ->maxLength(64)
                                     ->prefixIcon('heroicon-m-phone'),
-                                    
+
                                 Forms\Components\TextInput::make('password')
                                     ->label('Nova Senha')
                                     ->helperText('Deixe em branco para manter a senha atual.')
@@ -154,19 +156,18 @@ class UserResource extends Resource
                                     ->default(10)
                                     ->required()
                                     ->prefixIcon('heroicon-m-squares-2x2'),
-                                    
+
                                 Forms\Components\Select::make('sectors')
                                     ->relationship(
                                         name: 'sectors',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query, Forms\Get $get) => 
-                                            $query->when(
-                                                $get('company_id'),
-                                                fn ($q, $companyId) => $q->where('company_id', $companyId),
-                                                fn ($q) => auth()->user() && !auth()->user()->isPlatformAdmin() 
-                                                    ? $q->where('company_id', auth()->user()->company_id) 
-                                                    : $q
-                                            )
+                                        modifyQueryUsing: fn (Builder $query, Forms\Get $get) => $query->when(
+                                            $get('company_id'),
+                                            fn ($q, $companyId) => $q->where('company_id', $companyId),
+                                            fn ($q) => auth()->user() && ! auth()->user()->isPlatformAdmin()
+                                                ? $q->where('company_id', auth()->user()->company_id)
+                                                : $q
+                                        )
                                     )
                                     ->multiple()
                                     ->preload()
@@ -252,7 +253,7 @@ class UserResource extends Resource
                 Tables\Columns\ImageColumn::make('avatar')
                     ->label('')
                     ->circular()
-                    ->defaultImageUrl(fn (User $record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=8b5cf6')
+                    ->defaultImageUrl(fn (User $record) => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&color=FFFFFF&background=8b5cf6')
                     ->grow(false),
 
                 Tables\Columns\TextColumn::make('name')
@@ -372,15 +373,15 @@ class UserResource extends Resource
                         $user = auth()->user();
                         $targetStatus = $data['status'] ?? $record->status;
                         $targetRole = $data['role'] ?? $record->role;
-                        
-                        $isBecameActiveAgent = ($targetStatus === 'active' && $targetRole === User::ROLE_AGENT) 
+
+                        $isBecameActiveAgent = ($targetStatus === 'active' && $targetRole === User::ROLE_AGENT)
                                                && (! ($record->status === 'active' && $record->role === User::ROLE_AGENT));
 
                         if ($user && ! $user->isPlatformAdmin() && $isBecameActiveAgent) {
                             $company = $user->company;
-                            $planService = app(\App\Services\PlanService::class);
+                            $planService = app(PlanService::class);
                             if (! $planService->canAddAttendant($company)) {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->title('Limite de Atendentes Atingido')
                                     ->body("A sua subscrição permite apenas {$company->max_attendants} atendentes ativos.")
                                     ->danger()
@@ -412,4 +413,3 @@ class UserResource extends Resource
         ];
     }
 }
-

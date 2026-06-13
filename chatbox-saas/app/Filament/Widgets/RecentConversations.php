@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Filament\Resources\ConversationResource;
+use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Models\Conversation;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -21,7 +21,7 @@ class RecentConversations extends BaseWidget
 
     protected static ?int $sort = 8;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Últimas conversas';
 
@@ -93,4 +93,3 @@ class RecentConversations extends BaseWidget
             ]);
     }
 }
-

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ChatbotResource\Widgets;
 use App\Models\Chatbot;
 use App\Models\Conversation;
 use App\Models\Lead;
+use App\Services\PlanService;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
@@ -16,7 +17,7 @@ class ChatbotOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -48,7 +49,7 @@ class ChatbotOverviewWidget extends BaseWidget
 
         // 3. Economia de Tempo (Ex: Cada conversa economiza em média 5 minutos de um atendente humano)
         $totalConversationsThisMonth = (clone $conversationsQuery)->whereMonth('created_at', Carbon::now()->month)->count();
-        $minutesSaved = $totalConversationsThisMonth * 5; 
+        $minutesSaved = $totalConversationsThisMonth * 5;
         $hoursSaved = round($minutesSaved / 60, 1);
 
         // 4. Créditos de IA (se houver companhia)
@@ -58,12 +59,12 @@ class ChatbotOverviewWidget extends BaseWidget
         $aiCreditsIcon = 'heroicon-o-cpu-chip';
         $aiCreditsDescription = 'Recurso desativado';
 
-        if ($company && app(\App\Services\PlanService::class)->hasFeature($company, 'ai_automation')) {
+        if ($company && app(PlanService::class)->hasFeature($company, 'ai_automation')) {
             $usage = $company->ai_credits_used;
             $balance = $company->ai_credits_balance;
             if ($balance > 0) {
                 $percentage = ($usage / $balance) * 100;
-                $aiCreditsStatus = number_format($percentage, 0) . '% consumido';
+                $aiCreditsStatus = number_format($percentage, 0).'% consumido';
                 if ($percentage >= 90) {
                     $aiCreditsColor = 'danger';
                     $aiCreditsDescription = 'Créditos quase esgotados!';
@@ -83,18 +84,18 @@ class ChatbotOverviewWidget extends BaseWidget
 
         return [
             Stat::make('Conversas (Hoje)', $countToday)
-                ->description(($trendConversations > 0 ? '+' : '') . ($countToday - $countYesterday) . ' em relação a ontem')
+                ->description(($trendConversations > 0 ? '+' : '').($countToday - $countYesterday).' em relação a ontem')
                 ->descriptionIcon($trendIconConversations)
                 ->color($trendColorConversations)
                 ->icon('heroicon-o-chat-bubble-left-right'),
 
             Stat::make('Leads Capturados (Hoje)', $countLeadsToday)
-                ->description(($trendLeads > 0 ? '+' : '') . ($countLeadsToday - $countLeadsYesterday) . ' em relação a ontem')
+                ->description(($trendLeads > 0 ? '+' : '').($countLeadsToday - $countLeadsYesterday).' em relação a ontem')
                 ->descriptionIcon($trendIconLeads)
                 ->color($trendColorLeads)
                 ->icon('heroicon-o-users'),
 
-            Stat::make('Economia de Tempo (Mês)', $hoursSaved . ' horas')
+            Stat::make('Economia de Tempo (Mês)', $hoursSaved.' horas')
                 ->description('Tempo poupado da sua equipe')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('primary')

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use App\Models\Chatbot;
+use Illuminate\Http\Request;
 
 class WidgetFingerprintService
 {
@@ -16,7 +16,7 @@ class WidgetFingerprintService
         $host = $request->getHost();
         $userAgent = $request->header('User-Agent');
         $ip = $request->ip();
-        
+
         $data = [
             'chatbot_id' => $chatbot->id,
             'domain' => $domain,

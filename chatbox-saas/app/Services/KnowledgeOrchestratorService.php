@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\AiAnswerAuditLog;
 use App\Models\Chatbot;
-use App\Models\Conversation;
-use App\Models\KnowledgeSource;
-use App\Models\KnowledgeBase;
 use App\Models\Company;
+use App\Models\Conversation;
+use App\Models\KnowledgeBase;
+use App\Models\KnowledgeSource;
+use App\Models\UnresolvedQuestion;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\AiAnswerAuditLog;
 
 class KnowledgeOrchestratorService
 {
-
     /**
      * Resolve a mensagem do usuário tentando usar as Fontes de Conhecimento ativas
      * na ordem correta, antes de recorrer ao LLM puro.
@@ -28,6 +28,7 @@ class KnowledgeOrchestratorService
             $companyAnswer = $this->tryCompanyData($company, $userMessage);
             if ($companyAnswer) {
                 $this->logAudit($conversation->id, $userMessage, 'company_data', 50);
+
                 return $companyAnswer;
             }
         }
@@ -37,6 +38,7 @@ class KnowledgeOrchestratorService
             $faqAnswer = $this->tryFaq($companyId, $userMessage);
             if ($faqAnswer) {
                 $this->logAudit($conversation->id, $userMessage, 'faq', 100);
+
                 return $faqAnswer;
             }
         }
@@ -46,6 +48,7 @@ class KnowledgeOrchestratorService
             $apiAnswer = $this->tryExternalApi($companyId, $userMessage);
             if ($apiAnswer) {
                 $this->logAudit($conversation->id, $userMessage, 'external_api', 200);
+
                 return $apiAnswer;
             }
         }
@@ -73,16 +76,17 @@ class KnowledgeOrchestratorService
                 $hoursText = "Nosso horário de funcionamento é:\n";
                 foreach ($company->business_hours as $day => $hours) {
                     if ($hours['active'] ?? false) {
-                        $hoursText .= ucfirst($day) . ": " . ($hours['start'] ?? '') . " às " . ($hours['end'] ?? '') . "\n";
+                        $hoursText .= ucfirst($day).': '.($hours['start'] ?? '').' às '.($hours['end'] ?? '')."\n";
                     }
                 }
+
                 return rtrim($hoursText);
             }
         }
 
         if (str_contains($msg, 'telefone') || str_contains($msg, 'contato')) {
             if ($company->phone) {
-                return "Você pode entrar em contato conosco pelo telefone/WhatsApp: " . $company->phone;
+                return 'Você pode entrar em contato conosco pelo telefone/WhatsApp: '.$company->phone;
             }
         }
 
@@ -99,7 +103,9 @@ class KnowledgeOrchestratorService
     private function tryFaq(int $companyId, string $userMessage): ?string
     {
         $cleanMessage = mb_strtolower(trim($userMessage));
-        if (empty($cleanMessage)) return null;
+        if (empty($cleanMessage)) {
+            return null;
+        }
 
         // Tenta Match exato de 100% primeiro (Custo zero de IA)
         $exactFaq = KnowledgeBase::where('company_id', $companyId)
@@ -114,10 +120,12 @@ class KnowledgeOrchestratorService
 
         // True AI RAG (Vector Search)
         try {
-            $aiService = app(\App\Services\AiService::class);
+            $aiService = app(AiService::class);
             $userEmbedding = $aiService->generateEmbeddings($cleanMessage);
 
-            if (!$userEmbedding) return null;
+            if (! $userEmbedding) {
+                return null;
+            }
 
             $faqs = KnowledgeBase::where('company_id', $companyId)
                 ->where('is_active', true)
@@ -140,7 +148,8 @@ class KnowledgeOrchestratorService
 
             // Limiar de Confiança: 0.75 (75% de similaridade semântica)
             if ($bestMatch && $highestSimilarity >= 0.75) {
-                \Illuminate\Support\Facades\Log::info("Vector Search FAQ: Encontrou match com similaridade {$highestSimilarity} para a pergunta: {$cleanMessage}");
+                Log::info("Vector Search FAQ: Encontrou match com similaridade {$highestSimilarity} para a pergunta: {$cleanMessage}");
+
                 return strip_tags($bestMatch->content);
             }
 
@@ -148,7 +157,7 @@ class KnowledgeOrchestratorService
             $this->logUnresolvedQuestion($companyId, $userMessage);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Erro no Vector Search RAG: " . $e->getMessage());
+            Log::error('Erro no Vector Search RAG: '.$e->getMessage());
         }
 
         return null;
@@ -157,11 +166,13 @@ class KnowledgeOrchestratorService
     private function logUnresolvedQuestion(int $companyId, string $question): void
     {
         $cleanQuestion = trim($question);
-        if (empty($cleanQuestion) || mb_strlen($cleanQuestion) < 10) return; // Ignora saudações curtas
+        if (empty($cleanQuestion) || mb_strlen($cleanQuestion) < 10) {
+            return;
+        } // Ignora saudações curtas
 
         // Busca se existe uma pergunta muito parecida (Neste caso, faremos match simples para performance)
         // Para escalar, poderíamos usar vector search aqui também, mas LIKE resolve repetições exatas.
-        $existing = \App\Models\UnresolvedQuestion::where('company_id', $companyId)
+        $existing = UnresolvedQuestion::where('company_id', $companyId)
             ->where('question', $cleanQuestion)
             ->first();
 
@@ -169,11 +180,11 @@ class KnowledgeOrchestratorService
             $existing->increment('frequency');
             $existing->touch();
         } else {
-            \App\Models\UnresolvedQuestion::create([
+            UnresolvedQuestion::create([
                 'company_id' => $companyId,
                 'question' => $cleanQuestion,
                 'frequency' => 1,
-                'status' => 'pending'
+                'status' => 'pending',
             ]);
         }
     }
@@ -194,7 +205,9 @@ class KnowledgeOrchestratorService
             $normB += pow($vec2[$i], 2);
         }
 
-        if ($normA == 0 || $normB == 0) return 0;
+        if ($normA == 0 || $normB == 0) {
+            return 0;
+        }
 
         return $dotProduct / (sqrt($normA) * sqrt($normB));
     }
@@ -205,7 +218,7 @@ class KnowledgeOrchestratorService
             ->where('source_type', 'external_api')
             ->first();
 
-        if (!$source || !$source->config || empty($source->config['url'])) {
+        if (! $source || ! $source->config || empty($source->config['url'])) {
             return null;
         }
 
@@ -216,14 +229,14 @@ class KnowledgeOrchestratorService
                 $response = Http::withHeaders($source->config['headers'] ?? [])
                     ->timeout(5)
                     ->get($source->config['url'], [
-                        'query' => $userMessage
+                        'query' => $userMessage,
                     ]);
 
                 if ($response->successful() && $response->json('answer')) {
                     return $response->json('answer');
                 }
             } catch (\Exception $e) {
-                Log::error("External API Knowledge Source failed", ['error' => $e->getMessage()]);
+                Log::error('External API Knowledge Source failed', ['error' => $e->getMessage()]);
             }
         }
 
@@ -236,7 +249,7 @@ class KnowledgeOrchestratorService
             'conversation_id' => $conversationId,
             'user_message' => $userMessage,
             'source_used' => $sourceUsed,
-            'tokens_saved_estimated' => $tokensSaved
+            'tokens_saved_estimated' => $tokensSaved,
         ]);
     }
 }

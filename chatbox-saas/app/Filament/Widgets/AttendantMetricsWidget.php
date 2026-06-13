@@ -16,7 +16,7 @@ class AttendantMetricsWidget extends BaseWidget
         $onlineAttendants = User::whereIn('role', [User::ROLE_AGENT, User::ROLE_SUPERVISOR])
             ->where('presence_status', 'online')
             ->count();
-            
+
         $activeAttendants = User::whereIn('role', [User::ROLE_AGENT, User::ROLE_SUPERVISOR])
             ->where('status', 'active')
             ->count();

@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlatformLegalConsent;
+use App\Models\PlatformLegalDocument;
+use App\Models\PlatformLgpdRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PlatformLegalController extends Controller
 {
@@ -26,7 +31,7 @@ class PlatformLegalController extends Controller
         return view('legal.lgpd-central');
     }
 
-    public function submitLgpdRequest(\Illuminate\Http\Request $request)
+    public function submitLgpdRequest(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -35,32 +40,32 @@ class PlatformLegalController extends Controller
             'details' => 'nullable|string',
         ]);
 
-        $protocol = 'LGPD-' . strtoupper(uniqid());
+        $protocol = 'LGPD-'.strtoupper(uniqid());
 
-        \App\Models\PlatformLgpdRequest::create([
+        PlatformLgpdRequest::create([
             ...$validated,
             'protocol' => $protocol,
         ]);
 
-        return back()->with('success', 'Sua solicitação foi registrada com sucesso! Protocolo: ' . $protocol);
+        return back()->with('success', 'Sua solicitação foi registrada com sucesso! Protocolo: '.$protocol);
     }
 
     public function pendingAcceptance()
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
-        if (!$user) {
+        $user = Auth::user();
+        if (! $user) {
             return redirect()->route('filament.admin.auth.login');
         }
 
-        $activeDocuments = \App\Models\PlatformLegalDocument::where('is_active', true)->get();
+        $activeDocuments = PlatformLegalDocument::where('is_active', true)->get();
         $pendingDocuments = [];
 
         foreach ($activeDocuments as $doc) {
-            $hasAccepted = \App\Models\PlatformLegalConsent::where('user_id', $user->id)
+            $hasAccepted = PlatformLegalConsent::where('user_id', $user->id)
                 ->where('platform_legal_document_id', $doc->id)
                 ->exists();
 
-            if (!$hasAccepted) {
+            if (! $hasAccepted) {
                 $pendingDocuments[] = $doc;
             }
         }
@@ -72,19 +77,19 @@ class PlatformLegalController extends Controller
         return view('legal.pending-acceptance', compact('pendingDocuments'));
     }
 
-    public function acceptPending(\Illuminate\Http\Request $request)
+    public function acceptPending(Request $request)
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
-        if (!$user) {
+        $user = Auth::user();
+        if (! $user) {
             return redirect()->route('filament.admin.auth.login');
         }
 
         $documentIds = $request->input('documents', []);
 
         foreach ($documentIds as $docId) {
-            $doc = \App\Models\PlatformLegalDocument::find($docId);
+            $doc = PlatformLegalDocument::find($docId);
             if ($doc && $doc->is_active) {
-                \App\Models\PlatformLegalConsent::firstOrCreate([
+                PlatformLegalConsent::firstOrCreate([
                     'user_id' => $user->id,
                     'platform_legal_document_id' => $doc->id,
                 ], [
@@ -95,7 +100,7 @@ class PlatformLegalController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_has_pending_legal_docs");
+        Cache::forget("user_{$user->id}_has_pending_legal_docs");
 
         return redirect('/admin');
     }

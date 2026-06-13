@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PipelineResource\Pages;
 
+use App\Filament\Resources\Pages\BaseEditRecord;
 use App\Filament\Resources\PipelineResource;
 use Filament\Actions;
-use App\Filament\Resources\Pages\BaseEditRecord;
 
 class EditPipeline extends BaseEditRecord
 {

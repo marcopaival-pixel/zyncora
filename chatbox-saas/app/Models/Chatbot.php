@@ -2,22 +2,26 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-use App\Traits\BelongsToCompany;
 
 class Chatbot extends Model
 {
     use BelongsToCompany;
 
     public const STATUS_INCOMPLETE = 'config_incompleta';
+
     public const STATUS_CONFIGURING = 'em_configuracao';
+
     public const STATUS_READY = 'pronto_publicar';
+
     public const STATUS_PUBLISHED = 'publicado';
+
     public const STATUS_ACTIVE = 'active'; // Keeping 'active' for backwards compatibility
+
     public const STATUS_PAUSED = 'pausado';
 
     protected $fillable = [

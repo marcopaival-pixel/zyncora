@@ -2,14 +2,14 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Models\SystemErrorLog;
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Conversation;
+use App\Models\SystemErrorLog;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SystemHealthWidget extends BaseWidget
 {
@@ -41,6 +41,7 @@ class SystemHealthWidget extends BaseWidget
     {
         try {
             DB::connection()->getPdo();
+
             return Stat::make('Banco de Dados', 'Conectado')
                 ->description('MySQL/MariaDB Operational')
                 ->descriptionIcon('heroicon-m-check-circle')
@@ -62,7 +63,7 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $pending = \Illuminate\Support\Facades\Cache::remember('system_health_jobs_pending', now()->addMinutes(5), fn () => DB::table('jobs')->count());
+        $pending = Cache::remember('system_health_jobs_pending', now()->addMinutes(5), fn () => DB::table('jobs')->count());
         $warning = (int) config('chatbox.monitoring.queue_pending_warning', 50);
         $critical = (int) config('chatbox.monitoring.queue_pending_critical', 200);
         $color = $pending >= $critical ? 'danger' : ($pending >= $warning ? 'warning' : 'success');
@@ -81,7 +82,7 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $failed = \Illuminate\Support\Facades\Cache::remember('system_health_jobs_failed', now()->addMinutes(5), fn () => DB::table('failed_jobs')->count());
+        $failed = Cache::remember('system_health_jobs_failed', now()->addMinutes(5), fn () => DB::table('failed_jobs')->count());
         $warning = (int) config('chatbox.monitoring.failed_jobs_warning', 1);
         $color = $failed >= $warning ? 'danger' : 'success';
 
@@ -99,7 +100,7 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $count = \Illuminate\Support\Facades\Cache::remember('system_health_errors_24h', now()->addMinutes(10), fn () => SystemErrorLog::query()
+        $count = Cache::remember('system_health_errors_24h', now()->addMinutes(10), fn () => SystemErrorLog::query()
             ->where('created_at', '>=', now()->subDay())
             ->count());
         $warning = (int) config('chatbox.monitoring.error_log_warning_24h', 10);
@@ -114,7 +115,7 @@ class SystemHealthWidget extends BaseWidget
     protected function getBroadcastingStat(): Stat
     {
         $driver = config('broadcasting.default');
-        
+
         return Stat::make('Broadcasting', strtoupper($driver))
             ->description($driver === 'reverb' ? 'Real-time Ativo' : 'Modo Log/Desativado')
             ->descriptionIcon('heroicon-m-signal')
@@ -123,8 +124,8 @@ class SystemHealthWidget extends BaseWidget
 
     protected function getBusinessStat(): Stat
     {
-        $companies = \Illuminate\Support\Facades\Cache::remember('system_health_companies_count', now()->addMinutes(30), fn () => Company::count());
-        $chats = \Illuminate\Support\Facades\Cache::remember('system_health_chats_today', now()->addMinutes(10), fn () => Conversation::where('created_at', '>=', now()->startOfDay())->count());
+        $companies = Cache::remember('system_health_companies_count', now()->addMinutes(30), fn () => Company::count());
+        $chats = Cache::remember('system_health_chats_today', now()->addMinutes(10), fn () => Conversation::where('created_at', '>=', now()->startOfDay())->count());
 
         return Stat::make('Hoje', "{$chats} Chats")
             ->description("{$companies} Clientes Ativos")
@@ -132,4 +133,3 @@ class SystemHealthWidget extends BaseWidget
             ->color('primary');
     }
 }
-

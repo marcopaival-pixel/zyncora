@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Services\BillingCheckoutService;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection;
 
 class UpgradePlan extends Page
 {
@@ -23,7 +24,8 @@ class UpgradePlan extends Page
     protected static ?int $navigationSort = 10;
 
     public Company $company;
-    public \Illuminate\Database\Eloquent\Collection $plans;
+
+    public Collection $plans;
 
     public function mount(): void
     {
@@ -64,6 +66,7 @@ class UpgradePlan extends Page
                 ->warning()
                 ->body('Administradores de plataforma não podem assinar planos. Utilize a gestão de Empresas no painel Super Admin.')
                 ->send();
+
             return;
         }
 
@@ -120,4 +123,3 @@ class UpgradePlan extends Page
         $this->redirect(static::getUrl());
     }
 }
-

@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\SystemErrorLog;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\SystemErrorLog;
 
 /**
  * Cliente mínimo para a WhatsApp Cloud API (Meta Graph).
@@ -27,7 +28,7 @@ class WhatsAppCloudClient
             ->timeout(30)
             ->retry(3, 1000, function (\Exception $exception, $request) {
                 // Tenta novamente caso seja erro de servidor ou rate limit (429)
-                return $exception instanceof \Illuminate\Http\Client\RequestException &&
+                return $exception instanceof RequestException &&
                        ($exception->response->status() >= 500 || $exception->response->status() === 429);
             })
             ->post($url, [
@@ -44,7 +45,7 @@ class WhatsAppCloudClient
         if ($response->failed()) {
             $errorMessage = sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body());
             Log::error($errorMessage);
-            
+
             SystemErrorLog::create([
                 'category' => 'whatsapp_api',
                 'error_message' => $errorMessage,
@@ -80,7 +81,7 @@ class WhatsAppCloudClient
             ->asJson()
             ->timeout(30)
             ->retry(3, 1000, function (\Exception $exception, $request) {
-                return $exception instanceof \Illuminate\Http\Client\RequestException &&
+                return $exception instanceof RequestException &&
                        ($exception->response->status() >= 500 || $exception->response->status() === 429);
             })
             ->post($url, [
@@ -94,7 +95,7 @@ class WhatsAppCloudClient
         if ($response->failed()) {
             $errorMessage = sprintf('WhatsApp API HTTP %s: %s', $response->status(), $response->body());
             Log::error($errorMessage);
-            
+
             SystemErrorLog::create([
                 'category' => 'whatsapp_api',
                 'error_message' => $errorMessage,

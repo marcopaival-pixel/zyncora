@@ -73,7 +73,7 @@ class TenantIsolationTest extends TestCase
 
         $this->assertCount(1, $visibleBots);
         $this->assertSame($chatbotA->id, $visibleBots->first()->id);
-        
+
         // Limpa contexto
         $tenantService->setCompany(null);
     }

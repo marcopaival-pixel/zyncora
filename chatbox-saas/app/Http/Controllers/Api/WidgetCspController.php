@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chatbot;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class WidgetCspController extends Controller
 {
@@ -33,7 +33,7 @@ class WidgetCspController extends Controller
                 'meta_tag' => sprintf('<meta http-equiv="Content-Security-Policy" content="%s">', $cspPolicy),
                 'header_example' => sprintf('Content-Security-Policy: %s', $cspPolicy),
                 'instructions' => 'Cole a meta tag dentro da seção <head> do seu site para garantir que apenas scripts autorizados da Zynkora possam interagir com o Widget, bloqueando ataques XSS.',
-            ]
+            ],
         ]);
     }
 }

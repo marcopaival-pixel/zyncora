@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\LgpdSettingResource\Pages;
 
 use App\Filament\Resources\LgpdSettingResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
 
 class EditLgpdSetting extends BaseEditRecord
 {

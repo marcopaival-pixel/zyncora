@@ -54,20 +54,20 @@ class WebhookIngestionService
      */
     public function validateUniversalSignature(Request $request, ?string $appSecret, string $channelName): bool
     {
-        if (!$appSecret) {
+        if (! $appSecret) {
             return true; // Se não tem segredo configurado, assume válido (depende da política de segurança)
         }
 
         $signature = $request->header('X-Hub-Signature-256');
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
-        $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), $appSecret);
-        
+        $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $appSecret);
+
         $isValid = hash_equals($expected, (string) $signature);
-        
-        if (!$isValid) {
+
+        if (! $isValid) {
             Log::warning("{$channelName}_universal_webhook_invalid_signature", ['ip' => $request->ip()]);
         }
 
@@ -80,7 +80,7 @@ class WebhookIngestionService
     public function validateCompanySignature(Request $request, Company $company, string $driver): bool
     {
         $signature = $request->header('X-Hub-Signature-256');
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
@@ -90,14 +90,15 @@ class WebhookIngestionService
             ->first();
 
         $appSecret = data_get($integration?->credentials, 'app_secret');
-        if (!$appSecret) {
+        if (! $appSecret) {
             Log::warning("{$driver}_webhook_missing_app_secret", [
                 'company_id' => $company->id,
             ]);
+
             return false;
         }
 
-        $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), (string) $appSecret);
+        $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), (string) $appSecret);
 
         return hash_equals($expected, (string) $signature);
     }

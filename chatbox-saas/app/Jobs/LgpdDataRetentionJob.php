@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\Contact;
 use App\Models\Conversation;
 use App\Models\LgpdSetting;
 use App\Models\Message;
@@ -30,7 +29,7 @@ class LgpdDataRetentionJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info("Iniciando limpeza de dados LGPD...");
+        Log::info('Iniciando limpeza de dados LGPD...');
 
         $settings = LgpdSetting::where('is_active', true)
             ->where('retention_days', '>', 0)
@@ -44,8 +43,8 @@ class LgpdDataRetentionJob implements ShouldQueue
             $deletedMessages = Message::whereHas('conversation', function ($query) use ($companyId) {
                 $query->where('company_id', $companyId);
             })
-            ->where('created_at', '<', $cutoffDate)
-            ->delete();
+                ->where('created_at', '<', $cutoffDate)
+                ->delete();
 
             // 2. Conversas antigas (se não tiverem mensagens recentes)
             $deletedConversations = Conversation::where('company_id', $companyId)

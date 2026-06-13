@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AiConsumptionHistory;
 use App\Models\Company;
 use App\Models\Plan;
-use App\Models\AiConsumptionHistory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -131,10 +131,10 @@ class PlanSubscriptionService
             'expires_at' => $expiresAt,
             'subscription_status' => 'active',
         ]);
-        
+
         $this->resetAiFranchise($company, $base, $expiresAt, $plan);
     }
-    
+
     public function resetAiFranchise(Company $company, Carbon $periodStart, Carbon $periodEnd, ?Plan $plan = null): void
     {
         $planModel = $plan ?? ($company->plan_id ? Plan::find($company->plan_id) : Plan::where('slug', $company->plan)->first());
@@ -149,9 +149,9 @@ class PlanSubscriptionService
                 'credits_purchased' => 0, // This could be queried from AiCreditPurchase in the period
             ]);
         }
-        
+
         $company->update([
-            'ai_conversations_used' => 0
+            'ai_conversations_used' => 0,
         ]);
     }
 

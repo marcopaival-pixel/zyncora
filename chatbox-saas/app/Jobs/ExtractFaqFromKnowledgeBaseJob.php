@@ -2,8 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Models\KnowledgeBase;
 use App\Models\ChatbotFlow;
+use App\Models\KnowledgeBase;
+use App\Services\AIGeneratorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,7 +26,7 @@ class ExtractFaqFromKnowledgeBaseJob implements ShouldQueue
     {
         try {
             $content = strip_tags($this->knowledgeBase->content ?? '');
-            
+
             if (empty(trim($content))) {
                 return;
             }
@@ -35,13 +36,13 @@ class ExtractFaqFromKnowledgeBaseJob implements ShouldQueue
                 return;
             }
 
-            $aiGenerator = app(\App\Services\AIGeneratorService::class);
-            
+            $aiGenerator = app(AIGeneratorService::class);
+
             // Re-use or extend AI generator to extract FAQ
             // Since this is a new feature, we simulate the LLM call that returns JSON
             // In a real scenario, $aiGenerator->extractFaq($content) would prompt:
             // "Extract max 5 frequent questions and answers from this text. Return as JSON array with 'question', 'answer', 'trigger'."
-            
+
             $faqs = $this->callLlmForFaqExtraction($content);
 
             if (empty($faqs)) {
@@ -63,7 +64,7 @@ class ExtractFaqFromKnowledgeBaseJob implements ShouldQueue
             }
 
         } catch (\Exception $e) {
-            Log::error('ExtractFaqFromKnowledgeBaseJob failed: ' . $e->getMessage());
+            Log::error('ExtractFaqFromKnowledgeBaseJob failed: '.$e->getMessage());
             // Fail silently so it doesn't crash the queue, but log it
         }
     }
@@ -73,7 +74,7 @@ class ExtractFaqFromKnowledgeBaseJob implements ShouldQueue
         // This is a stub that should be replaced with an actual API call to OpenAI/Anthropic/Gemini
         // using the application's configured LLM service.
         // It prompts the LLM to read $content and extract Q&A pairs.
-        
+
         // Example integration:
         // $prompt = "Extraia as principais dúvidas (FAQ) do seguinte texto. Retorne um JSON array com chaves: trigger (curto), question (pergunta do usuario) e answer (resposta curta e direta). Texto: " . $content;
         // $response = Http::post('...', ['prompt' => $prompt]);

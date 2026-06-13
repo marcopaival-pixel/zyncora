@@ -3,14 +3,17 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use App\Models\User;
+use App\Services\PlanService;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 
 class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    public function getTitle(): string 
+    public function getTitle(): string
     {
         return 'Membros e Utilizadores';
     }
@@ -31,23 +34,24 @@ class ListUsers extends ListRecords
                     $user = auth()->user();
                     if ($user && ! $user->isPlatformAdmin()) {
                         $data['company_id'] = $user->company_id;
-                        $data['role'] = $data['role'] ?? \App\Models\User::ROLE_AGENT;
-                        if (($data['role'] ?? '') === \App\Models\User::ROLE_PLATFORM_ADMIN) {
-                            $data['role'] = \App\Models\User::ROLE_AGENT;
+                        $data['role'] = $data['role'] ?? User::ROLE_AGENT;
+                        if (($data['role'] ?? '') === User::ROLE_PLATFORM_ADMIN) {
+                            $data['role'] = User::ROLE_AGENT;
                         }
                     }
+
                     return $data;
                 })
                 ->before(function (Actions\CreateAction $action, array $data) {
                     $user = auth()->user();
-                    $targetRole = $data['role'] ?? \App\Models\User::ROLE_AGENT;
+                    $targetRole = $data['role'] ?? User::ROLE_AGENT;
 
-                    if ($user && ! $user->isPlatformAdmin() && $targetRole === \App\Models\User::ROLE_AGENT) {
+                    if ($user && ! $user->isPlatformAdmin() && $targetRole === User::ROLE_AGENT) {
                         $company = $user->company;
-                        $planService = app(\App\Services\PlanService::class);
+                        $planService = app(PlanService::class);
 
                         if (! $planService->canAddAttendant($company)) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Limite de Atendentes Atingido')
                                 ->body("A sua subscrição permite apenas {$company->max_attendants} atendentes ativos. Por favor, faça upgrade do seu plano ou desative um atendente existente.")
                                 ->danger()

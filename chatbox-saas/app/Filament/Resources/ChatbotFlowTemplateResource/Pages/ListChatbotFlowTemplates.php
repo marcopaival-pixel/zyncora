@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\ChatbotFlowTemplateResource\Pages;
 
 use App\Filament\Resources\ChatbotFlowTemplateResource;
+use Database\Seeders\ChatbotFlowTemplateSeeder;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 
 class ListChatbotFlowTemplates extends ListRecords
@@ -32,8 +34,8 @@ class ListChatbotFlowTemplates extends ListRecords
                 ->modalSubmitActionLabel('Gerar agora')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    (new \Database\Seeders\ChatbotFlowTemplateSeeder())->run();
-                    \Filament\Notifications\Notification::make()
+                    (new ChatbotFlowTemplateSeeder)->run();
+                    Notification::make()
                         ->title('Templates atualizados')
                         ->body('A biblioteca foi sincronizada com os modelos padrão.')
                         ->success()

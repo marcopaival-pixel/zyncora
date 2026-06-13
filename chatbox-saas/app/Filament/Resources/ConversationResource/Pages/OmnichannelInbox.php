@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\ConversationResource\Pages;
 
+use App\Events\MessageCreated;
 use App\Filament\Resources\ConversationResource;
-use Filament\Resources\Pages\Page;
 use App\Models\Conversation;
 use App\Models\Message;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
-use App\Events\MessageCreated;
 
 class OmnichannelInbox extends Page
 {
@@ -17,7 +18,9 @@ class OmnichannelInbox extends Page
     protected static string $view = 'filament.resources.conversation-resource.pages.omnichannel-inbox';
 
     public ?int $activeConversationId = null;
+
     public string $newMessage = '';
+
     public int $companyId;
 
     public function mount()
@@ -55,16 +58,16 @@ class OmnichannelInbox extends Page
                 // Conversas já assumidas pelo agente
                 $q->where('assignee_id', $user->id)
                   // OU conversas novas (sem assignee)
-                  ->orWhere(function ($sub) use ($departmentIds) {
-                      $sub->whereNull('assignee_id');
-                      if (!empty($departmentIds)) {
-                          // Se o agente tem departamentos, ele vê as nulas E que são do departamento dele (ou sem departamento)
-                          $sub->where(function ($dSub) use ($departmentIds) {
-                              $dSub->whereIn('department_id', $departmentIds)
-                                   ->orWhereNull('department_id');
-                          });
-                      }
-                  });
+                    ->orWhere(function ($sub) use ($departmentIds) {
+                        $sub->whereNull('assignee_id');
+                        if (! empty($departmentIds)) {
+                            // Se o agente tem departamentos, ele vê as nulas E que são do departamento dele (ou sem departamento)
+                            $sub->where(function ($dSub) use ($departmentIds) {
+                                $dSub->whereIn('department_id', $departmentIds)
+                                    ->orWhereNull('department_id');
+                            });
+                        }
+                    });
             });
         }
 
@@ -74,8 +77,10 @@ class OmnichannelInbox extends Page
     #[Computed]
     public function activeConversation()
     {
-        if (!$this->activeConversationId) return null;
-        
+        if (! $this->activeConversationId) {
+            return null;
+        }
+
         return Conversation::with(['messages' => function ($q) {
             $q->orderBy('created_at', 'asc');
         }])->find($this->activeConversationId);
@@ -90,10 +95,10 @@ class OmnichannelInbox extends Page
     public function assumeConversation()
     {
         $conversation = $this->activeConversation;
-        if ($conversation && !$conversation->assignee_id) {
+        if ($conversation && ! $conversation->assignee_id) {
             $conversation->update([
                 'assignee_id' => Auth::id(),
-                'status' => 'open'
+                'status' => 'open',
             ]);
         }
     }
@@ -101,15 +106,17 @@ class OmnichannelInbox extends Page
     public function sendMessage()
     {
         $text = trim($this->newMessage);
-        if (empty($text) || !$this->activeConversationId) return;
+        if (empty($text) || ! $this->activeConversationId) {
+            return;
+        }
 
         $conversation = $this->activeConversation;
 
         // Assumir o ticket implicitamente
-        if (!$conversation->assignee_id) {
+        if (! $conversation->assignee_id) {
             $conversation->update([
                 'assignee_id' => Auth::id(),
-                'status' => 'open'
+                'status' => 'open',
             ]);
         }
 
@@ -135,12 +142,14 @@ class OmnichannelInbox extends Page
     public function transferConversation(?int $departmentId, ?int $userId = null)
     {
         $conversation = $this->activeConversation;
-        if (!$conversation) return;
+        if (! $conversation) {
+            return;
+        }
 
         $conversation->update([
             'department_id' => $departmentId,
             'assignee_id' => $userId, // Se nulo, volta pra fila
-            'status' => $userId ? 'open' : 'waiting'
+            'status' => $userId ? 'open' : 'waiting',
         ]);
 
         Message::create([
@@ -152,7 +161,7 @@ class OmnichannelInbox extends Page
         ]);
 
         $this->activeConversationId = null;
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title('Conversa Transferida')
             ->success()
             ->send();

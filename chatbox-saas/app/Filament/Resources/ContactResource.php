@@ -32,7 +32,10 @@ class ContactResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
-        if ($user && $user->isPlatformAdmin()) return false;
+        if ($user && $user->isPlatformAdmin()) {
+            return false;
+        }
+
         return $user?->canChat() ?? false;
     }
 
@@ -215,7 +218,7 @@ class ContactResource extends Resource
                                 $data['created_until'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
-                    })
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -240,4 +243,3 @@ class ContactResource extends Resource
         ];
     }
 }
-

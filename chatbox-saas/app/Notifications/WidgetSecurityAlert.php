@@ -12,8 +12,11 @@ class WidgetSecurityAlert extends Notification implements ShouldQueue
     use Queueable;
 
     public string $type;
+
     public string $title;
+
     public string $message;
+
     public array $data;
 
     /**
@@ -43,13 +46,13 @@ class WidgetSecurityAlert extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->error() // Red button/header for security alerts
-                    ->subject('Alerta de Segurança - Widget Chatbot')
-                    ->greeting("Olá, $notifiable->name")
-                    ->line("**{$this->title}**")
-                    ->line($this->message)
-                    ->action('Ver Painel de Segurança', url('/admin/security'))
-                    ->line('Por favor, revise as configurações do seu chatbot imediatamente.');
+            ->error() // Red button/header for security alerts
+            ->subject('Alerta de Segurança - Widget Chatbot')
+            ->greeting("Olá, $notifiable->name")
+            ->line("**{$this->title}**")
+            ->line($this->message)
+            ->action('Ver Painel de Segurança', url('/admin/security'))
+            ->line('Por favor, revise as configurações do seu chatbot imediatamente.');
     }
 
     /**

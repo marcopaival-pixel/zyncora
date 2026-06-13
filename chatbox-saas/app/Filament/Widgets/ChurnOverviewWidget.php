@@ -11,11 +11,11 @@ class ChurnOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $totalCanceled = Company::where('status', 'canceled')->count();
-        
+
         $recentCancellations = Company::where('status', 'canceled')
             ->where('updated_at', '>=', now()->subDays(30))
             ->count();
-            
+
         $totalExpired = Company::where('status', 'expired')->count();
 
         return [

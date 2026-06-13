@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Http\Middleware\EnsureSingleSession;
 use App\Models\User;
 use App\Services\WebLoginSessionService;
 use Filament\Facades\Filament;
@@ -65,7 +66,7 @@ class CustomLogin extends BaseLogin
     /**
      * Após o login bem-sucedido, o Filament chama {@see session()->regenerate()}.
      * Sincroniza {@see User::$current_session_id} com o ID final da sessão para o
-     * {@see \App\Http\Middleware\EnsureSingleSession} não desligar o utilizador de seguida.
+     * {@see EnsureSingleSession} não desligar o utilizador de seguida.
      */
     public function authenticate(): ?LoginResponse
     {
@@ -77,8 +78,9 @@ class CustomLogin extends BaseLogin
                 app(WebLoginSessionService::class)->syncAfterFilamentLogin($user);
 
                 // Redireciona o SuperAdmin para o painel correto caso ele tenha logado pelo painel padrão
-                if ($user->isPlatformAdmin() && Filament::getCurrentPanel()->getId() !== 'super-admin' && !$user->is_impersonating) {
-                    return new class implements \Filament\Http\Responses\Auth\Contracts\LoginResponse {
+                if ($user->isPlatformAdmin() && Filament::getCurrentPanel()->getId() !== 'super-admin' && ! $user->is_impersonating) {
+                    return new class implements LoginResponse
+                    {
                         public function toResponse($request)
                         {
                             return redirect()->to(Filament::getPanel('super-admin')->getUrl());

@@ -6,6 +6,9 @@ use App\Filament\Resources\Pages\BaseEditRecord;
 use App\Filament\SuperAdmin\Resources\PlanResource;
 use App\Filament\Widgets\PlanEditSummaryWidget;
 use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Widgets\Widget;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
 
 class EditPlan extends BaseEditRecord
@@ -13,7 +16,7 @@ class EditPlan extends BaseEditRecord
     protected static string $resource = PlanResource::class;
 
     /**
-     * @return array<class-string<\Filament\Widgets\Widget> | \Filament\Widgets\WidgetConfiguration>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     protected function getHeaderWidgets(): array
     {
@@ -22,22 +25,22 @@ class EditPlan extends BaseEditRecord
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int | string | array
+    public function getHeaderWidgetsColumns(): int|string|array
     {
         return 1;
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return 'Editar plano de assinatura';
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return $this->getRecord()?->name ?? 'Plano';
     }
 
-    public function getSubheading(): string | Htmlable | null
+    public function getSubheading(): string|Htmlable|null
     {
         $record = $this->getRecord();
         if ($record === null) {
@@ -59,13 +62,13 @@ class EditPlan extends BaseEditRecord
         ];
     }
 
-    protected function getSaveFormAction(): \Filament\Actions\Action
+    protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
             ->label('Guardar alterações');
     }
 
-    protected function getCancelFormAction(): \Filament\Actions\Action
+    protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()
             ->label('Descartar');

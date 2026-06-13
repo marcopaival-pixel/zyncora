@@ -10,8 +10,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class SuperAdminAiConsumptionWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
-    
-    protected int | string | array $columnSpan = 'full';
+
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -53,7 +53,10 @@ class SuperAdminAiConsumptionWidget extends BaseWidget
                     ->label('Franquia (%)')
                     ->state(function (Company $record) {
                         $limit = $record->plan?->max_ai_conversations ?? 0;
-                        if ($limit == 0) return 100;
+                        if ($limit == 0) {
+                            return 100;
+                        }
+
                         return min(100, round(($record->ai_conversations_used / $limit) * 100, 1));
                     })
                     ->suffix('%')

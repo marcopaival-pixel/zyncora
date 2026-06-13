@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\ChatbotResource\Pages;
 
+use App\Filament\Actions\HelpAction;
 use App\Filament\Resources\ChatbotResource;
+use App\Filament\Resources\ChatbotResource\Widgets\ChatbotOverviewWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -23,7 +25,7 @@ class ListChatbots extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            \App\Filament\Actions\HelpAction::make()->module('Chatbots'),
+            HelpAction::make()->module('Chatbots'),
             Actions\CreateAction::make()
                 ->label('Novo chatbot')
                 ->icon('heroicon-o-plus-circle'),
@@ -33,7 +35,7 @@ class ListChatbots extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Resources\ChatbotResource\Widgets\ChatbotOverviewWidget::class,
+            ChatbotOverviewWidget::class,
         ];
     }
 }

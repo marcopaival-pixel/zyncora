@@ -4,16 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ConversationResource\Pages;
 use App\Filament\Resources\ConversationResource\RelationManagers;
+use App\Models\ActivityLog;
 use App\Models\Conversation;
+use App\Models\User;
+use App\Services\AiService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
-use App\Services\AiService;
 use Illuminate\Database\Eloquent\Builder;
 
 class ConversationResource extends Resource
@@ -40,7 +42,9 @@ class ConversationResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $user = auth()->user();
-        if (!$user) return null;
+        if (! $user) {
+            return null;
+        }
 
         return cache()->remember("nav_badge_waiting_{$user->company_id}", 30, function () use ($user) {
             $query = static::getModel()::where('status', 'waiting');
@@ -48,6 +52,7 @@ class ConversationResource extends Resource
                 $query->where('company_id', $user->company_id);
             }
             $count = $query->count();
+
             return $count > 0 ? (string) $count : null;
         });
     }
@@ -55,7 +60,10 @@ class ConversationResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
-        if ($user && $user->isPlatformAdmin()) return false;
+        if ($user && $user->isPlatformAdmin()) {
+            return false;
+        }
+
         return $user?->hasPermission('view_conversas') ?? false;
     }
 
@@ -80,7 +88,7 @@ class ConversationResource extends Resource
             if ($user->isAgent()) {
                 $query->where(function ($q) use ($user) {
                     $q->where('assignee_id', $user->id)
-                      ->orWhereNull('assignee_id');
+                        ->orWhereNull('assignee_id');
                 });
             }
         }
@@ -111,7 +119,7 @@ class ConversationResource extends Resource
                             return [];
                         }
 
-                        return \App\Models\User::query()
+                        return User::query()
                             ->where('company_id', $companyId)
                             ->where('status', 'active')
                             ->orderBy('name')
@@ -175,12 +183,12 @@ class ConversationResource extends Resource
                         Infolists\Components\TextEntry::make('ai_sentiment')
                             ->label('Sentimento Detetado')
                             ->badge()
-                            ->color(fn (string|null $state): string => match ($state) {
+                            ->color(fn (?string $state): string => match ($state) {
                                 'positive' => 'success',
                                 'negative' => 'danger',
                                 default => 'gray',
                             })
-                            ->formatStateUsing(fn (string|null $state): string => match ($state) {
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
                                 'positive' => 'Positivo',
                                 'negative' => 'Negativo',
                                 default => 'Neutro',
@@ -268,11 +276,11 @@ class ConversationResource extends Resource
                     ->tooltip('Monitorar conversa sem intervir (Gera log de auditoria)')
                     ->action(function (Conversation $record) {
                         // Cumprindo regra de Governança do AGENTS.md: Log de Auditoria para Spy Mode
-                        \App\Models\ActivityLog::create([
+                        ActivityLog::create([
                             'user_id' => auth()->id(),
                             'company_id' => $record->company_id,
                             'event' => 'conversation_spy',
-                            'description' => "O atendente " . auth()->user()->name . " iniciou o monitoramento da conversa #{$record->id}.",
+                            'description' => 'O atendente '.auth()->user()->name." iniciou o monitoramento da conversa #{$record->id}.",
                             'subject_type' => Conversation::class,
                             'subject_id' => $record->id,
                             'ip_address' => request()->ip(),
@@ -320,6 +328,7 @@ class ConversationResource extends Resource
                     ->modalDescription('Baseado no histórico recente desta conversa.')
                     ->modalContent(function (Conversation $record, AiService $ai) {
                         $suggestion = $ai->suggestResponse($record);
+
                         return view('filament.components.ai-suggestion', [
                             'suggestion' => $suggestion,
                         ]);
@@ -359,4 +368,3 @@ class ConversationResource extends Resource
         ];
     }
 }
-

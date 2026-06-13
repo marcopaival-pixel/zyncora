@@ -16,7 +16,7 @@ class SuperAdminFinancialWidget extends BaseWidget
         // Totais Gerais
         $totalCompanies = Company::count();
         $totalUsers = User::count();
-        
+
         // Status do SaaS
         $activeCompanies = Company::where('status', 'active')->count();
         $trialCompanies = Company::where('status', 'trial')->count();
@@ -39,8 +39,8 @@ class SuperAdminFinancialWidget extends BaseWidget
         $arr = $totalMrr * 12;
 
         return [
-            Stat::make('MRR (Mensal Recorrente)', 'R$ ' . number_format($totalMrr, 2, ',', '.'))
-                ->description('R$ ' . number_format($arr, 2, ',', '.') . ' de ARR (Estimado)')
+            Stat::make('MRR (Mensal Recorrente)', 'R$ '.number_format($totalMrr, 2, ',', '.'))
+                ->description('R$ '.number_format($arr, 2, ',', '.').' de ARR (Estimado)')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
 

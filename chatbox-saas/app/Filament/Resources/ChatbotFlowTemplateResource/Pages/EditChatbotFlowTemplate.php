@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\ChatbotFlowTemplateResource\Pages;
 
 use App\Filament\Resources\ChatbotFlowTemplateResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
 
 class EditChatbotFlowTemplate extends BaseEditRecord
 {

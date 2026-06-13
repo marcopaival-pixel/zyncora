@@ -79,18 +79,18 @@ class PermissionResource extends Resource
                     ->label('Módulo')
                     ->badge()
                     ->color(fn (string $state): string => match (true) {
-                        str_contains(strtolower($state), 'utilizad')  => 'info',
-                        str_contains(strtolower($state), 'usuario')   => 'info',
-                        str_contains(strtolower($state), 'conversa')  => 'success',
+                        str_contains(strtolower($state), 'utilizad') => 'info',
+                        str_contains(strtolower($state), 'usuario') => 'info',
+                        str_contains(strtolower($state), 'conversa') => 'success',
                         str_contains(strtolower($state), 'atendimen') => 'success',
-                        str_contains(strtolower($state), 'chatbot')   => 'success',
-                        str_contains(strtolower($state), 'lgpd')      => 'warning',
-                        str_contains(strtolower($state), 'sistema')   => 'danger',
+                        str_contains(strtolower($state), 'chatbot') => 'success',
+                        str_contains(strtolower($state), 'lgpd') => 'warning',
+                        str_contains(strtolower($state), 'sistema') => 'danger',
                         str_contains(strtolower($state), 'plataform') => 'danger',
-                        str_contains(strtolower($state), 'perfil')    => 'primary',
-                        str_contains(strtolower($state), 'permiss')   => 'primary',
-                        str_contains(strtolower($state), 'crm')       => 'purple',
-                        str_contains(strtolower($state), 'integra')   => 'gray',
+                        str_contains(strtolower($state), 'perfil') => 'primary',
+                        str_contains(strtolower($state), 'permiss') => 'primary',
+                        str_contains(strtolower($state), 'crm') => 'purple',
+                        str_contains(strtolower($state), 'integra') => 'gray',
                         default => 'gray',
                     })
                     ->sortable()
@@ -110,8 +110,7 @@ class PermissionResource extends Resource
                     ->badge()
                     ->color(fn (int $state): string => $state === 0 ? 'danger' : 'success')
                     ->sortable()
-                    ->tooltip(fn (Permission $record): string =>
-                        $record->roles->isEmpty()
+                    ->tooltip(fn (Permission $record): string => $record->roles->isEmpty()
                             ? '⚠️ Nenhum perfil usa esta permissão (órfã)'
                             : $record->roles->pluck('name')->join(', ')
                     ),
@@ -131,8 +130,7 @@ class PermissionResource extends Resource
 
                 Tables\Filters\Filter::make('orphaned')
                     ->label('Sem perfil associado (órfãs)')
-                    ->query(fn (Builder $query): Builder =>
-                        $query->doesntHave('roles')
+                    ->query(fn (Builder $query): Builder => $query->doesntHave('roles')
                     )
                     ->indicator('⚠️ Apenas órfãs'),
             ])
@@ -155,7 +153,7 @@ class PermissionResource extends Resource
             ->emptyStateIcon('heroicon-o-key');
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('roles');
     }
@@ -167,4 +165,3 @@ class PermissionResource extends Resource
         ];
     }
 }
-

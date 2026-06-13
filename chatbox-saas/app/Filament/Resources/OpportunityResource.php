@@ -15,8 +15,11 @@ class OpportunityResource extends Resource
     protected static ?string $model = Opportunity::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+
     protected static ?string $navigationLabel = 'CRM / Oportunidades';
+
     protected static ?string $pluralModelLabel = 'Oportunidades de Venda';
+
     protected static ?string $navigationGroup = 'Atendimento';
 
     public static function form(Form $form): Form
@@ -104,15 +107,15 @@ class OpportunityResource extends Resource
                         'negotiating' => 'Em Negociação',
                         'won' => 'Ganhos',
                         'lost' => 'Perdidos',
-                    ])
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('view_chat')
                     ->label('Ver Chat')
                     ->icon('heroicon-o-chat-bubble-left-right')
-                    ->url(fn (Opportunity $record): string => $record->conversation_id 
-                        ? ConversationResource::getUrl('index') . '?tableFilters[id][value]=' . $record->conversation_id
+                    ->url(fn (Opportunity $record): string => $record->conversation_id
+                        ? ConversationResource::getUrl('index').'?tableFilters[id][value]='.$record->conversation_id
                         : '#')
                     ->visible(fn (Opportunity $record): bool => $record->conversation_id !== null),
             ])

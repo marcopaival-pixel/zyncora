@@ -2,14 +2,16 @@
 
 namespace App\Services;
 
+use App\Http\Middleware\EnsureSingleSession;
 use App\Models\User;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Sincroniza sessão web após login no Filament (depois do {@see session()->regenerate()}).
- * O evento {@see \Illuminate\Auth\Events\Login} dispara antes desse regenerate; gravar o ID
+ * O evento {@see Login} dispara antes desse regenerate; gravar o ID
  * da sessão nessa altura invalidava {@see User::$current_session_id} e o
- * {@see \App\Http\Middleware\EnsureSingleSession} terminava a sessão no pedido seguinte.
+ * {@see EnsureSingleSession} terminava a sessão no pedido seguinte.
  */
 class WebLoginSessionService
 {

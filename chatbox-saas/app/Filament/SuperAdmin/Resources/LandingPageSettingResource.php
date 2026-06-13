@@ -15,9 +15,11 @@ class LandingPageSettingResource extends Resource
     protected static ?string $model = LandingPageSetting::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
-    
+
     protected static ?string $modelLabel = 'Configuração da Landing Page';
+
     protected static ?string $pluralModelLabel = 'Configurações da Landing Page';
+
     protected static ?string $navigationGroup = 'Site Público';
 
     public static function form(Form $form): Form
@@ -70,7 +72,7 @@ class LandingPageSettingResource extends Resource
                                 Forms\Components\TextInput::make('social_facebook')->label('Facebook')->url(),
                                 Forms\Components\TextInput::make('social_youtube')->label('YouTube')->url(),
                             ])->columns(2),
-                    ])->columnSpanFull()
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -98,7 +100,7 @@ class LandingPageSettingResource extends Resource
             'edit' => Pages\EditLandingPageSetting::route('/{record}/edit'),
         ];
     }
-    
+
     public static function canCreate(): bool
     {
         return LandingPageSetting::count() === 0;

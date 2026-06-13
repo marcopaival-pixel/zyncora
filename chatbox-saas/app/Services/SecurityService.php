@@ -10,7 +10,7 @@ class SecurityService
     /**
      * Registra uma atividade no sistema
      */
-    public function log(string $event, string $description = null, $subject = null, array $properties = []): ActivityLog
+    public function log(string $event, ?string $description = null, $subject = null, array $properties = []): ActivityLog
     {
         return ActivityLog::create([
             'user_id' => auth()->id(),
@@ -33,7 +33,7 @@ class SecurityService
         $mime = $file->getMimeType();
         $size = $file->getSize() / 1024;
 
-        if (!in_array($mime, $allowedMimes)) {
+        if (! in_array($mime, $allowedMimes)) {
             return false;
         }
 

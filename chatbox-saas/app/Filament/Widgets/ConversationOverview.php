@@ -55,4 +55,3 @@ class ConversationOverview extends StatsOverviewWidget
         ];
     }
 }
-

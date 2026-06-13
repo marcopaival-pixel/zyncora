@@ -3,16 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KnowledgeBaseResource\Pages;
+use App\Jobs\ScrapeUrlForKnowledgeBase;
 use App\Models\KnowledgeBase;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use App\Jobs\ScrapeUrlForKnowledgeBase;
-use Filament\Notifications\Notification;
 
 class KnowledgeBaseResource extends Resource
 {
@@ -219,7 +219,7 @@ class KnowledgeBaseResource extends Resource
                 Tables\Actions\Action::make('preview')
                     ->label('Conteúdo Bruto')
                     ->icon('heroicon-o-eye')
-                    ->modalHeading(fn (KnowledgeBase $record) => 'Conteúdo: ' . $record->title)
+                    ->modalHeading(fn (KnowledgeBase $record) => 'Conteúdo: '.$record->title)
                     ->modalContent(fn (KnowledgeBase $record) => view('filament.components.html-preview', ['html' => $record->content]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fechar'),
@@ -249,4 +249,3 @@ class KnowledgeBaseResource extends Resource
         ];
     }
 }
-

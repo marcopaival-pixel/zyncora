@@ -13,27 +13,27 @@ return new class extends Migration
             // Hero section
             $table->string('hero_title')->default('Automatize seu atendimento com IA e aumente suas vendas');
             $table->string('hero_subtitle')->default('Crie chatbots em poucos minutos, reduzindo custos e aumentando conversões.');
-            
+
             // Stats / Social Proof
             $table->json('stats')->nullable();
-            
+
             // Benefits
             $table->json('benefits')->nullable();
-            
+
             // CTAs
             $table->string('primary_cta_text')->default('Começar agora');
             $table->string('secondary_cta_text')->default('Ver demonstração');
             $table->integer('trial_days')->default(7);
-            
+
             // Success Message
             $table->string('success_message_title')->default('Recebemos sua solicitação com sucesso!');
             $table->string('success_message_subtitle')->default('Nossa equipe entrará em contato em breve.');
-            
+
             // Contacts
             $table->string('contact_email')->nullable();
             $table->string('contact_whatsapp')->nullable();
             $table->string('contact_phone')->nullable();
-            
+
             // Social Networks
             $table->string('social_linkedin')->nullable();
             $table->string('social_instagram')->nullable();

@@ -4,15 +4,20 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ChatbotResource\Pages;
 use App\Filament\Resources\ChatbotResource\RelationManagers;
+use App\Helpers\SegmentHelper;
 use App\Models\Chatbot;
+use App\Services\AgentPersonalizationService;
 use App\Services\PlanService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 class ChatbotResource extends Resource
 {
@@ -37,7 +42,7 @@ class ChatbotResource extends Resource
         return ['name', 'whatsapp_phone', 'company.name'];
     }
 
-    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    public static function getGlobalSearchResultTitle(Model $record): string
     {
         $statusLabel = match ($record->status) {
             Chatbot::STATUS_INCOMPLETE => 'Configuração Incompleta',
@@ -48,10 +53,11 @@ class ChatbotResource extends Resource
             Chatbot::STATUS_PAUSED => 'Pausado',
             default => 'Inativo',
         };
-        return $record->name . ' (' . $statusLabel . ')';
+
+        return $record->name.' ('.$statusLabel.')';
     }
 
-    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             'Empresa' => $record->company?->name ?? 'N/A',
@@ -59,7 +65,6 @@ class ChatbotResource extends Resource
             'Telefone' => $record->whatsapp_phone ?? 'N/A',
         ];
     }
-
 
     /** Linha secundária na lista (canal + origem lógica). */
     public static function formatChatbotListContext(Chatbot $record): ?string
@@ -215,29 +220,29 @@ class ChatbotResource extends Resource
                                             ->label('Ativar Cérebro de IA')
                                             ->helperText(function (?Chatbot $record = null) {
                                                 if ($record && $record->company) {
-                                                    $planService = app(\App\Services\PlanService::class);
-                                                    
-                                                    if (!$planService->hasFeature($record->company, 'ai_automation')) {
+                                                    $planService = app(PlanService::class);
+
+                                                    if (! $planService->hasFeature($record->company, 'ai_automation')) {
                                                         return '⚠️ Funcionalidade não disponível no plano '.strtoupper($record->company->plan).'. Faça o upgrade.';
                                                     }
-                                                    
-                                                    if (!$planService->hasAiCredits($record->company)) {
+
+                                                    if (! $planService->hasAiCredits($record->company)) {
                                                         return '⛔ Seus créditos de IA esgotaram! Adquira mais créditos para continuar usando.';
                                                     }
-                                                    
+
                                                     $usage = $record->company->ai_credits_used;
                                                     $balance = $record->company->ai_credits_balance;
                                                     $percentage = $balance > 0 ? ($usage / $balance) * 100 : 100;
-                                                    
+
                                                     if ($percentage >= 80) {
-                                                        return "⚠️ Atenção: Você já usou " . number_format($percentage, 0) . "% dos seus créditos de IA ({$usage}/{$balance}).";
+                                                        return '⚠️ Atenção: Você já usou '.number_format($percentage, 0)."% dos seus créditos de IA ({$usage}/{$balance}).";
                                                     }
                                                 }
 
                                                 return 'Se ativado, o bot responderá usando a base de conhecimento (Consome 1 crédito de IA por resposta).';
                                             })
                                             ->disabled(function (?Chatbot $record = null) {
-                                                return $record && $record->company && ! app(\App\Services\PlanService::class)->canUseAi($record->company);
+                                                return $record && $record->company && ! app(PlanService::class)->canUseAi($record->company);
                                             })
                                             ->default(false),
 
@@ -260,7 +265,7 @@ class ChatbotResource extends Resource
                                                 'default' => 'Padrão do Sistema',
                                                 'company' => 'Logo da Empresa',
                                                 'ai' => 'Ícone de IA',
-                                                'custom' => 'Imagem Personalizada'
+                                                'custom' => 'Imagem Personalizada',
                                             ])
                                             ->default('default')
                                             ->live()
@@ -270,7 +275,7 @@ class ChatbotResource extends Resource
                                             ->disk('public')
                                             ->directory('avatars')
                                             ->image()
-                                            ->visible(fn(Forms\Get $get) => $get('avatar_type') === 'custom')
+                                            ->visible(fn (Forms\Get $get) => $get('avatar_type') === 'custom')
                                             ->columnSpanFull(),
                                         Forms\Components\Grid::make(4)
                                             ->schema([
@@ -282,7 +287,7 @@ class ChatbotResource extends Resource
                                                     ->label('Cor do Cabeçalho'),
                                                 Forms\Components\ColorPicker::make('message_color')
                                                     ->label('Cor das Mensagens'),
-                                            ])
+                                            ]),
                                     ]),
                                 Forms\Components\Section::make('Mascote Interativo (Flutuante)')
                                     ->description('Configure um boneco 3D para ficar ao lado do chat convidando os usuários.')
@@ -301,13 +306,17 @@ class ChatbotResource extends Resource
                                             ->live()
                                             ->columns(3)
                                             ->disabled(function (?Chatbot $record = null) {
-                                                if (!$record || !$record->company) return false; // Allow on create maybe?
-                                                return !app(\App\Services\PlanService::class)->hasFeature($record->company, 'custom_mascot');
+                                                if (! $record || ! $record->company) {
+                                                    return false;
+                                                } // Allow on create maybe?
+
+                                                return ! app(PlanService::class)->hasFeature($record->company, 'custom_mascot');
                                             })
                                             ->helperText(function (?Chatbot $record = null) {
-                                                if ($record && $record->company && !app(\App\Services\PlanService::class)->hasFeature($record->company, 'custom_mascot')) {
+                                                if ($record && $record->company && ! app(PlanService::class)->hasFeature($record->company, 'custom_mascot')) {
                                                     return '🔒 Recurso Premium: Faça o upgrade de plano para desbloquear Mascotes 3D Interativos na sua página!';
                                                 }
+
                                                 return '';
                                             }),
                                         Forms\Components\Placeholder::make('mascot_preview')
@@ -315,16 +324,17 @@ class ChatbotResource extends Resource
                                             ->content(function (Forms\Get $get) {
                                                 $type = $get('mascot_type');
                                                 if ($type && $type !== 'none') {
-                                                    return new \Illuminate\Support\HtmlString('<img src="/images/mascots/' . $type . '.png" style="max-height: 200px; object-fit: contain; border-radius: 12px; background: #f3f4f6; padding: 10px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">');
+                                                    return new HtmlString('<img src="/images/mascots/'.$type.'.png" style="max-height: 200px; object-fit: contain; border-radius: 12px; background: #f3f4f6; padding: 10px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">');
                                                 }
+
                                                 return '-';
                                             })
-                                            ->visible(fn(Forms\Get $get) => $get('mascot_type') !== 'none'),
+                                            ->visible(fn (Forms\Get $get) => $get('mascot_type') !== 'none'),
                                         Forms\Components\TextInput::make('mascot_greeting')
                                             ->label('Frase do Balãozinho')
                                             ->placeholder('Ex: Posso Ajudar?')
                                             ->maxLength(255)
-                                            ->visible(fn(Forms\Get $get) => $get('mascot_type') !== 'none'),
+                                            ->visible(fn (Forms\Get $get) => $get('mascot_type') !== 'none'),
                                     ]),
                             ]),
                         Forms\Components\Tabs\Tab::make('Menu e Ações')
@@ -373,7 +383,7 @@ class ChatbotResource extends Resource
                                             ->addAction(
                                                 fn (Forms\Components\Actions\Action $action) => $action->label('Adicionar Sugestão')
                                             ),
-                                    ])
+                                    ]),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -533,7 +543,7 @@ class ChatbotResource extends Resource
                             ->default('suporte'),
                         Forms\Components\Select::make('chatbot_segment')
                             ->label('Segmento Específico')
-                            ->options(\App\Helpers\SegmentHelper::getSecondarySegments())
+                            ->options(SegmentHelper::getSecondarySegments())
                             ->searchable()
                             ->helperText('Selecione o segmento do chatbot. Se vazio, usará o segmento da empresa.'),
                         Forms\Components\CheckboxList::make('chatbot_channels')
@@ -543,18 +553,18 @@ class ChatbotResource extends Resource
                                 'whatsapp' => 'WhatsApp',
                                 'instagram' => 'Instagram',
                                 'facebook' => 'Facebook Messenger',
-                                'telegram' => 'Telegram'
+                                'telegram' => 'Telegram',
                             ])
                             ->required()
                             ->default(['site'])
                             ->columns(2),
                     ])
-                    ->action(function (Chatbot $record, array $data, \App\Services\AgentPersonalizationService $service) {
+                    ->action(function (Chatbot $record, array $data, AgentPersonalizationService $service) {
                         $objective = $data['chatbot_objective'];
                         $channels = $data['chatbot_channels'];
                         $segment = $data['chatbot_segment'] ?? $record->company->segment ?? 'Outro Segmento';
                         $service->generateForSegment($record->company, $record, $segment, $objective, $channels);
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Configuração IA concluída!')
                             ->success()
                             ->send();

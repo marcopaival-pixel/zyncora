@@ -5,17 +5,22 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
-use App\Filament\Pages\Auth\CustomResetPassword;
+use App\Filament\Widgets\CompanyTrialWidget;
 use App\Filament\Widgets\CompanyUsageStats;
-use App\Filament\Widgets\LatestLogs;
 use App\Filament\Widgets\QuickActions;
 use App\Filament\Widgets\SystemHealthWidget;
+use App\Filament\Widgets\WelcomeAgentWidget;
 use App\Filament\Widgets\WelcomeHero;
+use App\Http\Middleware\CheckLegalDocumentsAcceptance;
+use App\Http\Middleware\CheckOnboardingStatus;
+use App\Http\Middleware\CheckTrialStatus;
+use App\Http\Middleware\ImpersonateCompanyMiddleware;
+use App\Http\Middleware\NoCacheMiddleware;
+use App\Services\TenantService;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -30,7 +35,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Http\Middleware\ImpersonateCompanyMiddleware;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -105,8 +109,8 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 SystemHealthWidget::class,
                 WelcomeHero::class,
-                \App\Filament\Widgets\CompanyTrialWidget::class,
-                \App\Filament\Widgets\WelcomeAgentWidget::class,
+                CompanyTrialWidget::class,
+                WelcomeAgentWidget::class,
                 QuickActions::class,
                 CompanyUsageStats::class,
             ])
@@ -123,20 +127,23 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\NoCacheMiddleware::class,
+                NoCacheMiddleware::class,
                 ImpersonateCompanyMiddleware::class,
-                \App\Http\Middleware\CheckLegalDocumentsAcceptance::class,
-                \App\Http\Middleware\CheckOnboardingStatus::class,
-                \App\Http\Middleware\CheckTrialStatus::class,
+                CheckLegalDocumentsAcceptance::class,
+                CheckOnboardingStatus::class,
+                CheckTrialStatus::class,
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 function (): string {
                     $user = Auth::user();
-                    if (!$user || !$user->company_id) return '';
+                    if (! $user || ! $user->company_id) {
+                        return '';
+                    }
 
-                    $data = cache()->remember("company_head_assets_{$user->company_id}", 3600, function() use ($user) {
+                    $data = cache()->remember("company_head_assets_{$user->company_id}", 3600, function () use ($user) {
                         $company = $user->company;
+
                         return [
                             'color' => $company->brand_color ?? '#3B82F6',
                             'favicon' => $company->favicon_path ? asset('storage/'.$company->favicon_path) : null,
@@ -229,11 +236,11 @@ class AdminPanelProvider extends PanelProvider
                     </div>";
 
                     if (session()->has('impersonated_company_id') && Auth::check() && Auth::user()->is_impersonating) {
-                        $companyName = app(\App\Services\TenantService::class)->getCompany()?->name ?? 'Empresa';
+                        $companyName = app(TenantService::class)->getCompany()?->name ?? 'Empresa';
                         $adminName = Auth::user()->name;
                         $startedAt = session('impersonation_started_at', now())->format('d/m/Y H:i');
                         $reason = session('impersonation_reason', 'Auditoria');
-                        
+
                         $html .= "
                         <div class='fixed top-0 inset-x-0 z-[100] bg-rose-600 text-white shadow-lg border-b border-rose-700 animate-in slide-in-from-top'>
                             <div class='max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-2'>
@@ -249,8 +256,8 @@ class AdminPanelProvider extends PanelProvider
                                     </div>
                                 </div>
                                 <div>
-                                    <form action='" . route('admin.impersonation.leave') . "' method='POST'>
-                                        " . csrf_field() . "
+                                    <form action='".route('admin.impersonation.leave')."' method='POST'>
+                                        ".csrf_field()."
                                         <button type='submit' style='color: #e11d48;' class='rounded-md bg-white px-3.5 py-2 text-sm font-semibold shadow-sm hover:opacity-90 transition-all'>
                                             Encerrar Sessão
                                         </button>
@@ -344,5 +351,3 @@ class AdminPanelProvider extends PanelProvider
             );
     }
 }
-
-

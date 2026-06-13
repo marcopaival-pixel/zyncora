@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckOnboardingStatus
@@ -11,13 +12,13 @@ class CheckOnboardingStatus
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Illuminate\Support\Facades\Auth::check()) {
-            $user = \Illuminate\Support\Facades\Auth::user();
-            
+        if (Auth::check()) {
+            $user = Auth::user();
+
             // Ignorar para admins do sistema (opcional)
             if ($user->role === 'platform_admin') {
                 return $next($request);
@@ -29,11 +30,11 @@ class CheckOnboardingStatus
                 'filament.admin.auth.logout',
                 'legal.pending-acceptance',
                 'legal.accept-pending',
-                'livewire.update' // Permitir requisições livewire do wizard
+                'livewire.update', // Permitir requisições livewire do wizard
             ];
 
-            if ($user->company && !$user->company->is_onboarding_completed) {
-                if (!in_array($request->route()?->getName(), $exemptRoutes)) {
+            if ($user->company && ! $user->company->is_onboarding_completed) {
+                if (! in_array($request->route()?->getName(), $exemptRoutes)) {
                     return redirect()->route('filament.admin.pages.onboarding-wizard');
                 }
             }

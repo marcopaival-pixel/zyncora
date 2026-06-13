@@ -3,13 +3,15 @@
 namespace App\Filament\SuperAdmin\Pages;
 
 use App\Models\Company;
+use App\Notifications\OverdueInvoiceNotification;
 use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Notification;
 
 class DefaultingCompaniesDashboard extends Page implements HasTable
 {
@@ -62,14 +64,14 @@ class DefaultingCompaniesDashboard extends Page implements HasTable
                 TextColumn::make('invoices_count')
                     ->label('Faturas Vencidas')
                     ->counts([
-                        'invoices' => fn (Builder $query) => $query->where('status', 'overdue')
+                        'invoices' => fn (Builder $query) => $query->where('status', 'overdue'),
                     ]),
             ])
             ->actions([
                 Action::make('notify')
                     ->label('Notificar')
                     ->icon('heroicon-o-bell')
-                    ->action(fn (Company $record) => \Illuminate\Support\Facades\Notification::route('mail', $record->email)->notify(new \App\Notifications\OverdueInvoiceNotification($record)))
+                    ->action(fn (Company $record) => Notification::route('mail', $record->email)->notify(new OverdueInvoiceNotification($record)))
                     ->requiresConfirmation(),
                 Action::make('suspend')
                     ->label('Suspender')

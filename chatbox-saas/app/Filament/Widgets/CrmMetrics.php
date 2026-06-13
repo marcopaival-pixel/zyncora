@@ -64,4 +64,3 @@ class CrmMetrics extends StatsOverviewWidget
         ];
     }
 }
-

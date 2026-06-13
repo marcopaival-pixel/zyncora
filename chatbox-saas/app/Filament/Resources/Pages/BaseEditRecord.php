@@ -15,5 +15,5 @@ abstract class BaseEditRecord extends EditRecord
 
     public static bool $formActionsAreSticky = true;
 
-    public static string | Alignment $formActionsAlignment = Alignment::End;
+    public static string|Alignment $formActionsAlignment = Alignment::End;
 }

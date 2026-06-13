@@ -15,8 +15,11 @@ class LandingPageAnalyticResource extends Resource
     protected static ?string $model = LandingPageAnalytic::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
     protected static ?string $modelLabel = 'Analytics da Landing Page';
+
     protected static ?string $pluralModelLabel = 'Analytics da Landing Page';
+
     protected static ?string $navigationGroup = 'Site Público';
 
     public static function form(Form $form): Form
@@ -68,7 +71,7 @@ class LandingPageAnalyticResource extends Resource
             'index' => Pages\ListLandingPageAnalytics::route('/'),
         ];
     }
-    
+
     public static function canCreate(): bool
     {
         return false;

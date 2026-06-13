@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api\PublicV1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Conversation;
 use App\Models\Channel;
-use App\Jobs\ProcessWebhookMessage;
+use App\Models\Conversation;
 use App\Services\WhatsAppOutboundDispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,7 +37,7 @@ class PublicMessageController extends Controller
             ->where('status', '!=', 'closed')
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = Conversation::query()->create([
                 'company_id' => $companyId,
                 'channel_id' => $channel->id,
@@ -66,7 +65,7 @@ class PublicMessageController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Mensagem enfileirada com sucesso.',
-            'data' => $message
+            'data' => $message,
         ]);
     }
 }

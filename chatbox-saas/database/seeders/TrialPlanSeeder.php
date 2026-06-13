@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Plan;
 use Illuminate\Database\Seeder;
 
 class TrialPlanSeeder extends Seeder
@@ -12,8 +12,8 @@ class TrialPlanSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Plan::firstOrCreate([
-            'slug' => 'trial'
+        Plan::firstOrCreate([
+            'slug' => 'trial',
         ], [
             'name' => 'Trial de 14 Dias',
             'description' => 'Plano de teste gratuito da Zynkora.',

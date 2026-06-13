@@ -2,37 +2,56 @@
 
 namespace App\Livewire;
 
+use App\Models\Deal;
+use App\Models\LandingPageAnalytic;
+use App\Models\LandingPageSetting;
 use App\Models\Lead;
 use App\Models\Pipeline;
-use App\Models\Deal;
-use App\Models\LandingPageSetting;
-use App\Models\LandingPageAnalytic;
 use Livewire\Component;
 
 class ContactForm extends Component
 {
     public $name = '';
+
     public $company = '';
+
     public $role = '';
+
     public $email = '';
+
     public $whatsapp = '';
+
     public $attendants_qty = '';
+
     public $segment = '';
+
     public $message = '';
+
     public $success = false;
-    
+
     // Tracking fields
     public $utm_source = '';
+
     public $utm_medium = '';
+
     public $utm_campaign = '';
+
     public $utm_content = '';
+
     public $utm_term = '';
+
     public $referer = '';
+
     public $browser = '';
+
     public $device = '';
+
     public $os = '';
+
     public $country = '';
+
     public $city = '';
+
     public $ip = '';
 
     public $settings;
@@ -106,7 +125,7 @@ class ContactForm extends Component
                 'company_id' => $pipeline->company_id,
                 'pipeline_id' => $pipeline->id,
                 'pipeline_stage_id' => $pipeline->stages()->first()->id,
-                'title' => 'Contato Site: ' . $this->name . ' - ' . $this->company,
+                'title' => 'Contato Site: '.$this->name.' - '.$this->company,
                 'value' => 0,
                 'status' => 'open',
                 'custom_fields' => [
@@ -119,8 +138,8 @@ class ContactForm extends Component
 
         $this->success = true;
         $this->reset([
-            'name', 'company', 'role', 'email', 'whatsapp', 
-            'attendants_qty', 'segment', 'message'
+            'name', 'company', 'role', 'email', 'whatsapp',
+            'attendants_qty', 'segment', 'message',
         ]);
     }
 

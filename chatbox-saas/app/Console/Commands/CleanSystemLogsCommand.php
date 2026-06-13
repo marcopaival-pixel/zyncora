@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\ActivityLog;
 use App\Models\SystemErrorLog;
 use App\Models\UserSessionLog;
-use App\Models\ActivityLog;
+use Illuminate\Console\Command;
 
 class CleanSystemLogsCommand extends Command
 {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\User;
 
 class PlanService
 {
@@ -20,7 +21,7 @@ class PlanService
     public function canAddAttendant(Company $company): bool
     {
         $attendantsCount = $company->users()
-            ->where('role', \App\Models\User::ROLE_AGENT)
+            ->where('role', User::ROLE_AGENT)
             ->where('status', 'active')
             ->count();
 
@@ -105,11 +106,12 @@ class PlanService
      */
     public function consumeAiCredit(Company $company, int $amount = 1): bool
     {
-        if (!$this->hasAiCredits($company)) {
+        if (! $this->hasAiCredits($company)) {
             return false;
         }
 
         $company->increment('ai_credits_used', $amount);
+
         return true;
     }
 }

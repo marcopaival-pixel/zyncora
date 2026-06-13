@@ -27,9 +27,9 @@ class CompanyImpersonatedNotification extends Notification implements ShouldQueu
             ->subject('Acesso Administrativo ao Seu Ambiente - Zynkora')
             ->greeting('Olá!')
             ->line('Um administrador da plataforma acessou a sua conta para fins de suporte e auditoria.')
-            ->line('**Administrador:** ' . $this->adminName)
-            ->line('**Motivo:** ' . $this->reason)
-            ->line('**Data e Hora:** ' . now()->format('d/m/Y H:i:s'))
+            ->line('**Administrador:** '.$this->adminName)
+            ->line('**Motivo:** '.$this->reason)
+            ->line('**Data e Hora:** '.now()->format('d/m/Y H:i:s'))
             ->line('Se você não solicitou suporte ou desconhece este acesso, por favor entre em contato com nossa equipe imediatamente.')
             ->action('Acessar Painel', url('/admin'))
             ->salutation('Equipe de Suporte Zynkora');

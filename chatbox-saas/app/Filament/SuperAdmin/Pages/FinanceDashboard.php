@@ -2,9 +2,9 @@
 
 namespace App\Filament\SuperAdmin\Pages;
 
-use Filament\Pages\Page;
 use App\Filament\SuperAdmin\Widgets\FinanceStatsWidget;
 use App\Filament\SuperAdmin\Widgets\RevenueChartWidget;
+use Filament\Pages\Page;
 
 class FinanceDashboard extends Page
 {

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Chatbot;
 use App\Models\WidgetAccessLog;
 use App\Models\WidgetFraudAlert;
-use App\Models\Chatbot;
 use App\Services\Fraud\Contracts\FraudDetectorInterface;
 
 class RiskScoringService
@@ -22,7 +22,7 @@ class RiskScoringService
     public function evaluateAccess(WidgetAccessLog $log, Chatbot $chatbot): int
     {
         $result = $this->fraudDetector->analyze($log, $chatbot);
-        
+
         $score = $result['score'] ?? 0;
         $reasons = $result['reasons'] ?? [];
 
@@ -40,9 +40,13 @@ class RiskScoringService
     protected function triggerFraudAlert(Chatbot $chatbot, int $score, array $reasons, WidgetAccessLog $log)
     {
         $level = 'low';
-        if ($score >= 90) $level = 'critical';
-        elseif ($score >= 70) $level = 'high';
-        elseif ($score >= 40) $level = 'medium';
+        if ($score >= 90) {
+            $level = 'critical';
+        } elseif ($score >= 70) {
+            $level = 'high';
+        } elseif ($score >= 40) {
+            $level = 'medium';
+        }
 
         WidgetFraudAlert::create([
             'chatbot_id' => $chatbot->id,
@@ -54,7 +58,7 @@ class RiskScoringService
                 'ip' => $log->ip_address,
                 'domain' => $log->domain,
                 'fingerprint_hash' => $log->fingerprint_hash,
-            ]
+            ],
         ]);
 
         // Aqui podemos injetar o disparo da Notificação Corporativa

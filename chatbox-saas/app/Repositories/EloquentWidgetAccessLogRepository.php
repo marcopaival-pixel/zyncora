@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Contracts\WidgetAccessLogRepositoryInterface;
 use App\Models\WidgetAccessLog;
+use App\Repositories\Contracts\WidgetAccessLogRepositoryInterface;
 
 class EloquentWidgetAccessLogRepository implements WidgetAccessLogRepositoryInterface
 {

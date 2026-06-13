@@ -1,10 +1,17 @@
 <?php
 
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\EnsureApiDocsBasicAuth;
+use App\Http\Middleware\EnsureApiDocsEnabled;
+use App\Http\Middleware\EnsureDemoRoutesEnabled;
+use App\Http\Middleware\EnsureHealthCheckToken;
 use App\Http\Middleware\EnsureSingleSession;
+use App\Http\Middleware\LogPerformanceMiddleware;
 use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\SessionTimeoutMiddleware;
 use App\Http\Middleware\TenantMiddleware;
+use App\Http\Middleware\ValidateWidgetAccess;
+use App\Http\Middleware\WhiteLabelMiddleware;
 use App\Models\SystemErrorLog;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
@@ -28,21 +35,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ],
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(\App\Http\Middleware\LogPerformanceMiddleware::class);
+        $middleware->append(LogPerformanceMiddleware::class);
         $middleware->appendToGroup('web', [
             SecurityHeadersMiddleware::class,
             SessionTimeoutMiddleware::class,
             EnsureSingleSession::class,
-            \App\Http\Middleware\WhiteLabelMiddleware::class,
+            WhiteLabelMiddleware::class,
         ]);
         $middleware->appendToGroup('api', TenantMiddleware::class);
         $middleware->alias([
             'permission' => CheckPermission::class,
-            'demo.enabled' => \App\Http\Middleware\EnsureDemoRoutesEnabled::class,
-            'api.docs' => \App\Http\Middleware\EnsureApiDocsEnabled::class,
-            'api.docs.auth' => \App\Http\Middleware\EnsureApiDocsBasicAuth::class,
-            'health.token' => \App\Http\Middleware\EnsureHealthCheckToken::class,
-            'white_label' => \App\Http\Middleware\WhiteLabelMiddleware::class,
+            'demo.enabled' => EnsureDemoRoutesEnabled::class,
+            'api.docs' => EnsureApiDocsEnabled::class,
+            'api.docs.auth' => EnsureApiDocsBasicAuth::class,
+            'health.token' => EnsureHealthCheckToken::class,
+            'white_label' => WhiteLabelMiddleware::class,
+            'widget.access' => ValidateWidgetAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

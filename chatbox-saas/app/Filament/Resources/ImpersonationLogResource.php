@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ImpersonationLogResource\Pages;
-use App\Filament\Resources\ImpersonationLogResource\RelationManagers;
 use App\Models\ImpersonationLog;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class ImpersonationLogResource extends Resource
 {
@@ -35,12 +32,12 @@ class ImpersonationLogResource extends Resource
         return false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }
@@ -97,11 +94,12 @@ class ImpersonationLogResource extends Resource
                 Tables\Columns\TextColumn::make('duration')
                     ->label('Duração')
                     ->getStateUsing(function (ImpersonationLog $record) {
-                        if (!$record->ended_at) {
+                        if (! $record->ended_at) {
                             return 'Em andamento';
                         }
                         $diff = $record->started_at->diffInMinutes($record->ended_at);
-                        return $diff . ' min';
+
+                        return $diff.' min';
                     }),
                 Tables\Columns\TextColumn::make('ip_address')
                     ->label('IP')
@@ -132,4 +130,3 @@ class ImpersonationLogResource extends Resource
         ];
     }
 }
-

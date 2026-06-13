@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ChatbotResource\Pages;
 
 use App\Filament\Resources\ChatbotResource;
+use App\Models\ChatbotFlowNodeStat;
 use App\Models\ChatbotFlowTemplate;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -110,7 +111,7 @@ class FlowBuilder extends Page
     #[Computed]
     public function getNodeStatsProperty()
     {
-        return \App\Models\ChatbotFlowNodeStat::query()
+        return ChatbotFlowNodeStat::query()
             ->where('chatbot_id', $this->record->id)
             ->selectRaw('node_id, sum(views) as total_views, sum(transfers) as total_transfers, sum(dropoffs) as total_dropoffs')
             ->groupBy('node_id')

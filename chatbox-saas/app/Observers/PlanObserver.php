@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Plan;
-
 use App\Models\PlanAuditLog;
 use Illuminate\Support\Facades\Cache;
 

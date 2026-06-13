@@ -21,7 +21,7 @@ class HandleLogoutSession
                 ->where('session_id', $sessionId)
                 ->update([
                     'is_active' => false,
-                    'logout_at' => now()
+                    'logout_at' => now(),
                 ]);
 
             // Limpa o current_session_id se for a sessão que está saindo

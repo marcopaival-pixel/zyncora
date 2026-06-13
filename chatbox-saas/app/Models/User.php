@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\UserSessionLog;
+use App\Notifications\SecurePasswordResetNotification;
 use App\Services\RoleSyncService;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     public const ROLE_PLATFORM_ADMIN = 'platform_admin';
@@ -50,8 +52,11 @@ class User extends Authenticatable implements FilamentUser
     ];
 
     public bool $is_impersonating = false;
+
     public ?string $impersonation_level = null;
+
     public ?int $original_company_id = null;
+
     protected ?array $cachedPermissions = null;
 
     protected $hidden = [
@@ -75,7 +80,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->role === self::ROLE_PLATFORM_ADMIN && !$this->is_impersonating) {
+        if ($this->role === self::ROLE_PLATFORM_ADMIN && ! $this->is_impersonating) {
             return true;
         }
 
@@ -84,11 +89,11 @@ class User extends Authenticatable implements FilamentUser
                 return str_starts_with($permission, 'view_');
             }
             if ($this->impersonation_level === 'view_edit') {
-                return !str_starts_with($permission, 'delete_') && !str_starts_with($permission, 'manage_financeiro');
+                return ! str_starts_with($permission, 'delete_') && ! str_starts_with($permission, 'manage_financeiro');
             }
             if ($this->impersonation_level === 'view_fix') {
                 // Allows edit but not delete, allows managing settings
-                return !str_starts_with($permission, 'delete_');
+                return ! str_starts_with($permission, 'delete_');
             }
             if ($this->impersonation_level === 'full_access') {
                 return true;
@@ -96,21 +101,21 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($this->cachedPermissions === null) {
-            $this->cachedPermissions = \Illuminate\Support\Facades\Cache::remember("user_{$this->id}_permissions_array", now()->addHours(1), function () {
+            $this->cachedPermissions = Cache::remember("user_{$this->id}_permissions_array", now()->addHours(1), function () {
                 $perms = [];
                 foreach ($this->roles()->with('permissions')->get() as $role) {
                     foreach ($role->permissions as $p) {
                         $perms[] = $p->name;
                     }
                 }
-                
+
                 $mappedRole = app(RoleSyncService::class)->resolvePermissionsForUserRole($this->role);
                 if ($mappedRole) {
                     foreach ($mappedRole->permissions()->get() as $p) {
                         $perms[] = $p->name;
                     }
                 }
-                
+
                 return array_unique($perms);
             });
         }
@@ -120,7 +125,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function hasAnyPermission(array $permissions): bool
     {
-        if ($this->role === self::ROLE_PLATFORM_ADMIN && !$this->is_impersonating) {
+        if ($this->role === self::ROLE_PLATFORM_ADMIN && ! $this->is_impersonating) {
             return true;
         }
 
@@ -163,6 +168,7 @@ class User extends Authenticatable implements FilamentUser
         if ($this->is_impersonating) {
             return false;
         }
+
         return $this->role === self::ROLE_PLATFORM_ADMIN;
     }
 
@@ -287,6 +293,6 @@ class User extends Authenticatable implements FilamentUser
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new \App\Notifications\SecurePasswordResetNotification($token));
+        $this->notify(new SecurePasswordResetNotification($token));
     }
 }

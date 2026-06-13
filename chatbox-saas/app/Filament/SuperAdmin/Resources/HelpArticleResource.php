@@ -16,9 +16,11 @@ class HelpArticleResource extends Resource
     protected static ?string $model = HelpArticle::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    
+
     protected static ?string $modelLabel = 'Artigo de Ajuda';
+
     protected static ?string $pluralModelLabel = 'Artigos de Ajuda';
+
     protected static ?string $navigationGroup = 'Gestão do Sistema';
 
     public static function form(Form $form): Form
@@ -32,7 +34,7 @@ class HelpArticleResource extends Resource
                             ->relationship('category', 'name')
                             ->required()
                             ->label('Categoria'),
-                            
+
                         Forms\Components\TextInput::make('module')
                             ->label('Módulo no Sistema')
                             ->helperText('Ex: Geral, CRM, Atendimento. (Usado para vincular à tela correta)')
@@ -50,7 +52,7 @@ class HelpArticleResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                            
+
                         Forms\Components\Textarea::make('description')
                             ->label('Descrição Curta')
                             ->columnSpanFull()

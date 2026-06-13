@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Services\AiService;
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class KnowledgeBase extends Model
 {
@@ -30,7 +32,7 @@ class KnowledgeBase extends Model
     protected static function booted()
     {
         static::saving(function ($model) {
-            if ($model->isDirty('content') && !empty($model->content)) {
+            if ($model->isDirty('content') && ! empty($model->content)) {
                 // Estimativa de tokens
                 $cleanText = strip_tags($model->content);
                 $wordCount = str_word_count($cleanText);
@@ -39,13 +41,13 @@ class KnowledgeBase extends Model
                 // Geração de Embedding se o conteúdo foi alterado manualmente e não via Job
                 // O Job sobrescreve isso depois se for de URL, mas para texto puro funciona na hora.
                 try {
-                    $aiService = app(\App\Services\AiService::class);
+                    $aiService = app(AiService::class);
                     $embedding = $aiService->generateEmbeddings($cleanText);
                     if ($embedding) {
                         $model->embedding = $embedding;
                     }
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Erro ao gerar embedding no model event: ' . $e->getMessage());
+                    Log::error('Erro ao gerar embedding no model event: '.$e->getMessage());
                 }
             }
         });

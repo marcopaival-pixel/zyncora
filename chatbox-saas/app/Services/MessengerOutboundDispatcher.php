@@ -24,7 +24,7 @@ class MessengerOutboundDispatcher
         }
 
         $psid = $conversation->client_phone;
-        if (!$psid) {
+        if (! $psid) {
             return;
         }
 
@@ -45,21 +45,22 @@ class MessengerOutboundDispatcher
                 'reason' => 'missing_page_access_token',
                 'company_id' => $conversation->company_id,
             ]);
+
             return;
         }
 
         try {
             $version = config('chatbox.messenger.graph_version', 'v21.0');
             $url = "https://graph.facebook.com/{$version}/me/messages?access_token={$pageAccessToken}";
-            
+
             $response = Http::post($url, [
                 'recipient' => ['id' => $psid],
                 'message' => ['text' => $message->body],
-                'messaging_type' => 'RESPONSE'
+                'messaging_type' => 'RESPONSE',
             ]);
 
             if ($response->failed()) {
-                throw new \Exception("Messenger API Error: " . $response->body());
+                throw new \Exception('Messenger API Error: '.$response->body());
             }
 
         } catch (\Throwable $e) {

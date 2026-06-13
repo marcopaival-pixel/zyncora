@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Services\ConversationStatsService;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,11 +43,11 @@ class Reports extends Page
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('back_to_premium')
+            Action::make('back_to_premium')
                 ->label('Recursos Avançados')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(\App\Filament\Pages\PremiumArea::getUrl()),
+                ->url(PremiumArea::getUrl()),
         ];
     }
 

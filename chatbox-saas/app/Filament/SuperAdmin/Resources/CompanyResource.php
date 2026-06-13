@@ -4,12 +4,24 @@ namespace App\Filament\SuperAdmin\Resources;
 
 use App\Filament\SuperAdmin\Resources\CompanyResource\Pages;
 use App\Models\Company;
+use App\Models\ImpersonationLog;
+use App\Notifications\CompanyImpersonatedNotification;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\ColorEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Tabs;
+use Filament\Infolists\Components\Tabs\Tab;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 class CompanyResource extends Resource
@@ -33,20 +45,19 @@ class CompanyResource extends Resource
         return ['name', 'slug', 'cnpj', 'email', 'responsible_name'];
     }
 
-    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->name . ' (' . ($record->status === 'active' ? 'Ativa' : ucfirst($record->status)) . ')';
+        return $record->name.' ('.($record->status === 'active' ? 'Ativa' : ucfirst($record->status)).')';
     }
 
-    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             'Email' => $record->email ?? 'N/A',
             'Plano' => $record->plan?->name ?? $record->plan ?? 'N/A',
-            'Conversas IA' => number_format((float)$record->ai_credits_used, 0, ',', '.') . ' usadas',
+            'Conversas IA' => number_format((float) $record->ai_credits_used, 0, ',', '.').' usadas',
         ];
     }
-
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -112,7 +123,7 @@ class CompanyResource extends Resource
                                     ->nullable()
                                     ->columnSpanFull(),
                             ]),
-                        
+
                         Forms\Components\Tabs\Tab::make('Assinatura & Limites')
                             ->icon('heroicon-m-credit-card')
                             ->schema([
@@ -242,8 +253,11 @@ class CompanyResource extends Resource
                                         : '')
                                     ->dehydrateStateUsing(function ($state) {
                                         $state = trim((string) $state);
-                                        if ($state === '') return null;
+                                        if ($state === '') {
+                                            return null;
+                                        }
                                         $decoded = json_decode($state, true);
+
                                         return is_array($decoded) ? $decoded : null;
                                     }),
                             ]),
@@ -256,12 +270,15 @@ class CompanyResource extends Resource
                                     ->label('Código de Incorporação')
                                     ->readonly()
                                     ->formatStateUsing(function (?Company $record) {
-                                        if (!$record) return '';
+                                        if (! $record) {
+                                            return '';
+                                        }
                                         $baseUrl = config('app.url');
+
                                         return "<script src=\"{$baseUrl}/widget/chatbox-widget.js\" data-slug=\"{$record->slug}\" data-api=\"{$baseUrl}/api\" defer></script>";
                                     })
                                     ->extraAttributes([
-                                        'onclick' => "this.select(); document.execCommand('copy'); window.alert('Copiado para a área de transferência!');"
+                                        'onclick' => "this.select(); document.execCommand('copy'); window.alert('Copiado para a área de transferência!');",
                                     ])
                                     ->helperText('Clique no campo para copiar o código e insira-o antes do fechamento da tag </body> do seu site.')
                                     ->columnSpanFull(),
@@ -277,7 +294,7 @@ class CompanyResource extends Resource
                 Tables\Columns\ImageColumn::make('logo_path')
                     ->label('Logo')
                     ->circular()
-                    ->defaultImageUrl(fn (Company $record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=09090b'),
+                    ->defaultImageUrl(fn (Company $record) => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&color=FFFFFF&background=09090b'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome Fantasia')
                     ->searchable()
@@ -371,7 +388,8 @@ class CompanyResource extends Resource
                     ->label('Último Login')
                     ->getStateUsing(function (Company $record) {
                         $lastLogin = $record->users()->max('last_login_at');
-                        return $lastLogin ? \Carbon\Carbon::parse($lastLogin)->format('d/m/Y H:i') : 'Nunca';
+
+                        return $lastLogin ? Carbon::parse($lastLogin)->format('d/m/Y H:i') : 'Nunca';
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -415,11 +433,10 @@ class CompanyResource extends Resource
             ->emptyStateIcon('heroicon-o-building-office-2')
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Visão 360')->iconButton(),
-                
+
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make()->label('Editar Dados'),
 
-                    
                     Tables\Actions\Action::make('alterar_plano')
                         ->label('Alterar Plano')
                         ->icon('heroicon-m-credit-card')
@@ -468,84 +485,84 @@ class CompanyResource extends Resource
 
                 Tables\Actions\Action::make('alterar_status')
                     ->iconButton()
-                        ->label('Alterar Status')
-                        ->icon('heroicon-m-shield-exclamation')
-                        ->color('warning')
-                        ->form([
-                            Forms\Components\Select::make('status')
-                                ->label('Novo Status')
-                                ->options([
-                                    'active' => 'Ativa',
-                                    'trial' => 'Em Trial',
-                                    'suspended' => 'Suspensa/Bloqueada',
-                                    'expired' => 'Expirada',
-                                    'canceled' => 'Cancelada',
-                                ])
-                                ->required()
-                                ->native(false)
-                                ->default(fn (Company $record) => $record->status),
-                        ])
-                        ->action(function (Company $record, array $data) {
-                            $record->update(['status' => $data['status']]);
-                        }),
+                    ->label('Alterar Status')
+                    ->icon('heroicon-m-shield-exclamation')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\Select::make('status')
+                            ->label('Novo Status')
+                            ->options([
+                                'active' => 'Ativa',
+                                'trial' => 'Em Trial',
+                                'suspended' => 'Suspensa/Bloqueada',
+                                'expired' => 'Expirada',
+                                'canceled' => 'Cancelada',
+                            ])
+                            ->required()
+                            ->native(false)
+                            ->default(fn (Company $record) => $record->status),
+                    ])
+                    ->action(function (Company $record, array $data) {
+                        $record->update(['status' => $data['status']]);
+                    }),
 
-                    Tables\Actions\Action::make('impersonate')
-                        ->label('Entrar como Empresa')
-                        ->icon('heroicon-m-eye')
-                        ->iconButton()
-                        ->color('success')
-                        ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false)
-                        ->form([
-                            Forms\Components\Select::make('permission_level')
-                                ->label('Nível de Permissão')
-                                ->options([
-                                    'view_only' => 'Apenas Visualizar',
-                                    'view_edit' => 'Visualizar e Editar',
-                                    'view_fix' => 'Visualizar e Corrigir Configurações',
-                                    'full_access' => 'Acesso Total'
-                                ])
-                                ->required()
-                                ->default('view_only')
-                                ->native(false),
-                            Forms\Components\TextInput::make('reason')
-                                ->label('Motivo do Acesso')
-                                ->required()
-                                ->maxLength(255)
-                                ->placeholder('Ex: Suporte a chamado #123'),
-                            Forms\Components\Toggle::make('notify_client')
-                                ->label('Enviar alerta ao cliente?')
-                                ->helperText('Notifica o responsável de que um admin acessou a conta.')
-                                ->default(false)
-                        ])
-                        ->action(function (Company $record, array $data) {
-                            $user = auth()->user();
+                Tables\Actions\Action::make('impersonate')
+                    ->label('Entrar como Empresa')
+                    ->icon('heroicon-m-eye')
+                    ->iconButton()
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->isPlatformAdmin() ?? false)
+                    ->form([
+                        Forms\Components\Select::make('permission_level')
+                            ->label('Nível de Permissão')
+                            ->options([
+                                'view_only' => 'Apenas Visualizar',
+                                'view_edit' => 'Visualizar e Editar',
+                                'view_fix' => 'Visualizar e Corrigir Configurações',
+                                'full_access' => 'Acesso Total',
+                            ])
+                            ->required()
+                            ->default('view_only')
+                            ->native(false),
+                        Forms\Components\TextInput::make('reason')
+                            ->label('Motivo do Acesso')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Ex: Suporte a chamado #123'),
+                        Forms\Components\Toggle::make('notify_client')
+                            ->label('Enviar alerta ao cliente?')
+                            ->helperText('Notifica o responsável de que um admin acessou a conta.')
+                            ->default(false),
+                    ])
+                    ->action(function (Company $record, array $data) {
+                        $user = auth()->user();
 
-                            // Gravar Log de Impersonação
-                            $log = \App\Models\ImpersonationLog::create([
-                                'super_admin_id' => $user->id,
-                                'company_id' => $record->id,
-                                'reason' => $data['reason'],
-                                'permission_level' => $data['permission_level'],
-                                'started_at' => now(),
-                                'ip_address' => request()->ip(),
-                            ]);
+                        // Gravar Log de Impersonação
+                        $log = ImpersonationLog::create([
+                            'super_admin_id' => $user->id,
+                            'company_id' => $record->id,
+                            'reason' => $data['reason'],
+                            'permission_level' => $data['permission_level'],
+                            'started_at' => now(),
+                            'ip_address' => request()->ip(),
+                        ]);
 
-                            // Set session variables
-                            session([
-                                'impersonated_company_id' => $record->id,
-                                'impersonation_level' => $data['permission_level'],
-                                'impersonation_started_at' => now(),
-                                'impersonation_reason' => $data['reason'],
-                                'impersonation_log_id' => $log->id,
-                            ]);
+                        // Set session variables
+                        session([
+                            'impersonated_company_id' => $record->id,
+                            'impersonation_level' => $data['permission_level'],
+                            'impersonation_started_at' => now(),
+                            'impersonation_reason' => $data['reason'],
+                            'impersonation_log_id' => $log->id,
+                        ]);
 
-                            if ($data['notify_client']) {
-                                \Illuminate\Support\Facades\Notification::route('mail', $record->email)
-                                    ->notify(new \App\Notifications\CompanyImpersonatedNotification($user->name, $data['reason']));
-                            }
+                        if ($data['notify_client']) {
+                            Notification::route('mail', $record->email)
+                                ->notify(new CompanyImpersonatedNotification($user->name, $data['reason']));
+                        }
 
-                            return redirect()->route('filament.admin.pages.dashboard');
-                        }),
+                        return redirect()->route('filament.admin.pages.dashboard');
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -554,33 +571,33 @@ class CompanyResource extends Resource
             ]);
     }
 
-    public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
+    public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->schema([
-                \Filament\Infolists\Components\Tabs::make('Visão 360')
+                Tabs::make('Visão 360')
                     ->tabs([
-                        \Filament\Infolists\Components\Tabs\Tab::make('Visão Geral')
+                        Tab::make('Visão Geral')
                             ->icon('heroicon-m-identification')
                             ->schema([
-                                \Filament\Infolists\Components\Section::make('Informações da Empresa')
+                                Section::make('Informações da Empresa')
                                     ->schema([
-                                        \Filament\Infolists\Components\TextEntry::make('name')->label('Nome Fantasia')->size('lg')->weight('bold'),
-                                        \Filament\Infolists\Components\TextEntry::make('slug')->label('Slug')->color('gray'),
-                                        \Filament\Infolists\Components\TextEntry::make('legal_name')->label('Razão Social'),
-                                        \Filament\Infolists\Components\TextEntry::make('cnpj')->label('CNPJ'),
-                                        \Filament\Infolists\Components\TextEntry::make('responsible_name')->label('Responsável'),
-                                        \Filament\Infolists\Components\TextEntry::make('email')->label('Email')->icon('heroicon-m-envelope'),
-                                        \Filament\Infolists\Components\TextEntry::make('phone')->label('Telefone'),
-                                        \Filament\Infolists\Components\TextEntry::make('created_at')->label('Data de Cadastro')->date('d/m/Y'),
+                                        TextEntry::make('name')->label('Nome Fantasia')->size('lg')->weight('bold'),
+                                        TextEntry::make('slug')->label('Slug')->color('gray'),
+                                        TextEntry::make('legal_name')->label('Razão Social'),
+                                        TextEntry::make('cnpj')->label('CNPJ'),
+                                        TextEntry::make('responsible_name')->label('Responsável'),
+                                        TextEntry::make('email')->label('Email')->icon('heroicon-m-envelope'),
+                                        TextEntry::make('phone')->label('Telefone'),
+                                        TextEntry::make('created_at')->label('Data de Cadastro')->date('d/m/Y'),
                                     ])->columns(3),
                             ]),
-                        \Filament\Infolists\Components\Tabs\Tab::make('Assinatura e Limites')
+                        Tab::make('Assinatura e Limites')
                             ->icon('heroicon-m-credit-card')
                             ->schema([
-                                \Filament\Infolists\Components\Section::make('Status do Plano e Saúde')
+                                Section::make('Status do Plano e Saúde')
                                     ->schema([
-                                        \Filament\Infolists\Components\TextEntry::make('status')
+                                        TextEntry::make('status')
                                             ->badge()
                                             ->color(fn (string $state): string => match ($state) {
                                                 'active' => 'success',
@@ -589,8 +606,8 @@ class CompanyResource extends Resource
                                                 'expired' => 'warning',
                                                 default => 'gray',
                                             }),
-                                        \Filament\Infolists\Components\TextEntry::make('health_status')
-                                            ->label(fn($record) => 'Saúde (Score: ' . $record->health_score . ')')
+                                        TextEntry::make('health_status')
+                                            ->label(fn ($record) => 'Saúde (Score: '.$record->health_score.')')
                                             ->badge()
                                             ->color(fn (string $state): string => match ($state) {
                                                 'saudável' => 'success',
@@ -599,41 +616,41 @@ class CompanyResource extends Resource
                                                 default => 'gray',
                                             })
                                             ->formatStateUsing(fn (string $state) => ucfirst($state)),
-                                        \Filament\Infolists\Components\TextEntry::make('plan.name')->label('Plano Atual'),
+                                        TextEntry::make('plan.name')->label('Plano Atual'),
 
-                                        \Filament\Infolists\Components\TextEntry::make('trial_end_at')
+                                        TextEntry::make('trial_end_at')
                                             ->label('Fim do Trial')
                                             ->date('d/m/Y')
                                             ->color(fn ($record) => $record->trial_end_at?->isPast() ? 'danger' : 'success'),
-                                        \Filament\Infolists\Components\TextEntry::make('expires_at')
+                                        TextEntry::make('expires_at')
                                             ->label('Vencimento')
                                             ->date('d/m/Y'),
                                     ])->columns(4),
-                                \Filament\Infolists\Components\Section::make('Consumo e Recursos')
+                                Section::make('Consumo e Recursos')
                                     ->schema([
-                                        \Filament\Infolists\Components\TextEntry::make('users_count')->label('Usuários')->state(fn ($record) => $record->users()->count()),
-                                        \Filament\Infolists\Components\TextEntry::make('chatbots_count')->label('Chatbots')->state(fn ($record) => $record->chatbots()->count()),
-                                        \Filament\Infolists\Components\TextEntry::make('ai_credits_used')->label('Conversas IA Consumidas')->numeric(),
-                                        \Filament\Infolists\Components\TextEntry::make('ai_credits_balance')->label('Saldo IA Total')->numeric(),
+                                        TextEntry::make('users_count')->label('Usuários')->state(fn ($record) => $record->users()->count()),
+                                        TextEntry::make('chatbots_count')->label('Chatbots')->state(fn ($record) => $record->chatbots()->count()),
+                                        TextEntry::make('ai_credits_used')->label('Conversas IA Consumidas')->numeric(),
+                                        TextEntry::make('ai_credits_balance')->label('Saldo IA Total')->numeric(),
                                     ])->columns(4),
                             ]),
-                        \Filament\Infolists\Components\Tabs\Tab::make('Personalização')
+                        Tab::make('Personalização')
                             ->icon('heroicon-m-paint-brush')
                             ->schema([
-                                \Filament\Infolists\Components\Section::make('Cores e Identidade')
+                                Section::make('Cores e Identidade')
                                     ->schema([
-                                        \Filament\Infolists\Components\ColorEntry::make('panel_color_primary')->label('Cor Primária do Painel'),
-                                        \Filament\Infolists\Components\ColorEntry::make('panel_color_secondary')->label('Cor Secundária do Painel'),
+                                        ColorEntry::make('panel_color_primary')->label('Cor Primária do Painel'),
+                                        ColorEntry::make('panel_color_secondary')->label('Cor Secundária do Painel'),
                                     ]),
                             ]),
-                        \Filament\Infolists\Components\Tabs\Tab::make('Chamados de Suporte')
+                        Tab::make('Chamados de Suporte')
                             ->icon('heroicon-m-ticket')
                             ->schema([
-                                \Filament\Infolists\Components\RepeatableEntry::make('supportTickets')
+                                RepeatableEntry::make('supportTickets')
                                     ->label('Últimos Chamados')
                                     ->schema([
-                                        \Filament\Infolists\Components\TextEntry::make('subject')->label('Assunto')->weight('bold'),
-                                        \Filament\Infolists\Components\TextEntry::make('status')
+                                        TextEntry::make('subject')->label('Assunto')->weight('bold'),
+                                        TextEntry::make('status')
                                             ->label('Status')
                                             ->badge()
                                             ->color(fn (string $state): string => match ($state) {
@@ -642,14 +659,14 @@ class CompanyResource extends Resource
                                                 'resolved', 'closed' => 'success',
                                                 default => 'gray',
                                             }),
-                                        \Filament\Infolists\Components\TextEntry::make('priority')
+                                        TextEntry::make('priority')
                                             ->label('Prioridade')
                                             ->badge(),
-                                        \Filament\Infolists\Components\TextEntry::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i'),
+                                        TextEntry::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i'),
                                     ])
                                     ->columns(4)
                                     ->hidden(fn ($record) => $record->supportTickets()->count() === 0),
-                                \Filament\Infolists\Components\TextEntry::make('no_tickets')
+                                TextEntry::make('no_tickets')
                                     ->label('Chamados')
                                     ->state('Esta empresa não possui chamados de suporte registrados.')
                                     ->hidden(fn ($record) => $record->supportTickets()->count() > 0),
@@ -657,7 +674,6 @@ class CompanyResource extends Resource
                     ])->columnSpanFull(),
             ]);
     }
-
 
     public static function getRelations(): array
     {
@@ -678,5 +694,4 @@ class CompanyResource extends Resource
             'edit' => Pages\EditCompany::route('/{record}/edit'),
         ];
     }
-
 }

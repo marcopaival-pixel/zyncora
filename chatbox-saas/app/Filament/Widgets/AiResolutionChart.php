@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Conversation;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\DB;
 
 class AiResolutionChart extends ChartWidget
 {
@@ -20,15 +19,17 @@ class AiResolutionChart extends ChartWidget
 
     protected static ?int $sort = 3;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function getData(): array
     {
         $user = auth()->user();
-        if (!$user) return [];
+        if (! $user) {
+            return [];
+        }
 
         $query = Conversation::query();
-        if (!$user->isPlatformAdmin()) {
+        if (! $user->isPlatformAdmin()) {
             $query->where('company_id', $user->company_id);
         }
 
@@ -79,4 +80,3 @@ class AiResolutionChart extends ChartWidget
         ];
     }
 }
-

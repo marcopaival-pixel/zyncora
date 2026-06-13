@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Permission;
-use App\Models\Role;
 use App\Models\User;
 use App\Services\RoleSyncService;
+use Database\Seeders\RBACSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +14,7 @@ class RbacSyncTest extends TestCase
 
     protected function seedRbac(): void
     {
-        $this->seed(\Database\Seeders\RBACSeeder::class);
+        $this->seed(RBACSeeder::class);
     }
 
     public function test_agent_receives_view_conversas_after_sync(): void

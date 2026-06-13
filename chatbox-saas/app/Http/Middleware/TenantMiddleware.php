@@ -24,7 +24,7 @@ class TenantMiddleware
 
         if ($slug) {
             $company = Company::query()->where('slug', $slug)->first();
-            
+
             if (! $company || $company->status !== 'active') {
                 abort(403, 'Company is inactive or not found.');
             }

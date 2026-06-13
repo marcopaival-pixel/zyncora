@@ -2,9 +2,9 @@
 
 namespace App\Services\Fraud;
 
-use App\Services\Fraud\Contracts\FraudDetectorInterface;
-use App\Models\WidgetAccessLog;
 use App\Models\Chatbot;
+use App\Models\WidgetAccessLog;
+use App\Services\Fraud\Contracts\FraudDetectorInterface;
 use Illuminate\Support\Facades\Http;
 
 class AwsFraudDetector implements FraudDetectorInterface
@@ -19,14 +19,15 @@ class AwsFraudDetector implements FraudDetectorInterface
                     'user_agent' => $log->user_agent,
                     'domain' => $log->domain,
                     'is_blocked' => $log->status === 'blocked',
-                ]
+                ],
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'score' => $data['risk_score'] ?? 0,
-                    'reasons' => ['Machine Learning Inference: ' . ($data['classification'] ?? 'Unknown')],
+                    'reasons' => ['Machine Learning Inference: '.($data['classification'] ?? 'Unknown')],
                 ];
             }
         } catch (\Exception $e) {

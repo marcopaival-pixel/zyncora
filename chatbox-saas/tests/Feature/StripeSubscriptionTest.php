@@ -95,7 +95,7 @@ class StripeSubscriptionTest extends TestCase
 
         $this->assertSame('active', $company->subscription_status);
         $this->assertNotNull($company->expires_at);
-        $this->assertTrue($company->expires_at->equalTo(\Carbon\Carbon::createFromTimestamp($periodEnd)));
+        $this->assertTrue($company->expires_at->equalTo(Carbon::createFromTimestamp($periodEnd)));
     }
 
     public function test_subscription_deleted_marks_canceled(): void

@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\LgpdRequestResource\Pages;
 
 use App\Filament\Resources\LgpdRequestResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
 
 class EditLgpdRequest extends BaseEditRecord
 {

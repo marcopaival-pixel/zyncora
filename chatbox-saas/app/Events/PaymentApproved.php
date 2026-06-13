@@ -2,11 +2,10 @@
 
 namespace App\Events;
 
+use App\Models\PaymentHistory;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -19,7 +18,7 @@ class PaymentApproved
     /**
      * Create a new event instance.
      */
-    public function __construct(\App\Models\PaymentHistory $payment)
+    public function __construct(PaymentHistory $payment)
     {
         $this->payment = $payment;
     }
@@ -27,7 +26,7 @@ class PaymentApproved
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

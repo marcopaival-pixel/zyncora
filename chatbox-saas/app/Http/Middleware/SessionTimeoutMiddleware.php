@@ -26,7 +26,7 @@ class SessionTimeoutMiddleware
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json([
                         'message' => 'Sua sessão expirou por inatividade.',
-                        'redirect' => route('filament.admin.auth.login')
+                        'redirect' => route('filament.admin.auth.login'),
                     ], 401);
                 }
 
@@ -34,9 +34,9 @@ class SessionTimeoutMiddleware
             }
 
             session(['last_activity_time' => time()]);
-            
+
             // Atualiza last_active_at no banco (evita muitas escritas, fazemos a cada 5 min)
-            if (!$user->last_active_at || $user->last_active_at->diffInMinutes(now()) >= 5) {
+            if (! $user->last_active_at || $user->last_active_at->diffInMinutes(now()) >= 5) {
                 $user->update(['last_active_at' => now()]);
             }
         }

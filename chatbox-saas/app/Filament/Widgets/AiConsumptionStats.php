@@ -2,19 +2,23 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\AiConsumptionHistory;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use App\Models\AiConsumptionHistory;
 
 class AiConsumptionStats extends BaseWidget
 {
     protected function getStats(): array
     {
         $user = auth()->user();
-        if (!$user) return [];
+        if (! $user) {
+            return [];
+        }
 
         $company = $user->company;
-        if (!$company) return [];
+        if (! $company) {
+            return [];
+        }
 
         $monthlyTokens = AiConsumptionHistory::where('company_id', $company->id)
             ->whereMonth('created_at', now()->month)

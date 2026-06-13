@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Models\User;
-use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Console\Command;
 
 class CheckTrialStatusAndNotifyAdmins extends Command
@@ -36,6 +36,7 @@ class CheckTrialStatusAndNotifyAdmins extends Command
 
         if ($companiesExpiringSoon->isEmpty()) {
             $this->info('Nenhum trial vencendo nos próximos 3 dias.');
+
             return;
         }
 
@@ -43,10 +44,10 @@ class CheckTrialStatusAndNotifyAdmins extends Command
 
         foreach ($companiesExpiringSoon as $company) {
             $daysLeft = $company->calcularDiasRestantes();
-            
+
             foreach ($superAdmins as $admin) {
                 Notification::make()
-                    ->title('Trial Vencendo: ' . $company->name)
+                    ->title('Trial Vencendo: '.$company->name)
                     ->body("A empresa {$company->name} tem apenas {$daysLeft} dias de trial restantes. Verifique a saúde e entre em contato.")
                     ->warning()
                     ->actions([
@@ -58,6 +59,6 @@ class CheckTrialStatusAndNotifyAdmins extends Command
             }
         }
 
-        $this->info('Notificações de trial enviadas com sucesso: ' . $companiesExpiringSoon->count());
+        $this->info('Notificações de trial enviadas com sucesso: '.$companiesExpiringSoon->count());
     }
 }

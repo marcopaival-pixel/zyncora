@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\AiAnswerAuditLog;
+use App\Models\AiUsageLog;
 use App\Models\Chatbot;
 use App\Models\Conversation;
 use App\Models\KnowledgeBase;
+use App\Models\Opportunity;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -60,8 +64,8 @@ class AIService
                 }
             }
 
-            usort($scoredKb, fn($a, $b) => $b['score'] <=> $a['score']);
-            
+            usort($scoredKb, fn ($a, $b) => $b['score'] <=> $a['score']);
+
             // Pega os top 5 mais relevantes
             $topMatches = array_slice($scoredKb, 0, 5);
             foreach ($topMatches as $match) {
@@ -82,7 +86,7 @@ class AIService
 
         // Histórico da conversa (memória de curto prazo)
         $historyMessages = $conversation->messages()->latest()->limit(6)->get()->reverse();
-        
+
         $contents = [];
         foreach ($historyMessages as $msg) {
             $contents[] = [
@@ -90,7 +94,7 @@ class AIService
                 'parts' => [['text' => $msg->body]],
             ];
         }
-        
+
         // Mensagem atual
         $contents[] = [
             'role' => 'user',
@@ -125,7 +129,7 @@ class AIService
             if (isset($company) && $company) {
                 $limit = $company->plan?->max_ai_conversations ?? 0;
                 $used = $company->ai_conversations_used ?? 0;
-                
+
                 if ($used < $limit) {
                     $company->increment('ai_conversations_used');
                 } else {
@@ -143,11 +147,11 @@ class AIService
 
             $textAnswer = $response->json('candidates.0.content.parts.0.text') ?? 'Não consegui gerar uma resposta no momento.';
 
-            \App\Models\AiAnswerAuditLog::create([
+            AiAnswerAuditLog::create([
                 'conversation_id' => $conversation->id,
                 'user_message' => $userMessage,
                 'source_used' => 'llm_generative',
-                'tokens_saved_estimated' => 0
+                'tokens_saved_estimated' => 0,
             ]);
 
             return $textAnswer;
@@ -206,7 +210,7 @@ class AIService
             if ($data) {
                 $score = $data['score'] ?? 0;
                 $summary = $data['summary'] ?? 'Resumo indisponível.';
-                
+
                 $conversation->update([
                     'ai_score' => $score,
                     'ai_sentiment' => $data['sentiment'] ?? 'neutral',
@@ -237,7 +241,7 @@ class AIService
         $apiKey = $this->apiKey();
 
         if (! $apiKey) {
-            return "Simulação: Olá, entendo a sua dúvida. Estamos analisando os detalhes e já te respondo com a solução correta.";
+            return 'Simulação: Olá, entendo a sua dúvida. Estamos analisando os detalhes e já te respondo com a solução correta.';
         }
 
         $query = KnowledgeBase::where('company_id', $conversation->company_id)->where('is_active', true);
@@ -245,9 +249,9 @@ class AIService
         $context = $contextSnippets->map(fn ($kb) => "{$kb->title}: {$kb->content}")->implode("\n");
 
         try {
-            $prompt = "Atue como um copiloto para um atendente humano. Leia o histórico do chat abaixo e crie UMA sugestão de resposta educada, útil e direta para o atendente enviar ao cliente.\n" .
-                      "Não use aspas, apenas o texto da resposta.\n\n" .
-                      "Base de conhecimento:\n{$context}\n\n" .
+            $prompt = "Atue como um copiloto para um atendente humano. Leia o histórico do chat abaixo e crie UMA sugestão de resposta educada, útil e direta para o atendente enviar ao cliente.\n".
+                      "Não use aspas, apenas o texto da resposta.\n\n".
+                      "Base de conhecimento:\n{$context}\n\n".
                       "Histórico:\n{$textToAnalyze}\n\nSugestão:";
 
             $model = 'gemini-1.5-pro';
@@ -258,15 +262,16 @@ class AIService
                 ]);
 
             if ($response->failed()) {
-                return "Não foi possível gerar a sugestão.";
+                return 'Não foi possível gerar a sugestão.';
             }
 
             $this->logUsage($conversation, $response, $model);
 
-            return trim((string) $response->json('candidates.0.content.parts.0.text')) ?? "Não foi possível gerar a sugestão.";
+            return trim((string) $response->json('candidates.0.content.parts.0.text')) ?? 'Não foi possível gerar a sugestão.';
         } catch (\Exception $e) {
             Log::error('gemini_agent_assist_error', ['message' => $e->getMessage()]);
-            return "Erro ao processar sugestão com a IA.";
+
+            return 'Erro ao processar sugestão com a IA.';
         }
     }
 
@@ -298,10 +303,10 @@ class AIService
     {
         // Verifica se já existe oportunidade para esta conversa (ou do mesmo lead se identificável)
         // Por hora, apenas 1 oportunidade por conversa.
-        $exists = \App\Models\Opportunity::where('conversation_id', $conversation->id)->exists();
+        $exists = Opportunity::where('conversation_id', $conversation->id)->exists();
 
-        if (!$exists) {
-            \App\Models\Opportunity::create([
+        if (! $exists) {
+            Opportunity::create([
                 'company_id' => $conversation->company_id,
                 'conversation_id' => $conversation->id,
                 'lead_name' => $conversation->customer_name ?? 'Lead Anônimo',
@@ -323,35 +328,38 @@ class AIService
     public function generateEmbeddings(string $text): ?array
     {
         $apiKey = $this->apiKey();
-        if (!$apiKey) {
+        if (! $apiKey) {
             // Em modo simulado, geramos um vetor randômico falso de 768 dimensões para testes
             $fakeVector = [];
             for ($i = 0; $i < 768; $i++) {
                 $fakeVector[] = mt_rand(-100, 100) / 1000;
             }
+
             return $fakeVector;
         }
 
         try {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={$apiKey}";
-            
+
             $response = Http::timeout($this->timeout())
                 ->retry($this->retryTimes(), $this->retrySleep())
                 ->post($url, [
                     'model' => 'models/text-embedding-004',
                     'content' => [
-                        'parts' => [['text' => $text]]
-                    ]
+                        'parts' => [['text' => $text]],
+                    ],
                 ]);
 
             if ($response->successful()) {
                 return $response->json('embedding.values');
             }
-            
+
             Log::warning('gemini_embedding_failed', ['status' => $response->status()]);
+
             return null;
         } catch (\Exception $e) {
             Log::error('gemini_embedding_error', ['message' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -378,16 +386,18 @@ class AIService
         return max(0, (int) config('chatbox.ai.gemini.retry_sleep', 250));
     }
 
-    protected function logUsage(Conversation $conversation, \Illuminate\Http\Client\Response $response, string $model): void
+    protected function logUsage(Conversation $conversation, Response $response, string $model): void
     {
         $usage = $response->json('usageMetadata');
-        if (!$usage) return;
+        if (! $usage) {
+            return;
+        }
 
         $promptTokens = $usage['promptTokenCount'] ?? 0;
         $completionTokens = $usage['candidatesTokenCount'] ?? 0;
         $totalTokens = $usage['totalTokenCount'] ?? 0;
 
-        // Estimativa de custo Gemini: 
+        // Estimativa de custo Gemini:
         // Flash: $0.075 / 1M prompt, $0.30 / 1M completion
         // Pro: $3.50 / 1M prompt, $10.50 / 1M completion
         if (str_contains($model, 'pro')) {
@@ -396,7 +406,7 @@ class AIService
             $cost = ($promptTokens / 1000000) * 0.075 + ($completionTokens / 1000000) * 0.30;
         }
 
-        \App\Models\AiUsageLog::create([
+        AiUsageLog::create([
             'company_id' => $conversation->company_id,
             'model_used' => $model,
             'prompt_tokens' => $promptTokens,
@@ -422,7 +432,9 @@ class AIService
             $normB += pow($vec2[$i], 2);
         }
 
-        if ($normA == 0 || $normB == 0) return 0;
+        if ($normA == 0 || $normB == 0) {
+            return 0;
+        }
 
         return $dotProduct / (sqrt($normA) * sqrt($normB));
     }

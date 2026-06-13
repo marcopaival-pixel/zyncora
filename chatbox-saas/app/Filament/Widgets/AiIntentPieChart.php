@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use App\Models\AiAnswerAuditLog;
+use Filament\Widgets\ChartWidget;
 
 class AiIntentPieChart extends ChartWidget
 {
@@ -15,14 +15,14 @@ class AiIntentPieChart extends ChartWidget
     {
         $company = auth()->user()->company;
 
-        if (!$company) {
+        if (! $company) {
             return [];
         }
 
         // Como o Audit Log não tem company_id diretamente, precisamos buscar através das conversations
         // Para simplificar no MVP, vamos fazer um mock visual baseado na tabela de AuditLog
         // Idealmente, AiAnswerAuditLog deveria ter company_id
-        
+
         $stats = \DB::table('ai_answer_audit_logs')
             ->join('conversations', 'ai_answer_audit_logs.conversation_id', '=', 'conversations.id')
             ->where('conversations.company_id', $company->id)
@@ -41,7 +41,7 @@ class AiIntentPieChart extends ChartWidget
             $data[] = $stats['company_data'];
             $colors[] = '#10b981'; // emerald
         }
-        
+
         if (isset($stats['faq'])) {
             $labels[] = 'FAQ (Custo Zero)';
             $data[] = $stats['faq'];

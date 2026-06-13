@@ -8,6 +8,7 @@ use App\Models\ChatbotFlowExecution;
 use App\Models\Company;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Services\Chatbot\MessageOrchestratorService;
 
 class ChatbotReplyService
 {
@@ -16,7 +17,7 @@ class ChatbotReplyService
         protected PlanService $planService,
         protected FlowEngineService $flowEngine,
         protected AgentDistributionService $distributionService,
-        protected \App\Services\Chatbot\MessageOrchestratorService $orchestrator
+        protected MessageOrchestratorService $orchestrator
     ) {}
 
     public function maybeAutoReply(Conversation $conversation, string $inboundText): ?Message
@@ -37,13 +38,14 @@ class ChatbotReplyService
 
         // Executar a análise de Lead/Oportunidade ANTES de responder (CRM - Fase 1)
         $this->aiService->analyzeConversation($conversation);
-        
+
         $text = mb_strtolower(trim($inboundText));
-        
+
         // 0. Transbordo Inteligente por Sentimento (Sentiment Analysis / PNL Lite)
         if ($this->detectNegativeSentiment($text)) {
-            $this->pushBotMessage($conversation, "Notei que você está frustrado. Estou transferindo sua conversa para a nossa equipe gerencial humana agora mesmo para resolver isso.");
+            $this->pushBotMessage($conversation, 'Notei que você está frustrado. Estou transferindo sua conversa para a nossa equipe gerencial humana agora mesmo para resolver isso.');
             $this->markAsWaitingAndDistribute($conversation);
+
             return null; // Stop AI/Bot processing
         }
 
@@ -75,18 +77,21 @@ class ChatbotReplyService
         if ($chatbot) {
             if (! $this->planService->canUseAi($company)) {
                 $this->markAsWaitingAndDistribute($conversation);
+
                 return null;
             }
 
             // Verifica saldo de créditos de IA
             if ($company->ai_credits_balance <= 0) {
-                $this->pushBotMessage($conversation, "Nossos assistentes virtuais estão temporariamente indisponíveis. Vou transferir você para nossa equipe humana.");
+                $this->pushBotMessage($conversation, 'Nossos assistentes virtuais estão temporariamente indisponíveis. Vou transferir você para nossa equipe humana.');
                 $this->markAsWaitingAndDistribute($conversation);
+
                 return null;
             }
 
             // Usar o Orquestrador Central para gerenciar intenção e agentes
             $aiResponse = $this->orchestrator->handleIncomingMessage($conversation, $chatbot, $inboundText);
+
             return $this->pushBotMessage($conversation, $aiResponse);
         }
 
@@ -100,18 +105,18 @@ class ChatbotReplyService
         $conversation->update(['status' => 'waiting', 'assignee_id' => null]);
         $this->distributionService->distribute($conversation->company_id);
     }
-    
+
     protected function detectNegativeSentiment(string $text): bool
     {
         // PNL Lite: Detecção rápida de intenção negativa / agressiva
         $angryKeywords = ['absurdo', 'lixo', 'procon', 'processar', 'advogado', 'reclame aqui', 'pessimo', 'péssimo', 'horrivel', 'horrível', 'ódio', 'cancelar', 'reembolso'];
-        
+
         foreach ($angryKeywords as $word) {
             if (str_contains($text, $word)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -119,7 +124,7 @@ class ChatbotReplyService
      * Executa o fluxo por palavra-chave e encadeamentos via {@see ChatbotFlow::$next_flow_key}
      * (correspondência ao campo {@see ChatbotFlow::$trigger} de outro registo, sem diferenciar maiúsculas).
      *
-     * @return \App\Models\Message|null  Primeira mensagem do bot na cadeia (compatível com o retorno de maybeAutoReply).
+     * @return Message|null Primeira mensagem do bot na cadeia (compatível com o retorno de maybeAutoReply).
      */
     protected function runKeywordFlowChain(Conversation $conversation, ChatbotFlow $primary): ?Message
     {

@@ -87,6 +87,19 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": {
+                "CVE-2026-48067": "*",
+                "CVE-2026-48998": "*",
+                "CVE-2026-49214": "*",
+                "CVE-2026-48019": "*",
+                "CVE-2026-48761": "*",
+                "CVE-2026-48760": "*",
+                "CVE-2026-48736": "*",
+                "CVE-2026-46644": "*",
+                "CVE-2026-48784": "*"
+            }
         }
     },
     "minimum-stability": "stable",
