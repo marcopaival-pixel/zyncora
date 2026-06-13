@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Channel extends Model
 {
@@ -15,12 +13,13 @@ class Channel extends Model
     /**
      * Verifica se a empresa deste canal já atingiu o limite contratado no plano.
      */
-    public static function canAddMoreChannels(\App\Models\Company $company): bool
+    public static function canAddMoreChannels(Company $company): bool
     {
         $limit = $company->max_channels ?? ($company->plan ? $company->plan->max_channels : 0);
         if ($limit === null || $limit === 0) {
             return false;
         }
+
         return $company->channels()->count() < $limit;
     }
 

@@ -18,14 +18,17 @@ class RagScraperService
             $response = Http::timeout(15)->get($url);
 
             if (! $response->successful()) {
-                Log::warning("RagScraperService: Falha ao acessar URL {$url}. Status: " . $response->status());
+                Log::warning("RagScraperService: Falha ao acessar URL {$url}. Status: ".$response->status());
+
                 return null;
             }
 
             $html = $response->body();
+
             return $this->extractTextFromHtml($html);
         } catch (\Exception $e) {
-            Log::error("RagScraperService: Erro ao raspar URL {$url} - " . $e->getMessage());
+            Log::error("RagScraperService: Erro ao raspar URL {$url} - ".$e->getMessage());
+
             return null;
         }
     }
@@ -42,8 +45,8 @@ class RagScraperService
 
         // Suprime warnings do DOMDocument relacionados a HTML malformado
         libxml_use_internal_errors(true);
-        $dom = new DOMDocument();
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NOAUTODTD | LIBXML_NOWARNING);
+        $dom = new DOMDocument;
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOAUTODTD | LIBXML_NOWARNING);
         libxml_clear_errors();
 
         $xpath = new DOMXPath($dom);
@@ -57,7 +60,7 @@ class RagScraperService
         // Focamos em extrair parágrafos, cabeçalhos, listas, e blocos de artigo.
         // Opcionalmente podemos pegar o body inteiro
         $bodyNodes = $xpath->query('//body');
-        
+
         if ($bodyNodes->length > 0) {
             $body = $bodyNodes->item(0);
             $textContent = $body->textContent;
@@ -66,7 +69,7 @@ class RagScraperService
         }
 
         // Limpeza do texto extraído: remover múltiplos espaços e quebras de linha inúteis
-        $textContent = preg_replace("/\s+/", " ", $textContent); // Converte quebras e tabs em espaço único
+        $textContent = preg_replace("/\s+/", ' ', $textContent); // Converte quebras e tabs em espaço único
         $textContent = trim($textContent);
 
         return $textContent;

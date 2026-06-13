@@ -21,17 +21,17 @@ class MessageCreated implements ShouldBroadcast
     public function __construct(public Message $message) {}
 
     /**
-     * @return array<int, \Illuminate\Broadcasting\Channel|\Illuminate\Broadcasting\PrivateChannel>
+     * @return array<int, Channel|PrivateChannel>
      */
     public function broadcastOn(): array
     {
         return [
             // Canal privado para atendentes no painel admin
             new PrivateChannel('conversation.'.$this->message->conversation_id),
-            
+
             // Canal público seguro para o widget do visitante
             new Channel('conversation.v2.'.$this->message->conversation_id.'.'.$this->message->conversation->visitor_token),
-            
+
             // Canal da empresa para notificações globais
             new PrivateChannel('company.'.$this->message->conversation->company_id),
         ];

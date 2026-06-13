@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Events\PaymentApproved;
+use App\Models\AiCreditPurchase;
 use App\Models\Company;
+use App\Models\PaymentHistory;
 use App\Models\Plan;
 use App\Models\User;
 use Carbon\Carbon;
@@ -72,8 +75,8 @@ class StripePaymentService
                 'price_data' => [
                     'currency' => config('chatbox.stripe.currency', 'brl'),
                     'product_data' => [
-                        'name' => 'Pacote de Créditos IA - ' . ucfirst($package),
-                        'description' => '+ ' . number_format($conversationsAdded, 0, ',', '.') . ' Conversas de IA',
+                        'name' => 'Pacote de Créditos IA - '.ucfirst($package),
+                        'description' => '+ '.number_format($conversationsAdded, 0, ',', '.').' Conversas de IA',
                     ],
                     'unit_amount' => (int) round((float) $price * 100),
                 ],
@@ -85,13 +88,13 @@ class StripePaymentService
                 'user_id' => (string) $user->id,
                 'conversations_added' => (string) $conversationsAdded,
                 'price' => (string) $price,
-                'payment_type' => 'ai_credit_purchase'
+                'payment_type' => 'ai_credit_purchase',
             ],
             'payment_intent_data' => [
                 'metadata' => [
                     'company_id' => (string) $company->id,
                     'package_name' => $package,
-                    'payment_type' => 'ai_credit_purchase'
+                    'payment_type' => 'ai_credit_purchase',
                 ],
             ],
             'success_url' => url('/admin/my-plan').'?checkout=success&session_id={CHECKOUT_SESSION_ID}',
@@ -151,29 +154,31 @@ class StripePaymentService
     protected function handleCheckoutCompleted(object $session): void
     {
         $paymentType = $session->metadata->payment_type ?? 'plan_subscription';
-        
+
         if ($paymentType === 'ai_credit_purchase') {
             $companyId = (int) ($session->metadata->company_id ?? 0);
             $company = Company::query()->find($companyId);
-            
-            if (!$company) return;
-            
+
+            if (! $company) {
+                return;
+            }
+
             $added = (int) ($session->metadata->conversations_added ?? 0);
             $price = (float) ($session->metadata->price ?? 0);
             $package = $session->metadata->package_name ?? 'avulso';
-            
-            \App\Models\AiCreditPurchase::create([
+
+            AiCreditPurchase::create([
                 'company_id' => $company->id,
                 'package_name' => $package,
                 'conversations_added' => $added,
                 'price' => $price,
                 'payment_method' => 'stripe',
-                'status' => 'completed'
+                'status' => 'completed',
             ]);
 
             $company->increment('ai_credits_balance', $added);
 
-            $paymentHistory = \App\Models\PaymentHistory::create([
+            $paymentHistory = PaymentHistory::create([
                 'company_id' => $company->id,
                 'type' => 'credit',
                 'amount' => $price,
@@ -183,7 +188,7 @@ class StripePaymentService
                 'paid_at' => now(),
             ]);
 
-            event(new \App\Events\PaymentApproved($paymentHistory));
+            event(new PaymentApproved($paymentHistory));
 
             return;
         }
@@ -290,9 +295,11 @@ class StripePaymentService
     {
         $amount = ($invoice->amount_paid ?? 0) / 100;
 
-        if ($amount <= 0) return;
+        if ($amount <= 0) {
+            return;
+        }
 
-        $paymentHistory = \App\Models\PaymentHistory::create([
+        $paymentHistory = PaymentHistory::create([
             'company_id' => $company->id,
             'type' => $type,
             'amount' => $amount,
@@ -302,7 +309,7 @@ class StripePaymentService
             'paid_at' => now(),
         ]);
 
-        event(new \App\Events\PaymentApproved($paymentHistory));
+        event(new PaymentApproved($paymentHistory));
     }
 
     protected function resolveInvoicePeriodEnd(object $invoice): ?Carbon

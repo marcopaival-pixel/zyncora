@@ -2,8 +2,8 @@
 
 namespace App\Services\Fraud\Contracts;
 
-use App\Models\WidgetAccessLog;
 use App\Models\Chatbot;
+use App\Models\WidgetAccessLog;
 
 interface FraudDetectorInterface
 {

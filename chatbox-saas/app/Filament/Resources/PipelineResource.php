@@ -30,7 +30,10 @@ class PipelineResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
-        if ($user && $user->isPlatformAdmin()) return false;
+        if ($user && $user->isPlatformAdmin()) {
+            return false;
+        }
+
         return $user?->hasPermission('view_clientes') ?? false;
     }
 
@@ -141,4 +144,3 @@ class PipelineResource extends Resource
         ];
     }
 }
-

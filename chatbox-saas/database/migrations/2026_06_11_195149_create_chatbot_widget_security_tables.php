@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('status', 32)->default('active'); // active, revoked, expired, suspended
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['company_id', 'status']);
         });
 
@@ -59,7 +59,7 @@ return new class extends Migration
             $table->string('block_reason')->nullable();
             $table->integer('risk_score')->default(0);
             $table->timestamps();
-            
+
             $table->index(['chatbot_id', 'created_at']);
             $table->index(['ip_address', 'created_at']);
         });

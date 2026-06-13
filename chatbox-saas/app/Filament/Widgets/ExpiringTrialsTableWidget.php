@@ -9,8 +9,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class ExpiringTrialsTableWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
-    
+    protected int|string|array $columnSpan = 'full';
+
     protected static ?string $heading = 'Empresas em Trial Vencendo em Breve';
 
     public function table(Table $table): Table

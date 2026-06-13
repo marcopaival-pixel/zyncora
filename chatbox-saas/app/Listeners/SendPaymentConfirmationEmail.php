@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\PaymentApproved;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Mail\PaymentConfirmedMail;
+use Illuminate\Support\Facades\Mail;
 
 class SendPaymentConfirmationEmail
 {
@@ -25,7 +25,7 @@ class SendPaymentConfirmationEmail
         $users = $company->users()->where('is_super_admin', true)->orWhere('role', 'admin')->get();
 
         foreach ($users as $user) {
-            \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\PaymentConfirmedMail($event->paymentHistory));
+            Mail::to($user->email)->queue(new PaymentConfirmedMail($event->paymentHistory));
         }
     }
 }

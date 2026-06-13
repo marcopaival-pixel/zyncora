@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\DealResource\Pages;
 
 use App\Filament\Resources\DealResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
 
 class EditDeal extends BaseEditRecord
 {

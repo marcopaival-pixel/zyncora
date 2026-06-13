@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
 
 class CheckTrialStatus extends Command
 {

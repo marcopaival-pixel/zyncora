@@ -13,9 +13,6 @@ class ForgotPasswordController extends Controller
 {
     /**
      * Send a reset link to the given user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function sendResetLink(Request $request): JsonResponse
     {
@@ -24,11 +21,11 @@ class ForgotPasswordController extends Controller
         // Check if user exists
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // We return a success response even if the user doesn't exist for security reasons
             // to prevent email enumeration.
             return response()->json([
-                'message' => __('We have emailed your password reset link!')
+                'message' => __('We have emailed your password reset link!'),
             ]);
         }
 
@@ -39,7 +36,7 @@ class ForgotPasswordController extends Controller
         $user->notify(new ResetPasswordNotification($token));
 
         return response()->json([
-            'message' => __('We have emailed your password reset link!')
+            'message' => __('We have emailed your password reset link!'),
         ]);
     }
 }

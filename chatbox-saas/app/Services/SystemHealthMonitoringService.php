@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\SystemErrorLog;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redis;
@@ -243,7 +244,7 @@ class SystemHealthMonitoringService
             return $this->result('Backup recente', 'warn', 'Nenhum ficheiro de backup encontrado', false);
         }
 
-        $lastBackupAt = \Carbon\Carbon::createFromTimestamp($newest);
+        $lastBackupAt = Carbon::createFromTimestamp($newest);
         $ageHours = (int) $lastBackupAt->diffInHours(now());
         $maxAgeHours = (int) config('chatbox.monitoring.backup_max_age_hours', 26);
 

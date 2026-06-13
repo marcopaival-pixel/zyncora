@@ -12,15 +12,16 @@ class ENotasProvider implements IFiscalProvider
     public function emitInvoice(PaymentHistory $payment, array $customerData): Invoice
     {
         Log::info("ENotasProvider: Emitting invoice for payment {$payment->id}");
-        
+
         // TODO: Implement ENotas API call
-        
-        return new Invoice();
+
+        return new Invoice;
     }
 
     public function cancelInvoice(Invoice $invoice, string $reason): bool
     {
         Log::info("ENotasProvider: Canceling invoice {$invoice->id}");
+
         return true;
     }
 

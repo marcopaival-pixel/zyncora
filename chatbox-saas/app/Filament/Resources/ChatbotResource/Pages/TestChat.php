@@ -5,13 +5,12 @@ namespace App\Filament\Resources\ChatbotResource\Pages;
 use App\Filament\Resources\ChatbotResource;
 use App\Models\Chatbot;
 use App\Services\KnowledgeBaseService;
-use Filament\Resources\Pages\Page;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Actions\Action;
-use Livewire\Attributes\Title;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\Page;
 
 class TestChat extends Page implements HasForms
 {
@@ -22,7 +21,9 @@ class TestChat extends Page implements HasForms
     protected static string $view = 'filament.resources.chatbot-resource.pages.test-chat';
 
     public Chatbot $record;
+
     public string $message = '';
+
     public array $chatHistory = [];
 
     public function mount(Chatbot $record): void
@@ -37,7 +38,9 @@ class TestChat extends Page implements HasForms
 
     public function sendMessage(): void
     {
-        if (empty(trim($this->message))) return;
+        if (empty(trim($this->message))) {
+            return;
+        }
 
         $userMsg = $this->message;
         $this->chatHistory[] = [

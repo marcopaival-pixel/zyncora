@@ -3,15 +3,12 @@
 namespace App\Filament\SuperAdmin\Resources;
 
 use App\Filament\SuperAdmin\Resources\HelpCategoryResource\Pages;
-use App\Filament\SuperAdmin\Resources\HelpCategoryResource\RelationManagers;
 use App\Models\HelpCategory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HelpCategoryResource extends Resource
 {

@@ -12,15 +12,16 @@ class AsaasFiscalProvider implements IFiscalProvider
     public function emitInvoice(PaymentHistory $payment, array $customerData): Invoice
     {
         Log::info("AsaasFiscalProvider: Emitting invoice for payment {$payment->id}");
-        
+
         // TODO: Implement Asaas API call
-        
-        return new Invoice();
+
+        return new Invoice;
     }
 
     public function cancelInvoice(Invoice $invoice, string $reason): bool
     {
         Log::info("AsaasFiscalProvider: Canceling invoice {$invoice->id}");
+
         return true;
     }
 

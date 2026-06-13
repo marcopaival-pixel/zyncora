@@ -24,7 +24,7 @@ class TelegramOutboundDispatcher
         }
 
         $chatId = $conversation->client_phone;
-        if (!$chatId) {
+        if (! $chatId) {
             return;
         }
 
@@ -45,6 +45,7 @@ class TelegramOutboundDispatcher
                 'reason' => 'missing_bot_token',
                 'company_id' => $conversation->company_id,
             ]);
+
             return;
         }
 
@@ -57,7 +58,7 @@ class TelegramOutboundDispatcher
             ]);
 
             if ($response->failed()) {
-                throw new \Exception("Telegram API Error: " . $response->body());
+                throw new \Exception('Telegram API Error: '.$response->body());
             }
 
         } catch (\Throwable $e) {

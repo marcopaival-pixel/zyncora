@@ -16,7 +16,7 @@ class PlanEditSummaryWidget extends Widget
 
     protected static bool $isDiscovered = false;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public ?Plan $record = null;
 
@@ -35,4 +35,3 @@ class PlanEditSummaryWidget extends Widget
         ];
     }
 }
-

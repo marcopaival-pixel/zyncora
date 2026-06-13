@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UnresolvedQuestionResource\Pages;
-use App\Models\UnresolvedQuestion;
 use App\Models\KnowledgeBase;
+use App\Models\UnresolvedQuestion;
+use App\Services\AiService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,8 +19,11 @@ class UnresolvedQuestionResource extends Resource
     protected static ?string $model = UnresolvedQuestion::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-light-bulb';
+
     protected static ?string $navigationLabel = 'Insights RAG';
+
     protected static ?string $pluralModelLabel = 'Dúvidas Não Resolvidas';
+
     protected static ?string $navigationGroup = 'Inteligência Artificial';
 
     public static function form(Form $form): Form
@@ -83,7 +88,7 @@ class UnresolvedQuestionResource extends Resource
                         'resolved' => 'Resolvidas',
                         'ignored' => 'Ignoradas',
                     ])
-                    ->default('pending')
+                    ->default('pending'),
             ])
             ->actions([
                 Tables\Actions\Action::make('gerar_rascunho')
@@ -92,18 +97,18 @@ class UnresolvedQuestionResource extends Resource
                     ->color('primary')
                     ->action(function (UnresolvedQuestion $record) {
                         try {
-                            $aiService = app(\App\Services\AiService::class);
+                            $aiService = app(AiService::class);
                             $prompt = "Crie uma resposta curta e útil para a seguinte dúvida de um cliente da nossa empresa: '{$record->question}'. Apenas a resposta direta.";
                             // Simulando a geração via modelo de fallback se não houver contexto
                             $record->update([
-                                'suggested_draft' => "Resposta sugerida para: {$record->question}" // Placeholder; seria substituído pela chamada real de text generation se implementada
+                                'suggested_draft' => "Resposta sugerida para: {$record->question}", // Placeholder; seria substituído pela chamada real de text generation se implementada
                             ]);
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Rascunho gerado com sucesso!')
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Erro ao gerar rascunho.')
                                 ->danger()
                                 ->send();
@@ -123,15 +128,15 @@ class UnresolvedQuestionResource extends Resource
                             'source_type' => 'text',
                             'is_active' => true,
                         ]);
-                        
+
                         $record->update(['status' => 'resolved']);
-                        
-                        \Filament\Notifications\Notification::make()
+
+                        Notification::make()
                             ->title('FAQ criado com sucesso! RAG atualizado.')
                             ->success()
                             ->send();
                     })
-                    ->visible(fn (UnresolvedQuestion $record) => !empty($record->suggested_draft) && $record->status !== 'resolved'),
+                    ->visible(fn (UnresolvedQuestion $record) => ! empty($record->suggested_draft) && $record->status !== 'resolved'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

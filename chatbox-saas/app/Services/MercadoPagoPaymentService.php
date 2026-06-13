@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Events\PaymentApproved;
 use App\Models\Company;
+use App\Models\PaymentHistory;
 use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -170,9 +172,11 @@ class MercadoPagoPaymentService
     {
         $amount = (float) ($payment['transaction_amount'] ?? 0);
 
-        if ($amount <= 0) return;
+        if ($amount <= 0) {
+            return;
+        }
 
-        $paymentHistory = \App\Models\PaymentHistory::create([
+        $paymentHistory = PaymentHistory::create([
             'company_id' => $company->id,
             'type' => $type,
             'amount' => $amount,
@@ -182,7 +186,7 @@ class MercadoPagoPaymentService
             'paid_at' => now(),
         ]);
 
-        event(new \App\Events\PaymentApproved($paymentHistory));
+        event(new PaymentApproved($paymentHistory));
     }
 
     public function buildExternalReference(Company $company, Plan $plan): string

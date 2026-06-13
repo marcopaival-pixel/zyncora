@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\KnowledgeBase;
+use App\Services\AiService;
 use App\Services\RagScraperService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,7 +29,7 @@ class ScrapeUrlForKnowledgeBase implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(RagScraperService $scraperService, \App\Services\AiService $aiService): void
+    public function handle(RagScraperService $scraperService, AiService $aiService): void
     {
         if ($this->knowledgeBase->source_type !== 'url' || empty($this->knowledgeBase->source_path)) {
             return;
@@ -46,10 +47,10 @@ class ScrapeUrlForKnowledgeBase implements ShouldQueue
                 'content' => $textContent,
                 'embedding' => $embedding,
             ]);
-            Log::info("ScrapeUrlForKnowledgeBase: Extração concluída. Snippet ID {$this->knowledgeBase->id} atualizado com " . ($embedding ? 'Embedding gerado' : 'Sem embedding') . ".");
+            Log::info("ScrapeUrlForKnowledgeBase: Extração concluída. Snippet ID {$this->knowledgeBase->id} atualizado com ".($embedding ? 'Embedding gerado' : 'Sem embedding').'.');
 
             // Extrair FAQ após o conteúdo estar pronto
-            \App\Jobs\ExtractFaqFromKnowledgeBaseJob::dispatch($this->knowledgeBase);
+            ExtractFaqFromKnowledgeBaseJob::dispatch($this->knowledgeBase);
         } else {
             Log::warning("ScrapeUrlForKnowledgeBase: Nenhum conteúdo extraído da URL: {$url}");
         }

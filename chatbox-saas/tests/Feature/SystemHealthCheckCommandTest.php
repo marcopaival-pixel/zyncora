@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SystemHealthCheckCommandTest extends TestCase
@@ -26,7 +27,7 @@ class SystemHealthCheckCommandTest extends TestCase
     public function test_system_health_check_warns_on_failed_jobs(): void
     {
         DB::table('failed_jobs')->insert([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'uuid' => (string) Str::uuid(),
             'connection' => 'database',
             'queue' => 'default',
             'payload' => '{}',

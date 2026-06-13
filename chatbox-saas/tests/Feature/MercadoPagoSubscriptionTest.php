@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Plan;
+use App\Models\User;
 use App\Services\MercadoPagoPaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -45,7 +46,7 @@ class MercadoPagoSubscriptionTest extends TestCase
         ]);
 
         $company = Company::factory()->create();
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'company_id' => $company->id,
             'email' => 'financeiro@empresa.test',
         ]);

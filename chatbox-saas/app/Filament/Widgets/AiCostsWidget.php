@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Models\AiUsageLog;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 
 class AiCostsWidget extends BaseWidget
 {
@@ -25,7 +25,7 @@ class AiCostsWidget extends BaseWidget
         $user = auth()->user();
 
         // Apenas Administradores da Plataforma podem ver os custos reais agregados
-        if (!$user?->isPlatformAdmin()) {
+        if (! $user?->isPlatformAdmin()) {
             return [];
         }
 
@@ -39,8 +39,8 @@ class AiCostsWidget extends BaseWidget
             ->orderByDesc('total_cost')
             ->first();
 
-        $topCompanyName = $topCompanyLog && $topCompanyLog->company 
-            ? $topCompanyLog->company->name 
+        $topCompanyName = $topCompanyLog && $topCompanyLog->company
+            ? $topCompanyLog->company->name
             : 'Nenhuma';
 
         return [
@@ -49,16 +49,15 @@ class AiCostsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-cpu-chip')
                 ->color('info'),
 
-            Stat::make('Custo Estimado (Global)', '$ ' . number_format((float) $totalCost, 4, ',', '.'))
+            Stat::make('Custo Estimado (Global)', '$ '.number_format((float) $totalCost, 4, ',', '.'))
                 ->description('Custo da API do Google Cloud')
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('danger'),
 
             Stat::make('Maior Consumidor', $topCompanyName)
-                ->description($topCompanyLog ? number_format($topCompanyLog->tokens, 0, ',', '.') . ' conversas utilizadas' : 'Sem dados')
+                ->description($topCompanyLog ? number_format($topCompanyLog->tokens, 0, ',', '.').' conversas utilizadas' : 'Sem dados')
                 ->descriptionIcon('heroicon-m-building-office')
                 ->color('warning'),
         ];
     }
 }
-

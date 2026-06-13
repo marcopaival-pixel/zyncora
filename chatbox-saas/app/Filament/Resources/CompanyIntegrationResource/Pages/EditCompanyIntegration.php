@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\CompanyIntegrationResource\Pages;
 
 use App\Filament\Resources\CompanyIntegrationResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
 
 class EditCompanyIntegration extends BaseEditRecord
 {

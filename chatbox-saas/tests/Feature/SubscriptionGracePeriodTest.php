@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\SubscriptionGracePeriodMail;
 use App\Models\Company;
 use App\Models\Plan;
 use App\Services\PlanSubscriptionService;
@@ -84,7 +85,7 @@ class SubscriptionGracePeriodTest extends TestCase
         $sent = app(SubscriptionGracePeriodService::class)->notifyGracePeriodCompanies();
 
         $this->assertSame(1, $sent);
-        Mail::assertSent(\App\Mail\SubscriptionGracePeriodMail::class);
+        Mail::assertSent(SubscriptionGracePeriodMail::class);
     }
 
     public function test_process_grace_period_command_runs_successfully(): void

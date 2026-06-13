@@ -7,6 +7,7 @@ use App\Services\MercadoPagoPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MercadoPagoWebhookController extends Controller
 {
@@ -18,7 +19,7 @@ class MercadoPagoWebhookController extends Controller
 
         try {
             $payments->handleWebhook($request);
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        } catch (HttpException $e) {
             throw $e;
         } catch (\Throwable $e) {
             Log::error('mercadopago_webhook_handler_failed', [

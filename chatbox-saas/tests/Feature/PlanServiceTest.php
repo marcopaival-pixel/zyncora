@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
+use App\Models\User;
 use App\Services\PlanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -33,14 +34,14 @@ class PlanServiceTest extends TestCase
     public function test_can_add_user_respects_max_users_limit(): void
     {
         $company = Company::factory()->create(['max_users' => 1]);
-        
+
         $service = app(PlanService::class);
-        
+
         // Empresa nova não tem usuários ainda (além do factory se ele criar, mas aqui assumimos 0)
         $this->assertTrue($service->canAddUser($company));
 
         // Adiciona um usuário
-        \App\Models\User::factory()->create(['company_id' => $company->id]);
+        User::factory()->create(['company_id' => $company->id]);
 
         $this->assertFalse($service->canAddUser($company));
     }

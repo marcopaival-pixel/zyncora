@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('plans', function (Blueprint $table) {
             $table->integer('max_messages')->default(-1)->after('max_ai_conversations'); // -1 for unlimited
             $table->integer('max_integrations')->default(-1)->after('max_messages');
-            
+
             // Recursos Adicionais (Boleanos)
             $table->boolean('has_whatsapp')->default(true);
             $table->boolean('has_telegram')->default(true);
@@ -30,7 +30,7 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table->integer('max_messages')->default(-1)->after('ai_credits_balance');
             $table->integer('max_integrations')->default(-1)->after('max_messages');
-            
+
             // Recursos Adicionais (Boleanos)
             $table->boolean('has_whatsapp')->default(true);
             $table->boolean('has_telegram')->default(true);
@@ -52,18 +52,18 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table->dropColumn([
                 'max_messages', 'max_integrations',
-                'has_whatsapp', 'has_telegram', 'has_instagram', 'has_facebook', 
-                'has_webchat', 'has_openai', 'has_rag', 'has_inbox', 
-                'has_flow_builder', 'has_api', 'has_whitelabel', 'has_webhooks'
+                'has_whatsapp', 'has_telegram', 'has_instagram', 'has_facebook',
+                'has_webchat', 'has_openai', 'has_rag', 'has_inbox',
+                'has_flow_builder', 'has_api', 'has_whitelabel', 'has_webhooks',
             ]);
         });
 
         Schema::table('plans', function (Blueprint $table) {
             $table->dropColumn([
                 'max_messages', 'max_integrations',
-                'has_whatsapp', 'has_telegram', 'has_instagram', 'has_facebook', 
-                'has_webchat', 'has_openai', 'has_rag', 'has_inbox', 
-                'has_flow_builder', 'has_api', 'has_whitelabel', 'has_webhooks'
+                'has_whatsapp', 'has_telegram', 'has_instagram', 'has_facebook',
+                'has_webchat', 'has_openai', 'has_rag', 'has_inbox',
+                'has_flow_builder', 'has_api', 'has_whitelabel', 'has_webhooks',
             ]);
         });
     }

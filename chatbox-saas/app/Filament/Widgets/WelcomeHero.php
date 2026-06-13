@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Cache;
 
 class WelcomeHero extends Widget
 {
@@ -75,11 +76,11 @@ class WelcomeHero extends Widget
             return $this->emptyTenantData('orphan');
         }
 
-        $usersCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_users_count", now()->addMinutes(15), function () use ($company) {
+        $usersCount = Cache::remember("company_{$company->id}_users_count", now()->addMinutes(15), function () use ($company) {
             return $company->users()->count();
         });
 
-        $chatbotsCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_chatbots_count", now()->addMinutes(15), function () use ($company) {
+        $chatbotsCount = Cache::remember("company_{$company->id}_chatbots_count", now()->addMinutes(15), function () use ($company) {
             return $company->chatbots()->count();
         });
 
@@ -120,4 +121,3 @@ class WelcomeHero extends Widget
         ];
     }
 }
-

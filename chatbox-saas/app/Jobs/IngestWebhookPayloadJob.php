@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Channel;
 use App\Models\Conversation;
-use App\Models\Company;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,20 +22,19 @@ class IngestWebhookPayloadJob implements ShouldQueue
         public array $messageData,
         public string $messageType = 'text',
         public ?int $companyId = null // Se null, tentamos descobrir pelo external_ref
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
         $companyId = $this->companyId;
 
         // Tentar descobrir a empresa se não vier definida (webhooks universais)
-        if (!$companyId) {
+        if (! $companyId) {
             $channel = Cache::remember("{$this->channelType}_channel_{$this->externalRef}", 300, function () {
                 return Channel::where('type', $this->channelType)->where('external_ref', $this->externalRef)->first();
             });
 
-            if (!$channel) {
+            if (! $channel) {
                 // Não encontramos empresa para este canal, ignorar silenciosamente.
                 return;
             }
@@ -63,7 +61,7 @@ class IngestWebhookPayloadJob implements ShouldQueue
                 ->orderByDesc('id')
                 ->first();
 
-            if (!$conversation) {
+            if (! $conversation) {
                 $conversation = Conversation::query()->create([
                     'company_id' => $companyId,
                     'channel_id' => $channel->id,

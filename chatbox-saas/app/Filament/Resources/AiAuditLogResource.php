@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AiAuditLogResource\Pages;
-use App\Filament\Resources\AiAuditLogResource\RelationManagers;
 use App\Models\AiAuditLog;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AiAuditLogResource extends Resource
 {
@@ -118,4 +115,3 @@ class AiAuditLogResource extends Resource
         ];
     }
 }
-

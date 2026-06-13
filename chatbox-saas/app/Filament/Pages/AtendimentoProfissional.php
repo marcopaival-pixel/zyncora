@@ -2,11 +2,16 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
 use App\Models\Conversation;
+use App\Models\InternalNote;
 use App\Models\Message;
+use App\Models\QuickReply;
+use App\Models\User;
+use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
@@ -16,24 +21,32 @@ class AtendimentoProfissional extends Page
     use WithPagination;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+
     protected static string $view = 'filament.pages.atendimento-profissional';
+
     protected static ?string $title = 'Atendimento profissional';
 
     protected static ?string $navigationLabel = 'Atendimento profissional';
+
     protected static ?string $navigationGroup = 'Atendimento';
+
     protected static ?int $navigationSort = -1;
 
     // Propriedades Livewire para Reatividade
     public $search = '';
+
     public $activeConversationId = null;
+
     public $newMessage = '';
-    
+
     // Suporte a Anexos e Notas Internas
     public $attachment = null;
+
     public $isInternal = false;
 
     // Suporte a Respostas Rápidas
     public $showQuickReplies = false;
+
     public $quickReplySearch = '';
 
     /** Quantas mensagens recentes carregar na conversa ativa (aumenta com "Carregar anteriores"). */
@@ -44,7 +57,7 @@ class AtendimentoProfissional extends Page
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         return $user?->canChat() ?? false;
@@ -73,7 +86,7 @@ class AtendimentoProfissional extends Page
      */
     protected function visibleConversationsQuery(): Builder
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         return Conversation::query()
@@ -104,7 +117,7 @@ class AtendimentoProfissional extends Page
     // Identificar digitação de "/" (Slash Command)
     public function updatedNewMessage($value)
     {
-        if (\Illuminate\Support\Str::startsWith($value, '/')) {
+        if (Str::startsWith($value, '/')) {
             $this->showQuickReplies = true;
             $this->quickReplySearch = substr($value, 1);
         } else {
@@ -115,12 +128,14 @@ class AtendimentoProfissional extends Page
     // Buscar respostas rápidas
     public function getQuickRepliesProperty()
     {
-        if (!$this->showQuickReplies) return collect();
+        if (! $this->showQuickReplies) {
+            return collect();
+        }
 
-        return \App\Models\QuickReply::query()
-            ->when($this->quickReplySearch, function($q) {
-                $q->where('shortcut', 'like', '%' . $this->quickReplySearch . '%')
-                  ->orWhere('message', 'like', '%' . $this->quickReplySearch . '%');
+        return QuickReply::query()
+            ->when($this->quickReplySearch, function ($q) {
+                $q->where('shortcut', 'like', '%'.$this->quickReplySearch.'%')
+                    ->orWhere('message', 'like', '%'.$this->quickReplySearch.'%');
             })
             ->take(6)
             ->get();
@@ -155,11 +170,11 @@ class AtendimentoProfissional extends Page
     // Ouvir eventos em tempo real para atualizar o chat e a sidebar
     public function getListeners(): array
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         $companyId = $user?->company_id;
         $listeners = [];
-        
+
         if ($companyId) {
             // Ouvir atualizações da empresa (novos tickets, novas mensagens globais para mover sidebar)
             $listeners["echo-private:company.{$companyId},.message.created"] = '$refresh';
@@ -198,7 +213,7 @@ class AtendimentoProfissional extends Page
     /**
      * Últimas N mensagens (cronológicas), com deteção de mais histórico disponível.
      *
-     * @return array{messages: \Illuminate\Support\Collection, has_more: bool}
+     * @return array{messages: Collection, has_more: bool}
      */
     private function messagesSlice(): array
     {
@@ -250,13 +265,13 @@ class AtendimentoProfissional extends Page
     // Ação para alternar modo interno (Sussurro)
     public function toggleInternal()
     {
-        $this->isInternal = !$this->isInternal;
+        $this->isInternal = ! $this->isInternal;
     }
 
     // Ação para enviar mensagem
     public function sendMessage()
     {
-        if ((trim($this->newMessage) === '' && !$this->attachment) || !$this->activeConversationId) {
+        if ((trim($this->newMessage) === '' && ! $this->attachment) || ! $this->activeConversationId) {
             return;
         }
 
@@ -275,9 +290,9 @@ class AtendimentoProfissional extends Page
         $type = 'text';
 
         if ($this->attachment) {
-            $path = $this->attachment->store('attachments/' . $conversation->company_id, 'public');
+            $path = $this->attachment->store('attachments/'.$conversation->company_id, 'public');
             $type = 'file';
-            
+
             // Tentar identificar se é imagem
             $mime = $this->attachment->getMimeType();
             if (str_contains($mime, 'image')) {
@@ -297,7 +312,7 @@ class AtendimentoProfissional extends Page
 
         // Se for nota interna, também espelhamos no modelo de InternalNote para relatórios futuros
         if ($this->isInternal) {
-            \App\Models\InternalNote::create([
+            InternalNote::create([
                 'conversation_id' => $this->activeConversationId,
                 'user_id' => Auth::id(),
                 'content' => trim($this->newMessage),
@@ -312,4 +327,3 @@ class AtendimentoProfissional extends Page
         $this->isInternal = false;
     }
 }
-

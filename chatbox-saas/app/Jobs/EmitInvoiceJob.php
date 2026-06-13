@@ -2,11 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Contracts\Fiscal\IFiscalProvider;
+use App\Models\PaymentHistory;
 use Illuminate\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class EmitInvoiceJob implements ShouldQueue
 {
@@ -17,7 +20,7 @@ class EmitInvoiceJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(\App\Models\PaymentHistory $payment)
+    public function __construct(PaymentHistory $payment)
     {
         $this->payment = $payment;
     }
@@ -25,7 +28,7 @@ class EmitInvoiceJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(\App\Contracts\Fiscal\IFiscalProvider $fiscalProvider): void
+    public function handle(IFiscalProvider $fiscalProvider): void
     {
         try {
             $customerData = [
@@ -35,10 +38,10 @@ class EmitInvoiceJob implements ShouldQueue
             ];
 
             $invoice = $fiscalProvider->emitInvoice($this->payment, $customerData);
-            
-            \Illuminate\Support\Facades\Log::info("EmitInvoiceJob: Invoice successfully requested for payment {$this->payment->id}.");
+
+            Log::info("EmitInvoiceJob: Invoice successfully requested for payment {$this->payment->id}.");
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("EmitInvoiceJob Failed: " . $e->getMessage());
+            Log::error('EmitInvoiceJob Failed: '.$e->getMessage());
         }
     }
 }

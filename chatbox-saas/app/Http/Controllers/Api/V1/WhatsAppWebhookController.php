@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\IngestWebhookPayloadJob;
 use App\Models\Company;
 use App\Services\WebhookIngestionService;
-use App\Jobs\IngestWebhookPayloadJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -21,6 +21,7 @@ class WhatsAppWebhookController extends Controller
     public function verify(Request $request, string $companySlug): Response
     {
         $company = Company::query()->where('slug', $companySlug)->firstOrFail();
+
         return $this->ingestionService->companyVerify($request, $company, 'whatsapp_cloud');
     }
 
@@ -30,6 +31,7 @@ class WhatsAppWebhookController extends Controller
     public function universalVerify(Request $request): Response
     {
         $expected = config('chatbox.whatsapp.universal_verify_token', 'zincora_universal_token');
+
         return $this->ingestionService->universalVerify($request, $expected);
     }
 
@@ -39,7 +41,7 @@ class WhatsAppWebhookController extends Controller
     public function ingest(Request $request, string $companySlug): Response
     {
         $company = Company::query()->where('slug', $companySlug)->firstOrFail();
-        
+
         // 1. Validar Assinatura
         if (! $this->ingestionService->validateCompanySignature($request, $company, 'whatsapp_cloud')) {
             abort(403, 'Invalid signature.');
@@ -59,7 +61,7 @@ class WhatsAppWebhookController extends Controller
                     $from = (string) data_get($msg, 'from');
                     $type = (string) data_get($msg, 'type', '');
 
-                    if (!in_array($type, ['text', 'image', 'audio', 'video', 'document']) || $from === '') {
+                    if (! in_array($type, ['text', 'image', 'audio', 'video', 'document']) || $from === '') {
                         continue;
                     }
 
@@ -98,7 +100,7 @@ class WhatsAppWebhookController extends Controller
                 $metadata = data_get($change, 'value.metadata', []);
                 $phoneNumberId = data_get($metadata, 'phone_number_id');
 
-                if (!$phoneNumberId) {
+                if (! $phoneNumberId) {
                     continue;
                 }
 
@@ -106,7 +108,7 @@ class WhatsAppWebhookController extends Controller
                     $from = (string) data_get($msg, 'from');
                     $type = (string) data_get($msg, 'type', '');
 
-                    if (!in_array($type, ['text', 'image', 'audio', 'video', 'document']) || $from === '') {
+                    if (! in_array($type, ['text', 'image', 'audio', 'video', 'document']) || $from === '') {
                         continue;
                     }
 

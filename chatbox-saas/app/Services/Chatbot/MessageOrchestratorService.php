@@ -2,12 +2,18 @@
 
 namespace App\Services\Chatbot;
 
-use App\Models\Conversation;
 use App\Models\Chatbot;
+use App\Models\Conversation;
+use App\Services\Chatbot\Agents\CommercialAgent;
+use App\Services\Chatbot\Agents\FinancialAgent;
+use App\Services\Chatbot\Agents\SchedulingAgent;
+use App\Services\Chatbot\Agents\SupportAgent;
+use App\Services\KnowledgeOrchestratorService;
 
 class MessageOrchestratorService
 {
     protected IntentClassificationService $intentClassifier;
+
     protected MemoryService $memoryService;
 
     public function __construct(
@@ -37,7 +43,7 @@ class MessageOrchestratorService
         }
 
         // 3. Orquestrador de Conhecimento (Tenta Fontes Rápidas: Dados da Empresa, FAQ, API)
-        $knowledgeAnswer = app(\App\Services\KnowledgeOrchestratorService::class)->resolveAnswer($chatbot, $conversation, $userMessage);
+        $knowledgeAnswer = app(KnowledgeOrchestratorService::class)->resolveAnswer($chatbot, $conversation, $userMessage);
         if ($knowledgeAnswer) {
             return $knowledgeAnswer;
         }
@@ -53,17 +59,17 @@ class MessageOrchestratorService
     {
         switch ($intent) {
             case IntentClassificationService::INTENT_COMMERCIAL:
-                return app(\App\Services\Chatbot\Agents\CommercialAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
-            
+                return app(CommercialAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
+
             case IntentClassificationService::INTENT_SCHEDULING:
-                return app(\App\Services\Chatbot\Agents\SchedulingAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
-            
+                return app(SchedulingAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
+
             case IntentClassificationService::INTENT_FINANCIAL:
-                return app(\App\Services\Chatbot\Agents\FinancialAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
-                
+                return app(FinancialAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
+
             case IntentClassificationService::INTENT_SUPPORT:
             default:
-                return app(\App\Services\Chatbot\Agents\SupportAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
+                return app(SupportAgent::class)->handle($conversation, $chatbot, $userMessage, $memory);
         }
     }
 
@@ -73,7 +79,7 @@ class MessageOrchestratorService
             'status' => 'open_human',
             'assignee_id' => null, // Opcional: pode enviar para uma fila
         ]);
-        
-        return "Entendi. Estou transferindo você para um de nossos atendentes humanos. Por favor, aguarde um momento.";
+
+        return 'Entendi. Estou transferindo você para um de nossos atendentes humanos. Por favor, aguarde um momento.';
     }
 }

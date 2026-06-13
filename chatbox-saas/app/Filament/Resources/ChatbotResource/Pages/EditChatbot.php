@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\ChatbotResource\Pages;
 
 use App\Filament\Resources\ChatbotResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\BaseEditRecord;
+use Filament\Actions;
+use Filament\Notifications\Notification;
 
 class EditChatbot extends BaseEditRecord
 {
@@ -22,8 +23,8 @@ class EditChatbot extends BaseEditRecord
                 ->action(function () {
                     $record = $this->getRecord();
                     $segment = $record->company->segment ?? 'geral';
-                    
-                    $suggestions = match(strtolower($segment)) {
+
+                    $suggestions = match (strtolower($segment)) {
                         'academia', 'fitness' => [
                             ['title' => 'Conhecer Planos', 'icon' => '💪'],
                             ['title' => 'Agendar Avaliação', 'icon' => '📅'],
@@ -45,10 +46,10 @@ class EditChatbot extends BaseEditRecord
                             ['title' => 'Solicitar Orçamento', 'icon' => '📄'],
                         ]
                     };
-                    
+
                     // Remove existing to replace
                     $record->actionCards()->delete();
-                    
+
                     foreach ($suggestions as $index => $s) {
                         $record->actionCards()->create([
                             'company_id' => $record->company_id,
@@ -60,12 +61,12 @@ class EditChatbot extends BaseEditRecord
                             'is_active' => true,
                         ]);
                     }
-                    
-                    \Filament\Notifications\Notification::make()
+
+                    Notification::make()
                         ->title('Sugestões geradas com sucesso!')
                         ->success()
                         ->send();
-                        
+
                     $this->refreshFormData(['actionCards']);
                 }),
             Actions\Action::make('builder')

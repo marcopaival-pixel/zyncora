@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\LgpdAuditLog;
 use App\Models\LgpdConsent;
-use App\Models\LgpdRequest;
 use App\Models\LgpdSetting;
 use Illuminate\Support\Facades\Request;
 
@@ -62,10 +61,11 @@ class LgpdService
     public function maskSensitiveData(array $data): array
     {
         $sensitiveKeys = ['email', 'phone', 'client_phone', 'name', 'client_name', 'cpf', 'cnpj', 'address', 'password'];
-        
+
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $data[$key] = $this->maskSensitiveData($value);
+
                 continue;
             }
 
@@ -83,6 +83,6 @@ class LgpdService
             return '****';
         }
 
-        return substr($value, 0, 2) . str_repeat('*', strlen($value) - 4) . substr($value, -2);
+        return substr($value, 0, 2).str_repeat('*', strlen($value) - 4).substr($value, -2);
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\ConversationResource\Pages;
 
 use App\Filament\Resources\ConversationResource;
-use Filament\Actions;
+use App\Services\AgentDistributionService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 
 class ListConversations extends ListRecords
@@ -13,41 +15,41 @@ class ListConversations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('inbox')
+            Action::make('inbox')
                 ->label('Abrir Inbox Omnichannel')
                 ->icon('heroicon-o-chat-bubble-left-right')
                 ->color('primary')
                 ->url(fn (): string => ConversationResource::getUrl('inbox')),
 
-            Actions\Action::make('status_online')
+            Action::make('status_online')
                 ->label('Ficar Online')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->action(function () {
                     auth()->user()->update(['presence_status' => 'online']);
-                    \Filament\Notifications\Notification::make()->title('Você está online')->success()->send();
+                    Notification::make()->title('Você está online')->success()->send();
                     // Trigger distribution immediately
-                    app(\App\Services\AgentDistributionService::class)->distribute(auth()->user()->company_id);
+                    app(AgentDistributionService::class)->distribute(auth()->user()->company_id);
                 })
                 ->visible(fn () => auth()->user()->presence_status !== 'online'),
 
-            \Filament\Actions\Action::make('status_busy')
+            Action::make('status_busy')
                 ->label('Ficar Ocupado')
                 ->color('warning')
                 ->icon('heroicon-o-minus-circle')
                 ->action(function () {
                     auth()->user()->update(['presence_status' => 'busy']);
-                    \Filament\Notifications\Notification::make()->title('Você está ocupado')->warning()->send();
+                    Notification::make()->title('Você está ocupado')->warning()->send();
                 })
                 ->visible(fn () => auth()->user()->presence_status !== 'busy'),
 
-            \Filament\Actions\Action::make('status_offline')
+            Action::make('status_offline')
                 ->label('Ficar Offline')
                 ->color('danger')
                 ->icon('heroicon-o-x-circle')
                 ->action(function () {
                     auth()->user()->update(['presence_status' => 'offline']);
-                    \Filament\Notifications\Notification::make()->title('Você está offline')->danger()->send();
+                    Notification::make()->title('Você está offline')->danger()->send();
                 })
                 ->visible(fn () => auth()->user()->presence_status !== 'offline'),
         ];

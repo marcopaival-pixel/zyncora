@@ -2,13 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Contracts\WidgetAccessLogRepositoryInterface;
 use App\Models\WidgetAccessLog;
+use App\Repositories\Contracts\WidgetAccessLogRepositoryInterface;
 use Illuminate\Support\Facades\Http;
 
 class ClickHouseWidgetAccessLogRepository implements WidgetAccessLogRepositoryInterface
 {
     protected string $endpoint;
+
     protected string $database;
 
     public function __construct()
@@ -21,21 +22,22 @@ class ClickHouseWidgetAccessLogRepository implements WidgetAccessLogRepositoryIn
     {
         // Aqui simula a inserção via HTTP para o ClickHouse.
         // Em um cenário real de alta volumetria, faríamos um Insert Async (Batching) no Go/Node ou via filas longas.
-        
+
         try {
             $query = sprintf(
-                "INSERT INTO %s.widget_access_logs FORMAT JSONEachRow",
+                'INSERT INTO %s.widget_access_logs FORMAT JSONEachRow',
                 $this->database
             );
 
             // Para manter o contrato da aplicação simulamos o retorno do Model,
             // mas no mundo real ClickHouse retornaria true/false ou um objeto genérico.
-            Http::post($this->endpoint . '/?query=' . urlencode($query), [
-                json_encode($data)
+            Http::post($this->endpoint.'/?query='.urlencode($query), [
+                json_encode($data),
             ]);
-            
+
             $log = new WidgetAccessLog($data);
             $log->id = rand(100000, 999999); // Mock do ID apenas para fluxo do código
+
             return $log;
         } catch (\Exception $e) {
             return false;
@@ -53,9 +55,9 @@ class ClickHouseWidgetAccessLogRepository implements WidgetAccessLogRepositoryIn
                 $minutesAgo
             );
 
-            $response = Http::get($this->endpoint . '/?query=' . urlencode($query));
+            $response = Http::get($this->endpoint.'/?query='.urlencode($query));
             $result = $response->json();
-            
+
             return $result['data'][0]['total'] ?? 0;
         } catch (\Exception $e) {
             return 0; // Fallback

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\Contact;
 
 class PlanUsageService
 {
@@ -21,19 +22,19 @@ class PlanUsageService
         // Uso atual
         // Conta usuários ativos da empresa
         $usedUsers = $company->users()->count();
-        
+
         // Conta atendentes e roles que atuam no chat (ex: agent, supervisor)
         $usedAttendants = $company->users()->whereIn('role', ['agent', 'supervisor', 'manager'])->count();
-        
+
         // Canais integrados
         $usedChannels = $company->channels()->count();
-        
+
         // Chatbots criados
         $usedChatbots = $company->chatbots()->count();
-        
+
         // AI Conversations (Franquia do Plano)
         $usedAiConversations = $company->ai_conversations_used ?? 0;
-        
+
         // AI Credits (Pacotes Avulsos)
         $aiCreditsBalance = $company->ai_credits_balance ?? 0;
 
@@ -51,7 +52,7 @@ class PlanUsageService
                 'percentage' => $aiCreditsBalance > 0 ? 0 : 100,
                 'color' => 'success',
                 'unlimited' => false,
-            ]
+            ],
         ];
     }
 
@@ -62,8 +63,8 @@ class PlanUsageService
     {
         // Estatísticas básicas para o painel de resultados
         $totalConversations = $company->conversations()->count();
-        $totalLeads = \App\Models\Contact::where('company_id', $company->id)->count();
-        
+        $totalLeads = Contact::where('company_id', $company->id)->count();
+
         // Apenas como exemplo simples de horas economizadas (cada conversa = 5 min)
         $hoursSaved = round(($totalConversations * 5) / 60);
 
@@ -78,7 +79,7 @@ class PlanUsageService
     {
         $percentage = $limit > 0 ? min(100, round(($used / $limit) * 100)) : 0;
         $remaining = max(0, $limit - $used);
-        
+
         // Regras de cor: Verde < 70%, Amarelo 70% a 89%, Vermelho >= 90%
         $color = 'success';
         if ($percentage >= 90) {

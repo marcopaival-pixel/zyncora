@@ -7,7 +7,8 @@ use Filament\Widgets\ChartWidget;
 class ApiLatencyChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Latência da API (ms)';
-    protected int | string | array $columnSpan = 'full';
+
+    protected int|string|array $columnSpan = 'full';
 
     protected function getData(): array
     {

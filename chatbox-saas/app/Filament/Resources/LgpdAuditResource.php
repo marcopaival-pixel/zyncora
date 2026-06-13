@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LgpdAuditResource extends Resource
 {
@@ -19,22 +20,24 @@ class LgpdAuditResource extends Resource
     protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Log de Auditoria';
-    
+
     protected static ?string $pluralModelLabel = 'Logs de Auditoria';
 
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
+
         return $user?->isCompanyAdmin() || $user?->isPlatformAdmin() || $user?->isSupervisor();
     }
 
     public static function canViewAny(): bool
     {
         $user = auth()->user();
+
         return $user?->isCompanyAdmin() || $user?->isPlatformAdmin() || $user?->isSupervisor();
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with('user');
         $user = auth()->user();
@@ -114,4 +117,3 @@ class LgpdAuditResource extends Resource
         ];
     }
 }
-

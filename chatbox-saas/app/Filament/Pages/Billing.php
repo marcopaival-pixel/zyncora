@@ -2,18 +2,17 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Invoice;
 use App\Models\Plan;
 use App\Services\BillingCheckoutService;
 use App\Services\PlanSubscriptionService;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\Auth;
-
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use App\Models\Invoice;
+use Illuminate\Support\Facades\Auth;
 
 class Billing extends Page implements HasTable
 {
@@ -144,4 +143,3 @@ class Billing extends Page implements HasTable
             ]);
     }
 }
-

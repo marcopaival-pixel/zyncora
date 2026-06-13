@@ -2,21 +2,20 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use App\Models\AiConsumptionHistory;
-use App\Models\Company;
+use Filament\Widgets\ChartWidget;
 
 class AiConsumptionTimelineChart extends ChartWidget
 {
     protected static ?string $heading = 'Consumo de IA ao Longo do Tempo';
-    
+
     protected static ?int $sort = 3;
 
     protected function getData(): array
     {
         $company = auth()->user()->company;
-        
-        if (!$company) {
+
+        if (! $company) {
             return [];
         }
 
@@ -35,7 +34,7 @@ class AiConsumptionTimelineChart extends ChartWidget
         }
 
         // Incluir o mês atual (em andamento)
-        $labels[] = now()->format('M/Y') . ' (Atual)';
+        $labels[] = now()->format('M/Y').' (Atual)';
         $data[] = $company->ai_conversations_used;
 
         return [

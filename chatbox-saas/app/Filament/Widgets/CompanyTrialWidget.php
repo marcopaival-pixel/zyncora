@@ -13,12 +13,12 @@ class CompanyTrialWidget extends Widget
 
     protected static ?int $sort = -3; // Top of the dashboard
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public static function canView(): bool
     {
         $user = Auth::user();
-        if (!$user || !$user->company) {
+        if (! $user || ! $user->company) {
             return false;
         }
 
@@ -41,4 +41,3 @@ class CompanyTrialWidget extends Widget
         ];
     }
 }
-

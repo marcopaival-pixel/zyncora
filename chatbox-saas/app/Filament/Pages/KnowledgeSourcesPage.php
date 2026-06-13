@@ -2,14 +2,18 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
 use App\Models\KnowledgeSource;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 
 class KnowledgeSourcesPage extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-cpu-chip';
+
     protected static ?string $navigationGroup = 'Automação';
+
     protected static ?string $title = 'Fontes de Conhecimento';
+
     protected static ?int $navigationSort = 3;
 
     protected static string $view = 'filament.pages.knowledge-sources-page';
@@ -27,13 +31,14 @@ class KnowledgeSourcesPage extends Page
     public function toggleSource($type)
     {
         $companyId = session('impersonated_company_id') ?? auth()->user()?->company_id;
-        
-        if (!$companyId) {
-            \Filament\Notifications\Notification::make()
+
+        if (! $companyId) {
+            Notification::make()
                 ->title('Ação Inválida')
                 ->body('Nenhuma organização identificada. Só é possível gerir fontes de conhecimento no contexto de um cliente (Empresa).')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -41,11 +46,10 @@ class KnowledgeSourcesPage extends Page
             ['company_id' => $companyId, 'source_type' => $type],
             ['is_active' => false]
         );
-        
-        $source->is_active = !$source->is_active;
+
+        $source->is_active = ! $source->is_active;
         $source->save();
 
         $this->sources[$type] = $source->toArray();
     }
 }
-

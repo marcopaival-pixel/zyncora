@@ -127,4 +127,3 @@ class LgpdSettingResource extends Resource
         return $query;
     }
 }
-

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ContactResource\Pages;
 
 use App\Filament\Resources\ContactResource;
+use App\Filament\Resources\ContactResource\Widgets\ContactStatsOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\ContactResource\Widgets\ContactStatsOverview;
 
 class ListContacts extends ListRecords
 {

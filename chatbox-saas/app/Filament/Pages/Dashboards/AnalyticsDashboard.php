@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Dashboards;
 
+use App\Filament\Widgets\LatestLogs;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class AnalyticsDashboard extends BaseDashboard
@@ -20,7 +21,7 @@ class AnalyticsDashboard extends BaseDashboard
 
     protected ?string $subheading = 'Métricas detalhadas, volumetria e gráficos pesados.';
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|string|array
     {
         return 12;
     }
@@ -29,7 +30,7 @@ class AnalyticsDashboard extends BaseDashboard
     {
         return [
             // Widgets pesados podem ser movidos para cá no futuro
-            \App\Filament\Widgets\LatestLogs::class,
+            LatestLogs::class,
         ];
     }
 }

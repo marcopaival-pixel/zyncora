@@ -2,8 +2,12 @@
 
 namespace App\Filament\SuperAdmin\Pages;
 
+use App\Filament\Widgets\AttendantMetricsWidget;
+use App\Filament\Widgets\ChannelMetricsWidget;
+use App\Filament\Widgets\SuperAdminAiConsumptionWidget;
+use App\Filament\Widgets\SuperAdminFinancialWidget;
+use App\Filament\Widgets\SupportTicketsWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
-use Illuminate\Support\Facades\Auth;
 
 class SuperAdminDashboard extends BaseDashboard
 {
@@ -29,15 +33,15 @@ class SuperAdminDashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            \App\Filament\Widgets\SuperAdminFinancialWidget::class,
-            \App\Filament\Widgets\SuperAdminAiConsumptionWidget::class,
-            \App\Filament\Widgets\ChannelMetricsWidget::class,
-            \App\Filament\Widgets\AttendantMetricsWidget::class,
-            \App\Filament\Widgets\SupportTicketsWidget::class,
+            SuperAdminFinancialWidget::class,
+            SuperAdminAiConsumptionWidget::class,
+            ChannelMetricsWidget::class,
+            AttendantMetricsWidget::class,
+            SupportTicketsWidget::class,
         ];
     }
-    
-    public function getColumns(): int | string | array
+
+    public function getColumns(): int|string|array
     {
         return 1;
     }

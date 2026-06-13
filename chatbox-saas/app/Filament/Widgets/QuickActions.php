@@ -8,11 +8,11 @@ use App\Filament\Pages\CRMBoard;
 use App\Filament\Pages\Reports;
 use App\Filament\Resources\ChatbotResource;
 use App\Filament\Resources\CompanyIntegrationResource;
-use App\Filament\SuperAdmin\Resources\CompanyResource;
 use App\Filament\Resources\ContactResource;
 use App\Filament\Resources\ConversationResource;
 use App\Filament\Resources\DealResource;
 use App\Filament\Resources\UserResource;
+use App\Filament\SuperAdmin\Resources\CompanyResource;
 use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use Filament\Widgets\Widget;
 
@@ -124,4 +124,3 @@ class QuickActions extends Widget
         return $actions;
     }
 }
-

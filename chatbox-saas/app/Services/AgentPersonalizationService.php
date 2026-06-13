@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Company;
 use App\Models\Chatbot;
-use App\Models\KnowledgeBase;
 use App\Models\ChatbotFlow;
+use App\Models\Company;
+use App\Models\KnowledgeBase;
+use Illuminate\Support\Facades\Log;
 
 class AgentPersonalizationService
 {
@@ -13,11 +14,11 @@ class AgentPersonalizationService
     {
         // Define personality based on segment
         $personality = $this->getPersonalityForSegment($segment);
-        
+
         $companyContext = $this->buildCompanyContext($company);
-        
+
         $baseInstruction = "Você é o assistente virtual da empresa {$company->name}, do segmento de {$segment}. 
-Seu objetivo principal é focar em {$objective} através dos canais: " . implode(', ', $channels) . ". 
+Seu objetivo principal é focar em {$objective} através dos canais: ".implode(', ', $channels).". 
 Seu tom deve ser {$personality}.
 Abaixo estão os dados da empresa para você usar como contexto ao responder:
 {$companyContext}";
@@ -36,7 +37,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
             // We just ask AI to generate an engaging initial message based on the rich context
             // and maybe some additional dynamic FAQs. For now, we mainly update the initial message.
             $aiData = $aiGenerator->generateInitialSetup($company, $segment, $objective, $channels);
-            
+
             if ($aiData) {
                 if (isset($aiData['initial_message'])) {
                     $chatbot->update(['initial_message' => $aiData['initial_message']]);
@@ -46,38 +47,48 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 $this->insertGeneratedData($company, $aiData);
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('AI setup generation failed, using static templates only.', ['error' => $e->getMessage()]);
+            Log::warning('AI setup generation failed, using static templates only.', ['error' => $e->getMessage()]);
         }
     }
 
     private function buildCompanyContext(Company $company): string
     {
-        $context = "";
-        if ($company->website) $context .= "Site: {$company->website}\n";
-        if ($company->phone) $context .= "Telefone Fixo: {$company->phone}\n";
-        if ($company->whatsapp) $context .= "WhatsApp: {$company->whatsapp}\n";
-        if ($company->email) $context .= "E-mail: {$company->email}\n";
-        if ($company->address) $context .= "Endereço: {$company->address}\n";
-        
+        $context = '';
+        if ($company->website) {
+            $context .= "Site: {$company->website}\n";
+        }
+        if ($company->phone) {
+            $context .= "Telefone Fixo: {$company->phone}\n";
+        }
+        if ($company->whatsapp) {
+            $context .= "WhatsApp: {$company->whatsapp}\n";
+        }
+        if ($company->email) {
+            $context .= "E-mail: {$company->email}\n";
+        }
+        if ($company->address) {
+            $context .= "Endereço: {$company->address}\n";
+        }
+
         if ($company->business_hours) {
-            $context .= "Horário de Funcionamento: ";
+            $context .= 'Horário de Funcionamento: ';
             if (is_array($company->business_hours)) {
                 foreach ($company->business_hours as $day => $hours) {
                     $context .= "{$day}: {$hours}, ";
                 }
-                $context = rtrim($context, ', ') . "\n";
+                $context = rtrim($context, ', ')."\n";
             } else {
                 $context .= "{$company->business_hours}\n";
             }
         }
 
         if ($company->social_networks) {
-            $context .= "Redes Sociais: ";
+            $context .= 'Redes Sociais: ';
             if (is_array($company->social_networks)) {
                 foreach ($company->social_networks as $platform => $link) {
                     $context .= "{$platform}: {$link}, ";
                 }
-                $context = rtrim($context, ', ') . "\n";
+                $context = rtrim($context, ', ')."\n";
             }
         }
 
@@ -103,7 +114,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
             foreach ($data['flows'] as $flow) {
                 ChatbotFlow::create([
                     'company_id' => $company->id,
-                    'trigger' => $flow['trigger'] ?? 'Opção ' . ($sortOrder + 1),
+                    'trigger' => $flow['trigger'] ?? 'Opção '.($sortOrder + 1),
                     'question' => $flow['question'] ?? '',
                     'answer' => $flow['answer'] ?? '',
                     'active' => true,
@@ -138,7 +149,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
         // Base general knowledge
         $knowledgeItems[] = [
             'title' => 'Informações Gerais',
-            'content' => "A empresa {$company->name} atua no segmento de {$segment}. " . ($company->website ? "O site oficial é {$company->website}." : "Para mais detalhes, consulte nossos atendentes.")
+            'content' => "A empresa {$company->name} atua no segmento de {$segment}. ".($company->website ? "O site oficial é {$company->website}." : 'Para mais detalhes, consulte nossos atendentes.'),
         ];
 
         switch ($segment) {
@@ -151,7 +162,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 $knowledgeItems[] = ['title' => 'Horários de Funcionamento', 'content' => 'A academia está aberta de segunda a sexta das 06h às 22h, e aos finais de semana das 08h às 14h.'];
                 $knowledgeItems[] = ['title' => 'Avaliação Física', 'content' => 'A avaliação física pode ser agendada na recepção. É recomendada para a elaboração de um treino personalizado.'];
                 $knowledgeItems[] = ['title' => 'Matrícula', 'content' => 'A matrícula pode ser feita online ou diretamente na recepção, necessitando de um documento com foto.'];
-                
+
                 $flows[] = ['trigger' => 'Ver planos', 'question' => 'Quais são os planos disponíveis?', 'answer' => 'Nossos planos incluem as opções Mensal, Trimestral e Anual. Qual opção você gostaria de conhecer melhor?'];
                 $flows[] = ['trigger' => 'Agendar avaliação', 'question' => 'Como agendar avaliação?', 'answer' => 'Para agendar sua avaliação física, informe seu nome completo e o melhor horário para você.'];
                 break;
@@ -167,7 +178,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 $knowledgeItems[] = ['title' => 'Convênios', 'content' => 'Aceitamos os seguintes convênios: Unimed, Bradesco, Amil, SulAmérica, além de consultas particulares.'];
                 $knowledgeItems[] = ['title' => 'Agendamento de Consulta', 'content' => 'Para agendar uma consulta, basta informar a especialidade desejada e verificaremos os horários disponíveis.'];
                 $knowledgeItems[] = ['title' => 'Remarcar e Cancelar', 'content' => 'Você pode remarcar ou cancelar sua consulta entrando em contato com nossa equipe com pelo menos 24h de antecedência.'];
-                
+
                 $flows[] = ['trigger' => 'Agendar Consulta', 'question' => 'Gostaria de agendar uma consulta?', 'answer' => 'Com certeza! Para qual especialidade você deseja o agendamento?'];
                 $flows[] = ['trigger' => 'Remarcar Consulta', 'question' => 'Preciso remarcar minha consulta', 'answer' => 'Vamos remarcar. Por favor, me informe o seu nome completo e a data atual da consulta.'];
                 $flows[] = ['trigger' => 'Cancelar Consulta', 'question' => 'Quero cancelar uma consulta', 'answer' => 'Tudo bem. Poderia me informar seu nome completo para localizarmos o agendamento?'];
@@ -193,7 +204,7 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 $knowledgeItems[] = ['title' => 'Áreas de Atuação', 'content' => 'Atuamos em diversas áreas do Direito, prestando consultoria e representação jurídica especializada.'];
                 $knowledgeItems[] = ['title' => 'Agendamento de Consulta', 'content' => 'O primeiro atendimento serve para entender o caso e pode ser presencial ou por videoconferência.'];
                 $knowledgeItems[] = ['title' => 'Honorários', 'content' => 'Nossos honorários são estabelecidos de forma transparente após a análise preliminar do caso.'];
-                
+
                 $flows[] = ['trigger' => 'Agendar Reunião', 'question' => 'Como posso marcar uma reunião?', 'answer' => 'Para agendar seu atendimento, por favor me informe um breve resumo do seu caso.'];
                 $flows[] = ['trigger' => 'Áreas de Atuação', 'question' => 'Quais as áreas de atuação do escritório?', 'answer' => 'Atuamos no consultivo e contencioso. Qual é a natureza do seu problema jurídico?'];
                 break;
@@ -243,11 +254,11 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 $flows[] = ['trigger' => 'Fazer Reserva', 'question' => 'Gostaria de reservar uma mesa', 'answer' => 'Ficaremos felizes em receber você! Para qual dia, horário e quantidade de pessoas seria a reserva?'];
                 $flows[] = ['trigger' => 'Ver Cardápio', 'question' => 'Pode enviar o cardápio?', 'answer' => 'Claro! Aqui está o link do nosso cardápio digital: [Link do Cardápio]'];
                 break;
-                
+
             default:
-                $knowledgeItems[] = ['title' => 'Produtos e Serviços', 'content' => 'Oferecemos produtos e serviços de alta qualidade no segmento de ' . $segment . '.'];
+                $knowledgeItems[] = ['title' => 'Produtos e Serviços', 'content' => 'Oferecemos produtos e serviços de alta qualidade no segmento de '.$segment.'.'];
                 $knowledgeItems[] = ['title' => 'Atendimento', 'content' => 'Nossa equipe está pronta para tirar suas dúvidas e prestar o melhor suporte.'];
-                
+
                 $flows[] = ['trigger' => 'Falar com Atendente', 'question' => 'Quero falar com um humano', 'answer' => 'Vou transferir você para um de nossos especialistas. Aguarde um momento.'];
                 break;
         }

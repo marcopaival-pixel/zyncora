@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
@@ -13,6 +12,7 @@ class PasswordChangedNotification extends Notification
     use Queueable;
 
     public $ipAddress;
+
     public $userAgent;
 
     /**
@@ -41,12 +41,12 @@ class PasswordChangedNotification extends Notification
     {
         return (new MailMessage)
             ->subject(Lang::get('Sua senha foi alterada com sucesso - Zynkora'))
-            ->greeting('Olá, ' . $notifiable->name . '!')
+            ->greeting('Olá, '.$notifiable->name.'!')
             ->line(Lang::get('Sua senha foi alterada com sucesso.'))
             ->line(Lang::get('Detalhes da alteração:'))
-            ->line(Lang::get('- Data/Hora: ') . now()->format('d/m/Y H:i:s'))
-            ->line(Lang::get('- Endereço IP: ') . $this->ipAddress)
-            ->line(Lang::get('- Navegador/Dispositivo: ') . $this->userAgent)
+            ->line(Lang::get('- Data/Hora: ').now()->format('d/m/Y H:i:s'))
+            ->line(Lang::get('- Endereço IP: ').$this->ipAddress)
+            ->line(Lang::get('- Navegador/Dispositivo: ').$this->userAgent)
             ->line(Lang::get('Caso não tenha sido você, entre em contato imediatamente com o suporte.'));
     }
 

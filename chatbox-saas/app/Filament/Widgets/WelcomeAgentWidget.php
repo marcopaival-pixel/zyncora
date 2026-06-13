@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class WelcomeAgentWidget extends Widget
 {
@@ -11,8 +12,8 @@ class WelcomeAgentWidget extends Widget
 
     protected static string $view = 'filament.widgets.welcome-agent-widget';
 
-    protected int | string | array $columnSpan = 'full';
-    
+    protected int|string|array $columnSpan = 'full';
+
     protected static bool $isLazy = true;
 
     protected static ?int $sort = -1;
@@ -20,7 +21,9 @@ class WelcomeAgentWidget extends Widget
     public function getDaysRemaining(): int
     {
         $company = Auth::user()->company;
-        if (!$company || !$company->expires_at) return 0;
+        if (! $company || ! $company->expires_at) {
+            return 0;
+        }
 
         return max(0, (int) now()->diffInDays($company->expires_at, false));
     }
@@ -33,15 +36,20 @@ class WelcomeAgentWidget extends Widget
     public function getKnowledgeCount(): int
     {
         $company = Auth::user()?->company;
-        if (!$company) return 0;
-        return \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_knowledge_count", now()->addMinutes(30), fn () => $company->knowledgeBases()->count());
+        if (! $company) {
+            return 0;
+        }
+
+        return Cache::remember("company_{$company->id}_knowledge_count", now()->addMinutes(30), fn () => $company->knowledgeBases()->count());
     }
 
     public function getFlowsCount(): int
     {
         $company = Auth::user()?->company;
-        if (!$company) return 0;
-        return \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_flows_count", now()->addMinutes(30), fn () => $company->chatbotFlows()->count());
+        if (! $company) {
+            return 0;
+        }
+
+        return Cache::remember("company_{$company->id}_flows_count", now()->addMinutes(30), fn () => $company->chatbotFlows()->count());
     }
 }
-

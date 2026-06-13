@@ -2,14 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Message;
 use App\Models\ChatbotFlowSuggestion;
+use App\Models\Message;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class ProcessChatbotSuggestions extends Command
 {
     protected $signature = 'chatbot:process-suggestions';
+
     protected $description = 'Processa as últimas mensagens não reconhecidas e sugere novos fluxos.';
 
     public function handle()
@@ -23,13 +24,17 @@ class ProcessChatbotSuggestions extends Command
 
         $grouped = [];
         foreach ($recentMessages as $msg) {
-            if (!$msg->conversation || !$msg->conversation->chatbot_id) continue;
-            
+            if (! $msg->conversation || ! $msg->conversation->chatbot_id) {
+                continue;
+            }
+
             $text = mb_strtolower(trim($msg->body));
-            if (strlen($text) < 5) continue;
-            
+            if (strlen($text) < 5) {
+                continue;
+            }
+
             $cid = $msg->conversation->chatbot_id;
-            if (!isset($grouped[$cid][$text])) {
+            if (! isset($grouped[$cid][$text])) {
                 $grouped[$cid][$text] = [
                     'company_id' => $msg->conversation->company_id,
                     'count' => 0,
@@ -44,7 +49,7 @@ class ProcessChatbotSuggestions extends Command
 
         foreach ($grouped as $chatbotId => $texts) {
             foreach ($texts as $intent => $data) {
-                if ($data['count'] > 2) { 
+                if ($data['count'] > 2) {
                     ChatbotFlowSuggestion::updateOrCreate([
                         'chatbot_id' => $chatbotId,
                         'suggested_intent' => $intent,

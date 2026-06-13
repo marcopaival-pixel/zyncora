@@ -47,11 +47,10 @@ class ManagePermissions extends ManageRecords
                         }
 
                         fclose($handle);
-                    }, 'permissoes-' . now()->format('Ymd-His') . '.csv', [
+                    }, 'permissoes-'.now()->format('Ymd-His').'.csv', [
                         'Content-Type' => 'text/csv; charset=UTF-8',
                     ]);
                 }),
         ];
     }
 }
-

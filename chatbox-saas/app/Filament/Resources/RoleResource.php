@@ -121,4 +121,3 @@ class RoleResource extends Resource
         ];
     }
 }
-

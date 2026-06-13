@@ -2,9 +2,9 @@
 
 namespace App\Listeners;
 
-use Illuminate\Auth\Events\Failed;
 use App\Models\ActivityLog;
 use App\Models\User;
+use Illuminate\Auth\Events\Failed;
 
 class LogFailedLoginAttempt
 {
@@ -14,7 +14,7 @@ class LogFailedLoginAttempt
     public function handle(Failed $event): void
     {
         $email = $event->credentials['email'] ?? 'desconhecido';
-        
+
         // Tenta encontrar o usuário para associar ao log e à empresa
         $user = $event->user ?? User::where('email', $email)->first();
 

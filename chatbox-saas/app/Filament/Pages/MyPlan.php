@@ -2,8 +2,15 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Plan;
+use App\Filament\Actions\HelpAction;
+use App\Filament\Widgets\AiConsumptionTimelineChart;
+use App\Filament\Widgets\AiIntentPieChart;
 use App\Services\PlanUsageService;
+use App\Services\StripePaymentService;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,12 +27,19 @@ class MyPlan extends Page
     protected static string $view = 'filament.pages.my-plan';
 
     public $company;
+
     public $currentPlan;
+
     public $usageData;
+
     public $resultsMetrics;
+
     public $isTrial = false;
+
     public $trialDaysRemaining = 0;
+
     public $trialDaysTotal = 7; // Assumindo padrão
+
     public $trialPercentage = 0;
 
     public static function shouldRegisterNavigation(): bool
@@ -42,8 +56,8 @@ class MyPlan extends Page
     {
         $this->company = Auth::user()->company;
         $this->currentPlan = $this->company?->plan;
-        
-        if (!$this->company) {
+
+        if (! $this->company) {
             return;
         }
 
@@ -54,12 +68,12 @@ class MyPlan extends Page
         if ($this->company->subscription_status === 'trial') {
             $this->isTrial = true;
             $this->trialDaysRemaining = $this->company->calcularDiasRestantes();
-            
+
             if ($this->company->trial_start_at && $this->company->trial_end_at) {
                 $this->trialDaysTotal = $this->company->trial_start_at->diffInDays($this->company->trial_end_at, false) ?: 7;
             }
-            
-            $this->trialPercentage = $this->trialDaysTotal > 0 
+
+            $this->trialPercentage = $this->trialDaysTotal > 0
                 ? round((($this->trialDaysTotal - $this->trialDaysRemaining) / $this->trialDaysTotal) * 100)
                 : 100;
         }
@@ -68,12 +82,12 @@ class MyPlan extends Page
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('buy_credits')
+            Action::make('buy_credits')
                 ->label('Comprar Créditos Extras')
                 ->icon('heroicon-o-shopping-cart')
                 ->color('success')
                 ->form([
-                    \Filament\Forms\Components\Select::make('package')
+                    Select::make('package')
                         ->label('Pacote de Mensagens IA')
                         ->options([
                             'bronze' => 'Bronze (+500 Conversas) - R$ 29,00',
@@ -87,40 +101,48 @@ class MyPlan extends Page
                     $company = auth()->user()->company;
                     $added = 0;
                     $price = 0;
-                    
+
                     switch ($data['package']) {
-                        case 'bronze': $added = 500; $price = 29; break;
-                        case 'silver': $added = 2000; $price = 89; break;
-                        case 'gold': $added = 5000; $price = 199; break;
-                        case 'platinum': $added = 15000; $price = 499; break;
+                        case 'bronze': $added = 500;
+                            $price = 29;
+                            break;
+                        case 'silver': $added = 2000;
+                            $price = 89;
+                            break;
+                        case 'gold': $added = 5000;
+                            $price = 199;
+                            break;
+                        case 'platinum': $added = 15000;
+                            $price = 499;
+                            break;
                     }
 
-                    $stripeService = app(\App\Services\StripePaymentService::class);
-                    
+                    $stripeService = app(StripePaymentService::class);
+
                     try {
                         $checkoutUrl = $stripeService->createOneOffCheckoutSession(
-                            $company, 
+                            $company,
                             auth()->user(),
                             $data['package'],
                             $price,
                             $added
                         );
-                        
+
                         return redirect()->away($checkoutUrl);
                     } catch (\Exception $e) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Erro ao processar pagamento: ' . $e->getMessage())
+                        Notification::make()
+                            ->title('Erro ao processar pagamento: '.$e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
 
-            \Filament\Actions\Action::make('configure_ai')
+            Action::make('configure_ai')
                 ->label('Configurar Limites de IA')
                 ->icon('heroicon-o-cog-6-tooth')
                 ->color('gray')
                 ->form([
-                    \Filament\Forms\Components\Select::make('ai_limit_action')
+                    Select::make('ai_limit_action')
                         ->label('Ação ao Atingir o Limite')
                         ->options([
                             'block' => 'Bloquear IA (Padrão)',
@@ -131,7 +153,7 @@ class MyPlan extends Page
                         ->required()
                         ->live(),
 
-                    \Filament\Forms\Components\Select::make('auto_buy_package')
+                    Select::make('auto_buy_package')
                         ->label('Pacote para Compra Automática')
                         ->options([
                             'bronze' => 'Bronze (+500 Conversas)',
@@ -140,8 +162,8 @@ class MyPlan extends Page
                             'platinum' => 'Platinum (+15.000 Conversas)',
                         ])
                         ->default(fn () => auth()->user()->company?->auto_buy_package)
-                        ->visible(fn (\Filament\Forms\Get $get) => $get('ai_limit_action') === 'auto_buy')
-                        ->required(fn (\Filament\Forms\Get $get) => $get('ai_limit_action') === 'auto_buy'),
+                        ->visible(fn (Get $get) => $get('ai_limit_action') === 'auto_buy')
+                        ->required(fn (Get $get) => $get('ai_limit_action') === 'auto_buy'),
                 ])
                 ->action(function (array $data) {
                     $company = auth()->user()->company;
@@ -150,22 +172,21 @@ class MyPlan extends Page
                         'auto_buy_package' => $data['ai_limit_action'] === 'auto_buy' ? $data['auto_buy_package'] : null,
                     ]);
 
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Configurações salvas')
                         ->success()
                         ->send();
                 }),
 
-            \App\Filament\Actions\HelpAction::make()->module('Meu Plano'),
+            HelpAction::make()->module('Meu Plano'),
         ];
     }
 
     protected function getFooterWidgets(): array
     {
         return [
-            \App\Filament\Widgets\AiConsumptionTimelineChart::class,
-            \App\Filament\Widgets\AiIntentPieChart::class,
+            AiConsumptionTimelineChart::class,
+            AiIntentPieChart::class,
         ];
     }
 }
-

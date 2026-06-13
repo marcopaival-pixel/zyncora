@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\KnowledgeBaseResource\Pages;
 
 use App\Filament\Resources\KnowledgeBaseResource;
+use App\Jobs\ExtractFaqFromKnowledgeBaseJob;
+use App\Jobs\ScrapeUrlForKnowledgeBase;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateKnowledgeBase extends CreateRecord
@@ -30,9 +32,9 @@ class CreateKnowledgeBase extends CreateRecord
     protected function afterCreate(): void
     {
         if ($this->record->source_type === 'url') {
-            \App\Jobs\ScrapeUrlForKnowledgeBase::dispatch($this->record);
+            ScrapeUrlForKnowledgeBase::dispatch($this->record);
         } else {
-            \App\Jobs\ExtractFaqFromKnowledgeBaseJob::dispatch($this->record);
+            ExtractFaqFromKnowledgeBaseJob::dispatch($this->record);
         }
     }
 }

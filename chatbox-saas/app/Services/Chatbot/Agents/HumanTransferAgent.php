@@ -2,8 +2,8 @@
 
 namespace App\Services\Chatbot\Agents;
 
-use App\Models\Conversation;
 use App\Models\Chatbot;
+use App\Models\Conversation;
 
 class HumanTransferAgent extends BaseAgent
 {
@@ -12,7 +12,7 @@ class HumanTransferAgent extends BaseAgent
         $conversation->update([
             'status' => 'open_human',
         ]);
-        
-        return "Estou transferindo o seu atendimento para um humano. Por favor, aguarde na linha.";
+
+        return 'Estou transferindo o seu atendimento para um humano. Por favor, aguarde na linha.';
     }
 }

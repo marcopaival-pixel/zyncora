@@ -2,23 +2,44 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\Company;
+use App\Models\Plan;
+use App\Models\PlatformLegalConsent;
+use App\Models\PlatformLegalDocument;
+use App\Models\SubscriptionAuditLog;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Pages\Auth\Register as BaseRegister;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class CustomRegister extends BaseRegister
 {
     protected static string $view = 'filament.pages.auth.custom-register';
 
-    public function form(\Filament\Forms\Form $form): \Filament\Forms\Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
-                \Filament\Forms\Components\Wizard::make([
-                    \Filament\Forms\Components\Wizard\Step::make('Dados de Acesso')
+                Wizard::make([
+                    Step::make('Dados de Acesso')
                         ->schema([
                             $this->getNameFormComponent()
                                 ->label('Nome do responsável'),
                             $this->getEmailFormComponent(),
-                            \Filament\Forms\Components\TextInput::make('phone')
+                            TextInput::make('phone')
                                 ->label('Telefone / WhatsApp')
                                 ->tel()
                                 ->required()
@@ -27,9 +48,9 @@ class CustomRegister extends BaseRegister
                             $this->getPasswordConfirmationFormComponent(),
                         ]),
 
-                    \Filament\Forms\Components\Wizard\Step::make('Sua Empresa')
+                    Step::make('Sua Empresa')
                         ->schema([
-                            \Filament\Forms\Components\Radio::make('account_type')
+                            Radio::make('account_type')
                                 ->label('Tipo de conta')
                                 ->options([
                                     'empresa' => 'Empresa (CNPJ)',
@@ -40,17 +61,17 @@ class CustomRegister extends BaseRegister
                                 ->required()
                                 ->live(),
 
-                            \Filament\Forms\Components\TextInput::make('cnpj')
+                            TextInput::make('cnpj')
                                 ->label('CNPJ')
                                 ->mask('99.999.999/9999-99')
-                                ->visible(fn (\Filament\Forms\Get $get) => $get('account_type') === 'empresa')
+                                ->visible(fn (Get $get) => $get('account_type') === 'empresa')
                                 ->helperText('Consulta automática na Receita Federal.')
                                 ->live(onBlur: true)
-                                ->afterStateUpdated(function (string $state, \Filament\Forms\Set $set) {
+                                ->afterStateUpdated(function (string $state, Set $set) {
                                     $cnpj = preg_replace('/[^0-9]/', '', $state);
                                     if (strlen($cnpj) === 14) {
                                         try {
-                                            $response = \Illuminate\Support\Facades\Http::get("https://brasilapi.com.br/api/cnpj/v1/{$cnpj}");
+                                            $response = Http::get("https://brasilapi.com.br/api/cnpj/v1/{$cnpj}");
                                             if ($response->successful()) {
                                                 $data = $response->json();
                                                 $set('company_name', $data['razao_social'] ?? '');
@@ -62,48 +83,48 @@ class CustomRegister extends BaseRegister
                                     }
                                 }),
 
-                            \Filament\Forms\Components\TextInput::make('cpf')
+                            TextInput::make('cpf')
                                 ->label('CPF (Opcional)')
                                 ->mask('999.999.999-99')
-                                ->visible(fn (\Filament\Forms\Get $get) => $get('account_type') === 'autonomo'),
+                                ->visible(fn (Get $get) => $get('account_type') === 'autonomo'),
 
-                            \Filament\Forms\Components\TextInput::make('company_name')
+                            TextInput::make('company_name')
                                 ->label('Nome da Empresa / Razão Social')
                                 ->required()
                                 ->maxLength(255),
 
-                            \Filament\Forms\Components\TextInput::make('trade_name')
+                            TextInput::make('trade_name')
                                 ->label('Nome Fantasia')
                                 ->maxLength(255)
-                                ->visible(fn (\Filament\Forms\Get $get) => $get('account_type') === 'empresa'),
+                                ->visible(fn (Get $get) => $get('account_type') === 'empresa'),
                         ]),
 
-                    \Filament\Forms\Components\Wizard\Step::make('Termos Legais')
+                    Step::make('Termos Legais')
                         ->schema([
-                            \Filament\Forms\Components\Checkbox::make('terms_of_use')
+                            Checkbox::make('terms_of_use')
                                 ->label('Li e concordo com os Termos de Uso')
                                 ->required()
                                 ->accepted(),
-                            \Filament\Forms\Components\Checkbox::make('privacy_policy')
+                            Checkbox::make('privacy_policy')
                                 ->label('Li e concordo com a Política de Privacidade')
                                 ->required()
                                 ->accepted(),
                         ]),
                 ])
-                ->submitAction(new \Illuminate\Support\HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-1 gap-1 font-medium rounded-lg border transition-colors outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-4 text-sm text-white shadow focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Criar Conta</button>'))
+                    ->submitAction(new HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-1 gap-1 font-medium rounded-lg border transition-colors outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-4 text-sm text-white shadow focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Criar Conta</button>')),
             ])
             ->statePath('data');
     }
 
-    protected function handleRegistration(array $data): \Illuminate\Database\Eloquent\Model
+    protected function handleRegistration(array $data): Model
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
-            $trialPlan = \App\Models\Plan::where('slug', 'trial')->first();
+        return DB::transaction(function () use ($data) {
+            $trialPlan = Plan::where('slug', 'trial')->first();
 
-            $company = \App\Models\Company::create([
+            $company = Company::create([
                 'name' => $data['company_name'],
                 'phone' => $data['phone'],
-                'slug' => \Illuminate\Support\Str::slug($data['company_name']) . '-' . rand(100, 999),
+                'slug' => Str::slug($data['company_name']).'-'.rand(100, 999),
                 'status' => 'active',
                 'plan_id' => $trialPlan?->id,
                 'plan' => 'trial',
@@ -116,7 +137,7 @@ class CustomRegister extends BaseRegister
                 'is_onboarding_completed' => false,
             ]);
 
-            \App\Models\SubscriptionAuditLog::create([
+            SubscriptionAuditLog::create([
                 'company_id' => $company->id,
                 'action' => 'trial_started',
                 'new_status' => 'trial',
@@ -131,14 +152,14 @@ class CustomRegister extends BaseRegister
                 'password' => $data['password'],
                 'phone' => $data['phone'],
                 'company_id' => $company->id,
-                'role' => \App\Models\User::ROLE_COMPANY_ADMIN,
+                'role' => User::ROLE_COMPANY_ADMIN,
                 'status' => 'active',
             ]);
 
             // Save Legal Consents
-            $termsDoc = \App\Models\PlatformLegalDocument::where('type', 'terms')->where('is_active', true)->latest('published_at')->first();
+            $termsDoc = PlatformLegalDocument::where('type', 'terms')->where('is_active', true)->latest('published_at')->first();
             if ($termsDoc) {
-                \App\Models\PlatformLegalConsent::create([
+                PlatformLegalConsent::create([
                     'user_id' => $user->id,
                     'platform_legal_document_id' => $termsDoc->id,
                     'ip_address' => request()->ip(),
@@ -146,9 +167,9 @@ class CustomRegister extends BaseRegister
                 ]);
             }
 
-            $privacyDoc = \App\Models\PlatformLegalDocument::where('type', 'privacy')->where('is_active', true)->latest('published_at')->first();
+            $privacyDoc = PlatformLegalDocument::where('type', 'privacy')->where('is_active', true)->latest('published_at')->first();
             if ($privacyDoc) {
-                \App\Models\PlatformLegalConsent::create([
+                PlatformLegalConsent::create([
                     'user_id' => $user->id,
                     'platform_legal_document_id' => $privacyDoc->id,
                     'ip_address' => request()->ip(),
@@ -160,19 +181,19 @@ class CustomRegister extends BaseRegister
         });
     }
 
-    public function getHeading(): string | \Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         return 'Crie a sua conta gratuita';
     }
 
-    public function getSubheading(): string | \Illuminate\Contracts\Support\Htmlable
+    public function getSubheading(): string|Htmlable
     {
         return 'Automatize o seu atendimento agora mesmo.';
     }
 
-    public function loginAction(): \Filament\Actions\Action
+    public function loginAction(): Action
     {
-        return \Filament\Actions\Action::make('login')
+        return Action::make('login')
             ->link()
             ->label('Já tem uma conta? Faça login aqui')
             ->url(filament()->getLoginUrl());

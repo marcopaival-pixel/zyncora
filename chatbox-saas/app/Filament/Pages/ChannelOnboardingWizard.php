@@ -2,28 +2,33 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Channel;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Form;
-use Filament\Pages\Page;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Illuminate\Support\HtmlString;
-use App\Models\Channel;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\HtmlString;
 
 class ChannelOnboardingWizard extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationGroup = 'Atendimento';
+
     protected static ?string $navigationLabel = 'Adicionar Canal';
+
     protected static ?string $slug = 'channels/onboarding';
+
     protected static ?string $title = 'Assistente de Canais';
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string $view = 'filament.pages.channel-onboarding-wizard';
@@ -61,12 +66,12 @@ class ChannelOnboardingWizard extends Page implements HasForms
                                 ->label('Instruções')
                                 ->content(new HtmlString('Para o WhatsApp, acesse o painel da Meta for Developers e copie o seu <strong>Phone Number ID</strong> e o <strong>Access Token</strong> permanente.'))
                                 ->visible(fn ($get) => $get('type') === 'whatsapp'),
-                                
+
                             TextInput::make('external_ref')
                                 ->label(fn ($get) => $get('type') === 'whatsapp' ? 'Phone Number ID' : 'ID Externo')
                                 ->required()
                                 ->visible(fn ($get) => in_array($get('type'), ['whatsapp', 'widget'])),
-                                
+
                             TextInput::make('token_api')
                                 ->label('Token de Acesso / API Key')
                                 ->password()
@@ -78,10 +83,10 @@ class ChannelOnboardingWizard extends Page implements HasForms
                         ->schema([
                             Placeholder::make('resumo')
                                 ->label('Quase pronto!')
-                                ->content('Após clicar em "Finalizar", o sistema testará as credenciais. Se tudo estiver correto, o seu canal estará ativo e pronto para uso.')
+                                ->content('Após clicar em "Finalizar", o sistema testará as credenciais. Se tudo estiver correto, o seu canal estará ativo e pronto para uso.'),
                         ]),
                 ])
-                ->submitAction(new HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-1 gap-1 font-medium rounded-lg border transition-colors focus:outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-4 text-sm text-white shadow focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Finalizar e Conectar</button>'))
+                    ->submitAction(new HtmlString('<button type="submit" class="filament-button filament-button-size-md inline-flex items-center justify-center py-1 gap-1 font-medium rounded-lg border transition-colors focus:outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset min-h-[2.25rem] px-4 text-sm text-white shadow focus:ring-white border-transparent bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700">Finalizar e Conectar</button>')),
             ])
             ->statePath('data');
     }
@@ -91,12 +96,13 @@ class ChannelOnboardingWizard extends Page implements HasForms
         $state = $this->form->getState();
         $company = filament()->auth()->user()->company;
 
-        if (!\App\Models\Channel::canAddMoreChannels($company)) {
+        if (! Channel::canAddMoreChannels($company)) {
             Notification::make()
                 ->title('Limite Atingido')
                 ->body('Seu plano não permite adicionar mais canais. Faça o upgrade.')
                 ->danger()
                 ->send();
+
             return;
         }
 

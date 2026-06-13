@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Widgets\Concerns\RequiresCompanyOrPlatformAdmin;
 use App\Models\ChatLog;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -14,7 +13,7 @@ class LatestLogs extends BaseWidget
 
     protected static ?int $sort = 50;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Atividades Recentes do Sistema';
 
@@ -26,7 +25,7 @@ class LatestLogs extends BaseWidget
             ->emptyStateDescription('Ainda não há registos para o seu contexto.')
             ->query(function () {
                 return ChatLog::query()
-                    ->when(!auth()->user()->isPlatformAdmin(), fn($q) => $q->where('company_id', auth()->user()->company_id))
+                    ->when(! auth()->user()->isPlatformAdmin(), fn ($q) => $q->where('company_id', auth()->user()->company_id))
                     ->latest('logged_at');
             })
             ->columns([
@@ -46,4 +45,3 @@ class LatestLogs extends BaseWidget
             ->paginated([5]);
     }
 }
-

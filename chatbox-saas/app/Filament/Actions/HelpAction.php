@@ -2,10 +2,10 @@
 
 namespace App\Filament\Actions;
 
-use Filament\Actions\Action;
-use Illuminate\Contracts\View\View;
 use App\Models\HelpArticle;
 use App\Models\HelpLog;
+use Filament\Actions\Action;
+use Illuminate\Contracts\View\View;
 
 class HelpAction extends Action
 {
@@ -24,12 +24,12 @@ class HelpAction extends Action
             ->icon('heroicon-o-question-mark-circle')
             ->color('gray')
             ->slideOver()
-            ->modalHeading(fn () => 'Ajuda: ' . ($this->moduleName ?? 'Geral'))
+            ->modalHeading(fn () => 'Ajuda: '.($this->moduleName ?? 'Geral'))
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Fechar')
             ->modalContent(function (): View {
                 $article = HelpArticle::where('module', $this->moduleName)->where('is_active', true)->first();
-                
+
                 if ($article && auth()->check()) {
                     HelpLog::create([
                         'help_article_id' => $article->id,
@@ -41,7 +41,7 @@ class HelpAction extends Action
 
                 return view('filament.components.help-article-content', [
                     'article' => $article,
-                    'moduleName' => $this->moduleName
+                    'moduleName' => $this->moduleName,
                 ]);
             });
     }

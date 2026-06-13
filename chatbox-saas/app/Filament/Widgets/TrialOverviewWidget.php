@@ -15,7 +15,7 @@ class TrialOverviewWidget extends BaseWidget
             ->whereNotNull('trial_end_at')
             ->whereBetween('trial_end_at', [now(), now()->addDays(3)])
             ->count();
-            
+
         $highEngagementTrials = Company::where('status', 'trial')
             ->where('ai_credits_used', '>', 100)
             ->count();

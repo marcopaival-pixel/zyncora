@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\SecurityHeadersMiddleware;
 use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
@@ -13,7 +14,7 @@ class SecurityHeadersTest extends TestCase
             'security.csp.allow_unsafe_eval' => false,
         ]);
 
-        $middleware = app(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+        $middleware = app(SecurityHeadersMiddleware::class);
         $csp = $this->invokeBuildCsp($middleware);
 
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
@@ -26,7 +27,7 @@ class SecurityHeadersTest extends TestCase
             'security.csp.allow_unsafe_eval' => true,
         ]);
 
-        $middleware = app(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+        $middleware = app(SecurityHeadersMiddleware::class);
         $csp = $this->invokeBuildCsp($middleware);
 
         $this->assertStringContainsString("'unsafe-eval'", $csp);
@@ -45,7 +46,7 @@ class SecurityHeadersTest extends TestCase
         );
     }
 
-    protected function invokeBuildCsp(\App\Http\Middleware\SecurityHeadersMiddleware $middleware): string
+    protected function invokeBuildCsp(SecurityHeadersMiddleware $middleware): string
     {
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('buildContentSecurityPolicy');

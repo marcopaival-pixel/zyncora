@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\KnowledgeBaseResource\Pages;
 
+use App\Filament\Pages\PremiumArea;
 use App\Filament\Resources\KnowledgeBaseResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -21,7 +22,7 @@ class ListKnowledgeBases extends ListRecords
                 ->label('Recursos Avançados')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(\App\Filament\Pages\PremiumArea::getUrl()),
+                ->url(PremiumArea::getUrl()),
             Actions\CreateAction::make(),
         ];
     }

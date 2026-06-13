@@ -2,8 +2,20 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\PasswordRecoveryAudit;
+use App\Models\User;
+use App\Notifications\PasswordChangedNotification;
+use Filament\Facades\Filament;
+use Filament\Forms\Form;
+use Filament\Http\Responses\Auth\Contracts\PasswordResetResponse;
+use Filament\Notifications\Notification;
 use Filament\Pages\Auth\PasswordReset\ResetPassword as BaseResetPassword;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 
 class CustomResetPassword extends BaseResetPassword
 {
@@ -24,7 +36,7 @@ class CustomResetPassword extends BaseResetPassword
         return null;
     }
 
-    public function form(\Filament\Forms\Form $form): \Filament\Forms\Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -33,7 +45,7 @@ class CustomResetPassword extends BaseResetPassword
                 $this->getPasswordFormComponent()
                     ->label('Nova Senha')
                     ->rules([
-                        \Illuminate\Validation\Rules\Password::min(8)
+                        Password::min(8)
                             ->letters()
                             ->mixedCase()
                             ->numbers()
@@ -51,27 +63,27 @@ class CustomResetPassword extends BaseResetPassword
             ]);
     }
 
-    public function resetPassword(): ?\Filament\Http\Responses\Auth\Contracts\PasswordResetResponse
+    public function resetPassword(): ?PasswordResetResponse
     {
         $data = $this->form->getState();
         $email = $data['email'];
 
-        $status = \Illuminate\Support\Facades\Password::broker(\Filament\Facades\Filament::auth()->getProvider()->name ?? config('auth.defaults.passwords'))->reset(
+        $status = \Illuminate\Support\Facades\Password::broker(Filament::auth()->getProvider()->name ?? config('auth.defaults.passwords'))->reset(
             $data,
-            function (\App\Models\User $user, string $password) {
-                $user->password = \Illuminate\Support\Facades\Hash::make($password);
-                $user->setRememberToken(\Illuminate\Support\Str::random(60));
+            function (User $user, string $password) {
+                $user->password = Hash::make($password);
+                $user->setRememberToken(Str::random(60));
                 $user->save();
 
-                event(new \Illuminate\Auth\Events\PasswordReset($user));
+                event(new PasswordReset($user));
 
                 // Invalidar sessões ativas
-                \Illuminate\Support\Facades\DB::table('sessions')
+                DB::table('sessions')
                     ->where('user_id', $user->id)
                     ->delete();
 
                 // Auditoria de sucesso
-                \App\Models\PasswordRecoveryAudit::create([
+                PasswordRecoveryAudit::create([
                     'user_id' => $user->id,
                     'email' => $user->email,
                     'ip_address' => request()->ip(),
@@ -81,21 +93,21 @@ class CustomResetPassword extends BaseResetPassword
                 ]);
 
                 // Enviar notificação de senha alterada
-                $user->notify(new \App\Notifications\PasswordChangedNotification(request()->ip(), request()->userAgent()));
+                $user->notify(new PasswordChangedNotification(request()->ip(), request()->userAgent()));
             },
         );
 
         if ($status === \Illuminate\Support\Facades\Password::PASSWORD_RESET) {
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('Senha alterada com sucesso.')
                 ->success()
                 ->send();
 
-            return app(\Filament\Http\Responses\Auth\Contracts\PasswordResetResponse::class);
+            return app(PasswordResetResponse::class);
         }
 
         // Se falhou (ex: token inválido ou expirado)
-        \App\Models\PasswordRecoveryAudit::create([
+        PasswordRecoveryAudit::create([
             'email' => $email,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
@@ -103,7 +115,7 @@ class CustomResetPassword extends BaseResetPassword
             'status' => 'failed',
         ]);
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title(__($status))
             ->danger()
             ->send();

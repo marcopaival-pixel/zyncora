@@ -17,6 +17,7 @@ class AIGeneratorService
         $apiKey = config('services.openai.key');
         if (empty($apiKey)) {
             Log::info('AI Generator skipped: API Key not configured.');
+
             return null; // Triggers fallback
         }
 
@@ -29,7 +30,7 @@ class AIGeneratorService
                     'model' => 'gpt-3.5-turbo',
                     'messages' => [
                         ['role' => 'system', 'content' => 'Você é um especialista em configuração de Chatbots para empresas. Retorne apenas JSON válido.'],
-                        ['role' => 'user', 'content' => $prompt]
+                        ['role' => 'user', 'content' => $prompt],
                     ],
                     'response_format' => ['type' => 'json_object'],
                     'temperature' => 0.7,
@@ -37,6 +38,7 @@ class AIGeneratorService
 
             if ($response->successful()) {
                 $content = $response->json('choices.0.message.content');
+
                 return json_decode($content, true);
             }
 
@@ -51,6 +53,7 @@ class AIGeneratorService
     private function buildPrompt(Company $company, string $segment, string $objective, array $channels): string
     {
         $channelsStr = implode(', ', $channels);
+
         return <<<PROMPT
 Gere a configuração inicial para o chatbot da empresa "{$company->name}", que atua no segmento de "{$segment}".
 O objetivo principal do chatbot é: "{$objective}".

@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\ChatbotResource\Pages;
 
 use App\Filament\Resources\ChatbotResource;
+use App\Helpers\SegmentHelper;
 use App\Models\Chatbot;
+use App\Services\AgentPersonalizationService;
+use Filament\Forms;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms;
 use Illuminate\Support\HtmlString;
 
 class CreateChatbot extends CreateRecord
@@ -21,8 +24,11 @@ class CreateChatbot extends CreateRecord
     protected ?string $subheading = 'Configure seu assistente em menos de 5 minutos.';
 
     protected bool $generateWithAi = true;
+
     protected string $chatbotObjective = 'suporte';
+
     protected array $chatbotChannels = ['site'];
+
     protected ?string $chatbotSegment = null;
 
     protected function getSteps(): array
@@ -59,7 +65,7 @@ class CreateChatbot extends CreateRecord
                         ->label('Telefone WhatsApp (E.164)')
                         ->maxLength(64)
                         ->placeholder('+5511999999999')
-                        ->visible(fn(Forms\Get $get) => $get('default_channel') === 'whatsapp'),
+                        ->visible(fn (Forms\Get $get) => $get('default_channel') === 'whatsapp'),
                 ]),
 
             Step::make('Perfil e Segmento')
@@ -68,7 +74,7 @@ class CreateChatbot extends CreateRecord
                 ->schema([
                     Forms\Components\Select::make('chatbot_segment')
                         ->label('Qual o segmento da sua empresa?')
-                        ->options(\App\Helpers\SegmentHelper::getSecondarySegments())
+                        ->options(SegmentHelper::getSecondarySegments())
                         ->searchable()
                         ->required()
                         ->helperText('A IA usará este segmento para criar fluxos e respostas automaticamente.'),
@@ -90,7 +96,7 @@ class CreateChatbot extends CreateRecord
                             'site' => 'Site / WebChat',
                             'whatsapp' => 'WhatsApp',
                             'instagram' => 'Instagram',
-                            'facebook' => 'Facebook Messenger'
+                            'facebook' => 'Facebook Messenger',
                         ])
                         ->required()
                         ->default(['whatsapp']),
@@ -145,21 +151,21 @@ class CreateChatbot extends CreateRecord
             $company = $chatbot->company;
             $segment = $this->chatbotSegment ?? $company->segment ?? 'Outro Segmento';
             $channels = $this->chatbotChannels;
-            
-            app(\App\Services\AgentPersonalizationService::class)->generateForSegment(
-                $company, 
-                $chatbot, 
-                $segment, 
-                $this->chatbotObjective, 
+
+            app(AgentPersonalizationService::class)->generateForSegment(
+                $company,
+                $chatbot,
+                $segment,
+                $this->chatbotObjective,
                 $channels
             );
 
             // Set to READY after generating
             $chatbot->update(['status' => Chatbot::STATUS_READY]);
 
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('IA configurou seu assistente com sucesso!')
-                ->body('O assistente foi treinado com o segmento: ' . $segment . '. Revise e publique!')
+                ->body('O assistente foi treinado com o segmento: '.$segment.'. Revise e publique!')
                 ->success()
                 ->send();
         }

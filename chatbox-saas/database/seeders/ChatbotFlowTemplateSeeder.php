@@ -24,15 +24,15 @@ class ChatbotFlowTemplateSeeder extends Seeder
                                 '3' => ['id' => 3, 'name' => 'buttons', 'data' => ['params' => ['text' => 'Escolha uma das opções abaixo para agilizar seu contato:', 'btn1' => 'Comercial', 'btn2' => 'Suporte Técnico', 'btn3' => 'Financeiro']], 'class' => 'node-buttons', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '2', 'output' => 'output_1']]]], 'outputs' => [
                                     'output_1' => ['connections' => [['node' => '4', 'output' => 'input_1']]],
                                     'output_2' => ['connections' => [['node' => '5', 'output' => 'input_1']]],
-                                    'output_3' => ['connections' => [['node' => '6', 'output' => 'input_1']]]
+                                    'output_3' => ['connections' => [['node' => '6', 'output' => 'input_1']]],
                                 ], 'pos_x' => 700, 'pos_y' => 200],
                                 '4' => ['id' => 4, 'name' => 'message', 'data' => ['params' => ['text' => 'Perfeito! Vou te transferir para nossa equipe comercial. Um momento...']], 'class' => 'node-message', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '3', 'output' => 'output_1']]]], 'outputs' => ['output_1' => ['connections' => []]], 'pos_x' => 1100, 'pos_y' => 50],
                                 '5' => ['id' => 5, 'name' => 'message', 'data' => ['params' => ['text' => 'Vou te conectar com um técnico agora mesmo. Por favor, descreva o problema brevemente.']], 'class' => 'node-message', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '3', 'output' => 'output_2']]]], 'outputs' => ['output_1' => ['connections' => []]], 'pos_x' => 1100, 'pos_y' => 200],
                                 '6' => ['id' => 6, 'name' => 'message', 'data' => ['params' => ['text' => 'Entendido. Para questões financeiras, informe o CPF/CNPJ ou número do pedido.']], 'class' => 'node-message', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '3', 'output' => 'output_3']]]], 'outputs' => ['output_1' => ['connections' => []]], 'pos_x' => 1100, 'pos_y' => 350],
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'name' => '💰 Qualificação de Vendas (BANT)',
@@ -48,10 +48,10 @@ class ChatbotFlowTemplateSeeder extends Seeder
                                 '3' => ['id' => 3, 'name' => 'input', 'data' => ['params' => ['label' => 'Qual o seu nome completo?', 'variable' => 'lead_nome']], 'class' => 'node-input', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '2', 'output' => 'output_1']]]], 'outputs' => ['output_1' => ['connections' => [['node' => '4', 'output' => 'input_1']]]], 'pos_x' => 650, 'pos_y' => 250],
                                 '4' => ['id' => 4, 'name' => 'input', 'data' => ['params' => ['label' => 'Qual o seu orçamento aproximado para este projeto?', 'variable' => 'lead_budget']], 'class' => 'node-input', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '3', 'output' => 'output_1']]]], 'outputs' => ['output_1' => ['connections' => [['node' => '5', 'output' => 'input_1']]]], 'pos_x' => 950, 'pos_y' => 250],
                                 '5' => ['id' => 5, 'name' => 'message', 'data' => ['params' => ['text' => 'Obrigado @{{lead_nome}}! Recebemos suas informações. Um consultor entrará em contato em breve.']], 'class' => 'node-message', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '4', 'output' => 'output_1']]]], 'outputs' => ['output_1' => ['connections' => []]], 'pos_x' => 1250, 'pos_y' => 250],
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'name' => '📋 Pesquisa de Satisfação',
@@ -67,14 +67,14 @@ class ChatbotFlowTemplateSeeder extends Seeder
                                 '3' => ['id' => 3, 'name' => 'buttons', 'data' => ['params' => ['text' => 'Avalie sua experiência:', 'btn1' => '⭐ Excelente', 'btn2' => '😐 Regular', 'btn3' => '😞 Ruim']], 'class' => 'node-buttons', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '2', 'output' => 'output_1']]]], 'outputs' => [
                                     'output_1' => ['connections' => [['node' => '4', 'output' => 'input_1']]],
                                     'output_2' => ['connections' => [['node' => '4', 'output' => 'input_1']]],
-                                    'output_3' => ['connections' => [['node' => '4', 'output' => 'input_1']]]
+                                    'output_3' => ['connections' => [['node' => '4', 'output' => 'input_1']]],
                                 ], 'pos_x' => 700, 'pos_y' => 200],
                                 '4' => ['id' => 4, 'name' => 'message', 'data' => ['params' => ['text' => 'Muito obrigado pelo feedback! Isso nos ajuda a melhorar constantemente.']], 'class' => 'node-message', 'html' => '', 'inputs' => ['input_1' => ['connections' => [['node' => '3', 'output' => 'output_1'], ['node' => '3', 'output' => 'output_2'], ['node' => '3', 'output' => 'output_3']]]], 'outputs' => ['output_1' => ['connections' => []]], 'pos_x' => 1050, 'pos_y' => 200],
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $template) {

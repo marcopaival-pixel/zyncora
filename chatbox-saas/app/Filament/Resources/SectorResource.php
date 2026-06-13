@@ -137,4 +137,3 @@ class SectorResource extends Resource
         ];
     }
 }
-

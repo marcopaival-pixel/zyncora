@@ -24,7 +24,7 @@ class Dashboard extends BaseDashboard
             .' · Visão geral da operação, métricas e atalhos.';
     }
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|string|array
     {
         return 12;
     }

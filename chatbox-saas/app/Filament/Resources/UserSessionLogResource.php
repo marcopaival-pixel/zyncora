@@ -4,21 +4,19 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserSessionLogResource\Pages;
 use App\Models\UserSessionLog;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Split;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserSessionLogResource extends Resource
 {
@@ -29,7 +27,7 @@ class UserSessionLogResource extends Resource
     protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Sessão';
-    
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()?->canViewLogs() ?? false;
@@ -92,11 +90,11 @@ class UserSessionLogResource extends Resource
                                                     TextEntry::make('browser')
                                                         ->icon('heroicon-m-computer-desktop')
                                                         ->state(fn ($record) => "{$record->browser} / {$record->platform}")
-                                                        ->suffix(fn ($record) => " (" . ucfirst($record->device_type ?? 'Desconhecido') . ")"),
-                                                ])
+                                                        ->suffix(fn ($record) => ' ('.ucfirst($record->device_type ?? 'Desconhecido').')'),
+                                                ]),
                                             ])
-                                            ->contained(true)
-                                    ])
+                                            ->contained(true),
+                                    ]),
                             ])
                     )
                     ->description(fn ($record) => $record->user?->email),
@@ -140,7 +138,7 @@ class UserSessionLogResource extends Resource
                     ->action(function ($record) {
                         // Invalida na tabela de sessões do Laravel
                         \DB::table('sessions')->where('id', $record->session_id)->delete();
-                        
+
                         $record->update([
                             'is_active' => false,
                             'logout_at' => now(),
@@ -161,4 +159,3 @@ class UserSessionLogResource extends Resource
         ];
     }
 }
-

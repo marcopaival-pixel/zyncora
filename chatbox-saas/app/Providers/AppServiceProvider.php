@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\Fiscal\IFiscalProvider;
 use App\Events\MessageCreated;
+use App\Listeners\HandleLogoutSession;
+use App\Listeners\LogFailedLoginAttempt;
+use App\Listeners\LogSuccessfulLogin;
 use App\Listeners\QueueWhatsAppOutbound;
 use App\Models\Message;
 use App\Models\Plan;
@@ -10,11 +14,26 @@ use App\Models\User;
 use App\Observers\MessageObserver;
 use App\Observers\PlanObserver;
 use App\Observers\UserObserver;
+use App\Services\Fiscal\Providers\AsaasFiscalProvider;
+use App\Services\Fiscal\Providers\ENotasProvider;
+use App\Services\Fiscal\Providers\FocusNFeProvider;
+use App\Services\TenantService;
 use Database\Seeders\DemoUsersSeeder;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Field;
+use Filament\Forms\Components\Select;
 use Filament\Navigation\NavigationGroup;
+use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -26,14 +45,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(\App\Services\TenantService::class);
+        $this->app->singleton(TenantService::class);
 
-        $this->app->bind(\App\Contracts\Fiscal\IFiscalProvider::class, function ($app) {
+        $this->app->bind(IFiscalProvider::class, function ($app) {
             $provider = config('fiscal.default_provider', 'enotas');
-            return match($provider) {
-                'focus' => new \App\Services\Fiscal\Providers\FocusNFeProvider(),
-                'asaas' => new \App\Services\Fiscal\Providers\AsaasFiscalProvider(),
-                default => new \App\Services\Fiscal\Providers\ENotasProvider(),
+
+            return match ($provider) {
+                'focus' => new FocusNFeProvider,
+                'asaas' => new AsaasFiscalProvider,
+                default => new ENotasProvider,
             };
         });
     }
@@ -43,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Database\Eloquent\Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(! app()->isProduction());
 
         $this->maybeSeedDemoUsersInLocalDev();
         $this->registerFilamentNavigationGroups();
@@ -56,11 +76,11 @@ class AppServiceProvider extends ServiceProvider
                 ->extremePaginationLinks();
         });
 
-        \Filament\Tables\Filters\SelectFilter::configureUsing(function (\Filament\Tables\Filters\SelectFilter $filter): void {
+        SelectFilter::configureUsing(function (SelectFilter $filter): void {
             $filter->native(false);
         });
 
-        \Filament\Forms\Components\Select::configureUsing(function (\Filament\Forms\Components\Select $component): void {
+        Select::configureUsing(function (Select $component): void {
             $component->native(false);
         });
 
@@ -69,21 +89,21 @@ class AppServiceProvider extends ServiceProvider
         Plan::observe(PlanObserver::class);
 
         Event::listen(MessageCreated::class, QueueWhatsAppOutbound::class);
-        Event::listen(\Illuminate\Auth\Events\Login::class, \App\Listeners\LogSuccessfulLogin::class);
-        Event::listen(\Illuminate\Auth\Events\Failed::class, \App\Listeners\LogFailedLoginAttempt::class);
-        Event::listen(\Illuminate\Auth\Events\Logout::class, \App\Listeners\HandleLogoutSession::class);
+        Event::listen(Login::class, LogSuccessfulLogin::class);
+        Event::listen(Failed::class, LogFailedLoginAttempt::class);
+        Event::listen(Logout::class, HandleLogoutSession::class);
 
-        \Filament\Forms\Components\Field::macro('withHelp', function (string $title, string $description, ?array $examples = null) {
-            /** @var \Filament\Forms\Components\Field $this */
+        Field::macro('withHelp', function (string $title, string $description, ?array $examples = null) {
+            /** @var Field $this */
             return $this->hintAction(
-                \Filament\Forms\Components\Actions\Action::make('help')
+                Action::make('help')
                     ->icon('heroicon-o-question-mark-circle')
                     ->modalHeading($title)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Fechar')
                     ->modalContent(fn () => view('filament.components.field-help-content', [
                         'description' => $description,
-                        'examples' => $examples
+                        'examples' => $examples,
                     ]))
             );
         });
@@ -129,9 +149,9 @@ class AppServiceProvider extends ServiceProvider
                     ->collapsed(),
             ]);
 
-            \Filament\Support\Facades\FilamentView::registerRenderHook(
-                \Filament\View\PanelsRenderHook::BODY_END,
-                fn (): string => auth()->check() ? \Illuminate\Support\Facades\Blade::render('@livewire(\'global-help-button\')') : ''
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => auth()->check() ? Blade::render('@livewire(\'global-help-button\')') : ''
             );
         });
     }

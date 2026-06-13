@@ -2,8 +2,10 @@
 
 namespace App\Services\Chatbot\Agents;
 
-use App\Models\Conversation;
 use App\Models\Chatbot;
+use App\Models\Conversation;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 abstract class BaseAgent
 {
@@ -18,8 +20,8 @@ abstract class BaseAgent
     protected function generateGeminiResponse(string $systemPrompt, array $memory, string $userMessage): string
     {
         $apiKey = config('chatbox.ai.gemini.api_key');
-        if (!$apiKey) {
-            return "Modo de simulação ativado: " . static::class;
+        if (! $apiKey) {
+            return 'Modo de simulação ativado: '.static::class;
         }
 
         $contents = $memory; // Histórico
@@ -29,7 +31,7 @@ abstract class BaseAgent
         ];
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(15)
+            $response = Http::timeout(15)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
                     'system_instruction' => [
                         'parts' => [
@@ -42,10 +44,10 @@ abstract class BaseAgent
             if ($response->successful()) {
                 return $response->json('candidates.0.content.parts.0.text') ?? 'Não consegui processar a resposta.';
             }
-            
-            \Illuminate\Support\Facades\Log::warning('GeminiAgentFailed', ['body' => $response->body()]);
+
+            Log::warning('GeminiAgentFailed', ['body' => $response->body()]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('GeminiAgentException', ['msg' => $e->getMessage()]);
+            Log::error('GeminiAgentException', ['msg' => $e->getMessage()]);
         }
 
         return 'Desculpe, ocorreu um erro ao gerar a resposta no momento.';

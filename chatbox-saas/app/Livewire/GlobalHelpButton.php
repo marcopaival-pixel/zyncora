@@ -9,7 +9,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Livewire\Component;
 
-class GlobalHelpButton extends Component implements HasForms, HasActions
+class GlobalHelpButton extends Component implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;

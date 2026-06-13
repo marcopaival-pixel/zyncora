@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Models\Chatbot;
-use App\Models\ChatbotSecurityToken;
-use App\Models\ChatbotLicense;
 use App\Models\ChatbotDomain;
-use Illuminate\Support\Str;
+use App\Models\ChatbotLicense;
+use App\Models\ChatbotSecurityToken;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Illuminate\Support\Str;
 
 class WidgetSecurityService
 {
@@ -45,7 +45,7 @@ class WidgetSecurityService
     public function generateSessionJwt(Chatbot $chatbot, string $domain, string $sessionId): string
     {
         $tokenModel = $chatbot->securityToken;
-        if (!$tokenModel) {
+        if (! $tokenModel) {
             throw new \Exception('Security tokens not found for chatbot.');
         }
 
@@ -67,12 +67,13 @@ class WidgetSecurityService
     public function validateSessionJwt(Chatbot $chatbot, string $jwt): ?object
     {
         $tokenModel = $chatbot->securityToken;
-        if (!$tokenModel) {
+        if (! $tokenModel) {
             return null;
         }
 
         try {
             $decoded = JWT::decode($jwt, new Key($tokenModel->secret_key, 'HS256'));
+
             return $decoded;
         } catch (\Exception $e) {
             return null;
@@ -97,7 +98,7 @@ class WidgetSecurityService
     public function validateLicense(Chatbot $chatbot): bool
     {
         $license = ChatbotLicense::where('chatbot_id', $chatbot->id)->first();
-        if (!$license || $license->status !== 'active') {
+        if (! $license || $license->status !== 'active') {
             return false;
         }
 

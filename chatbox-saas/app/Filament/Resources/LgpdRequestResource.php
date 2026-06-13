@@ -4,12 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LgpdRequestResource\Pages;
 use App\Models\LgpdRequest;
+use App\Services\LgpdService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use App\Services\LgpdService;
+use Illuminate\Database\Eloquent\Builder;
 
 class LgpdRequestResource extends Resource
 {
@@ -20,7 +21,7 @@ class LgpdRequestResource extends Resource
     protected static ?string $navigationGroup = 'Configurações & Auditoria';
 
     protected static ?string $modelLabel = 'Solicitação LGPD';
-    
+
     protected static ?string $pluralModelLabel = 'Solicitações LGPD';
 
     public static function shouldRegisterNavigation(): bool
@@ -33,7 +34,7 @@ class LgpdRequestResource extends Resource
         return auth()->user()?->canViewLogs() ?? false;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
         $user = auth()->user();
@@ -139,7 +140,7 @@ class LgpdRequestResource extends Resource
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->action(function ($record, LgpdService $lgpdService) {
                         $record->update(['status' => 'completed', 'completed_at' => now()]);
-                        $lgpdService->log("processed_lgpd_request", $record);
+                        $lgpdService->log('processed_lgpd_request', $record);
                     }),
             ])
             ->bulkActions([
@@ -158,4 +159,3 @@ class LgpdRequestResource extends Resource
         ];
     }
 }
-

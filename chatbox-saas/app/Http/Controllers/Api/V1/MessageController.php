@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessWebhookMessage;
 use App\Models\Company;
 use App\Models\Conversation;
-use App\Models\Message;
 use App\Services\ChatbotReplyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,7 +62,7 @@ class MessageController extends Controller
         ]);
 
         // Processamento da resposta do bot assincronamente
-        \App\Jobs\ProcessWebhookMessage::dispatch($conversation, $data['body']);
+        ProcessWebhookMessage::dispatch($conversation, $data['body']);
 
         return response()->json([
             'visitor_message' => $visitor,

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AllRolesDemoUsersSeeder extends Seeder
@@ -18,7 +17,7 @@ class AllRolesDemoUsersSeeder extends Seeder
     {
         $company = Company::where('slug', 'demo')->first();
 
-        if (!$company) {
+        if (! $company) {
             $company = Company::create([
                 'name' => 'Empresa Demo',
                 'slug' => 'demo',

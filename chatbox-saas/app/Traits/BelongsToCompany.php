@@ -21,17 +21,18 @@ trait BelongsToCompany
         static::addGlobalScope('company', function (Builder $builder) {
             $tenantService = app(TenantService::class);
             $table = $builder->getQuery()->from;
-            
+
             // 1. Prioridade: Contexto definido explicitamente no TenantService (Middleware/API/Jobs)
             if ($companyId = $tenantService->getCompanyId()) {
                 $builder->where("{$table}.company_id", $companyId);
+
                 return;
             }
 
             // 2. Contexto de Usuário Autenticado (Painel Admin Filament)
             if (auth()->check()) {
                 $user = auth()->user();
-                
+
                 // Super-admins da plataforma veem todos os dados
                 if ($user->isPlatformAdmin()) {
                     return;
@@ -40,6 +41,7 @@ trait BelongsToCompany
                 // Usuários vinculados a uma empresa veem apenas os seus dados
                 if ($user->company_id) {
                     $builder->where("{$table}.company_id", $user->company_id);
+
                     return;
                 }
             }
