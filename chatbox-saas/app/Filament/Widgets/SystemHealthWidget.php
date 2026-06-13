@@ -62,7 +62,7 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $pending = DB::table('jobs')->count();
+        $pending = \Illuminate\Support\Facades\Cache::remember('system_health_jobs_pending', now()->addMinutes(5), fn () => DB::table('jobs')->count());
         $warning = (int) config('chatbox.monitoring.queue_pending_warning', 50);
         $critical = (int) config('chatbox.monitoring.queue_pending_critical', 200);
         $color = $pending >= $critical ? 'danger' : ($pending >= $warning ? 'warning' : 'success');
@@ -81,7 +81,7 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $failed = DB::table('failed_jobs')->count();
+        $failed = \Illuminate\Support\Facades\Cache::remember('system_health_jobs_failed', now()->addMinutes(5), fn () => DB::table('failed_jobs')->count());
         $warning = (int) config('chatbox.monitoring.failed_jobs_warning', 1);
         $color = $failed >= $warning ? 'danger' : 'success';
 
@@ -99,9 +99,9 @@ class SystemHealthWidget extends BaseWidget
                 ->color('gray');
         }
 
-        $count = SystemErrorLog::query()
+        $count = \Illuminate\Support\Facades\Cache::remember('system_health_errors_24h', now()->addMinutes(10), fn () => SystemErrorLog::query()
             ->where('created_at', '>=', now()->subDay())
-            ->count();
+            ->count());
         $warning = (int) config('chatbox.monitoring.error_log_warning_24h', 10);
         $color = $count >= $warning ? 'warning' : 'success';
 
@@ -123,8 +123,8 @@ class SystemHealthWidget extends BaseWidget
 
     protected function getBusinessStat(): Stat
     {
-        $companies = Company::count();
-        $chats = Conversation::where('created_at', '>=', now()->startOfDay())->count();
+        $companies = \Illuminate\Support\Facades\Cache::remember('system_health_companies_count', now()->addMinutes(30), fn () => Company::count());
+        $chats = \Illuminate\Support\Facades\Cache::remember('system_health_chats_today', now()->addMinutes(10), fn () => Conversation::where('created_at', '>=', now()->startOfDay())->count());
 
         return Stat::make('Hoje', "{$chats} Chats")
             ->description("{$companies} Clientes Ativos")

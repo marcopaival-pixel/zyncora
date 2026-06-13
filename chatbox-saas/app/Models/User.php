@@ -52,6 +52,7 @@ class User extends Authenticatable implements FilamentUser
     public bool $is_impersonating = false;
     public ?string $impersonation_level = null;
     public ?int $original_company_id = null;
+    protected ?array $cachedPermissions = null;
 
     protected $hidden = [
         'password',
@@ -94,19 +95,27 @@ class User extends Authenticatable implements FilamentUser
             }
         }
 
-        if ($this->roles()->whereHas('permissions', function ($query) use ($permission) {
-            $query->where('name', $permission);
-        })->exists()) {
-            return true;
+        if ($this->cachedPermissions === null) {
+            $this->cachedPermissions = \Illuminate\Support\Facades\Cache::remember("user_{$this->id}_permissions_array", now()->addHours(1), function () {
+                $perms = [];
+                foreach ($this->roles()->with('permissions')->get() as $role) {
+                    foreach ($role->permissions as $p) {
+                        $perms[] = $p->name;
+                    }
+                }
+                
+                $mappedRole = app(RoleSyncService::class)->resolvePermissionsForUserRole($this->role);
+                if ($mappedRole) {
+                    foreach ($mappedRole->permissions()->get() as $p) {
+                        $perms[] = $p->name;
+                    }
+                }
+                
+                return array_unique($perms);
+            });
         }
 
-        $mappedRole = app(RoleSyncService::class)->resolvePermissionsForUserRole($this->role);
-
-        if ($mappedRole === null) {
-            return false;
-        }
-
-        return $mappedRole->permissions()->where('name', $permission)->exists();
+        return in_array($permission, $this->cachedPermissions);
     }
 
     public function hasAnyPermission(array $permissions): bool
@@ -268,5 +277,16 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return $query->where('company_id', $user->company_id);
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\SecurePasswordResetNotification($token));
     }
 }

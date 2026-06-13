@@ -31,12 +31,14 @@
     }}
 >
     <a
+        wire:key="sidebar-item-{{ md5($url ?? uniqid()) }}"
+        data-navigate-ignore="true"
         {{ \Filament\Support\generate_href_html($url, $shouldOpenUrlInNewTab) }}
         x-on:click="window.matchMedia(`(max-width: 1024px)`).matches && $store.sidebar.close()"
         @if ($sidebarCollapsible)
             x-data="{ tooltip: false }"
             x-effect="
-                tooltip = $store.sidebar.isOpen
+                tooltip = ($store.sidebar.isOpen || !window.matchMedia('(hover: hover)').matches)
                     ? false
                     : {
                           content: @js($slot->toHtml()),

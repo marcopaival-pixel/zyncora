@@ -29,26 +29,42 @@ class AiCreditPurchaseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('package_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('conversations_added')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('$'),
-                Forms\Components\TextInput::make('payment_method')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('completed'),
+                Forms\Components\Section::make('Detalhes da Compra')
+                    ->description('Informe os detalhes da compra de créditos de IA.')
+                    ->schema([
+                        Forms\Components\Select::make('company_id')
+                            ->relationship('company', 'name')
+                            ->required()
+                            ->label('Empresa')
+                            ->searchable()
+                            ->columnSpanFull(),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('package_name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->label('Nome do Pacote'),
+                                Forms\Components\TextInput::make('conversations_added')
+                                    ->required()
+                                    ->numeric()
+                                    ->label('Conversas Adicionadas'),
+                                Forms\Components\TextInput::make('price')
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('R$')
+                                    ->label('Preço'),
+                                Forms\Components\TextInput::make('payment_method')
+                                    ->maxLength(255)
+                                    ->default(null)
+                                    ->label('Método de Pagamento'),
+                                Forms\Components\TextInput::make('status')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->default('completed')
+                                    ->label('Status')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -84,7 +100,8 @@ class AiCreditPurchaseResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

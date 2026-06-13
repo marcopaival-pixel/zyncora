@@ -54,18 +54,18 @@
         <section class="container hero">
             <div class="hero-content">
                 <span class="section-tag">SaaS de Chatbox Inteligente</span>
-                <h1 class="hero-title">O chat que conecta você ao <span>mundo.</span></h1>
+                <h1 class="hero-title">{!! $settings->hero_title ?? 'O chat que conecta você ao <span>mundo.</span>' !!}</h1>
                 <p class="hero-subtitle">
-                    Atenda clientes, automatize respostas e aumente suas vendas com o chatbox mais completo do mercado.
+                    {{ $settings->hero_subtitle ?? 'Atenda clientes, automatize respostas e aumente suas vendas com o chatbox mais completo do mercado.' }}
                 </p>
                 <div class="hero-actions">
-                    <a href="/admin/register" class="btn-primary btn-shimmer">Começar agora <i data-lucide="arrow-right"></i></a>
-                    <a href="/demo" class="btn-secondary"><i data-lucide="play-circle"></i> Ver demonstração</a>
+                    <a href="/admin/register" class="btn-primary btn-shimmer">{{ $settings->primary_cta_text ?? 'Começar agora' }} <i data-lucide="arrow-right"></i></a>
+                    <a href="#contact" class="btn-secondary"><i data-lucide="play-circle"></i> {{ $settings->secondary_cta_text ?? 'Ver demonstração' }}</a>
                 </div>
                 <div class="hero-check-group">
                     <span><i data-lucide="check"></i> Fácil de instalar</span>
                     <span><i data-lucide="check"></i> Sem cartão</span>
-                    <span><i data-lucide="check"></i> 7 dias grátis</span>
+                    <span><i data-lucide="check"></i> {{ $settings->trial_days ?? 7 }} dias grátis</span>
                 </div>
             </div>
 
@@ -110,14 +110,20 @@
 
         <!-- Trusted By Section -->
         <div class="container trusted-by reveal">
-            <p class="trusted-title">EMPRESAS QUE CONFIAM NA ZYNKORA</p>
-            <div class="partners-grid">
-                <div class="partner-item"><i data-lucide="layers"></i> TECHWAVE</div>
-                <div class="partner-item"><i data-lucide="box"></i> BRANDLY</div>
-                <div class="partner-item"><i data-lucide="cpu"></i> CONNECTA</div>
-                <div class="partner-item"><i data-lucide="cog"></i> INNOVAR</div>
-                <div class="partner-item"><i data-lucide="activity"></i> GROWTH</div>
-                <div class="partner-item"><i data-lucide="globe"></i> FUTURO DIGITAL</div>
+            <p class="trusted-title">NOSSOS NÚMEROS DE SUCESSO</p>
+            <div class="partners-grid" style="gap: 2rem; flex-wrap: wrap;">
+                @if($settings->stats && count($settings->stats) > 0)
+                    @foreach($settings->stats as $stat)
+                    <div class="partner-item" style="display:flex;flex-direction:column;align-items:center;">
+                        <span style="font-size: 2rem; font-weight: bold; color: #10b981;">{{ $stat['value'] }}</span>
+                        <span style="font-size: 0.9rem; color: #9ca3af;">{{ $stat['label'] }}</span>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="partner-item"><i data-lucide="layers"></i> +10.000 Atendimentos</div>
+                    <div class="partner-item"><i data-lucide="activity"></i> 24h Online</div>
+                    <div class="partner-item"><i data-lucide="globe"></i> Multicanal</div>
+                @endif
             </div>
         </div>
 
@@ -226,34 +232,30 @@
         <section class="container audience reveal">
             <div class="section-header">
                 <span class="section-tag">Versatilidade</span>
-                <h2 class="section-title">Feito para o seu negócio</h2>
+                <h2 class="section-title">Benefícios da Plataforma</h2>
             </div>
-            <div class="audience-grid">
-                <div class="audience-card">
-                    <i data-lucide="stethoscope"></i>
-                    <h4>Clínicas</h4>
-                    <p>Agendamentos e triagem automatizada.</p>
-                </div>
-                <div class="audience-card">
-                    <i data-lucide="dumbbell"></i>
-                    <h4>Academias</h4>
-                    <p>Suporte a alunos e venda de planos.</p>
-                </div>
-                <div class="audience-card">
-                    <i data-lucide="shopping-cart"></i>
-                    <h4>E-commerce</h4>
-                    <p>Rastreio de pedidos e dúvidas frequentes.</p>
-                </div>
-                <div class="audience-card">
-                    <i data-lucide="briefcase"></i>
-                    <h4>Escritórios</h4>
-                    <p>Qualificação de leads e primeira abordagem.</p>
-                </div>
-                <div class="audience-card">
-                    <i data-lucide="wrench"></i>
-                    <h4>Prestadores</h4>
-                    <p>Orçamentos rápidos e FAQ de serviços.</p>
-                </div>
+            <div class="audience-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                @if($settings->benefits && count($settings->benefits) > 0)
+                    @foreach($settings->benefits as $benefit)
+                    <div class="audience-card" style="display: flex; align-items: center; gap: 10px; flex-direction: row; text-align: left; padding: 1rem;">
+                        <i data-lucide="check-circle" style="color: #10b981;"></i>
+                        <h4 style="margin: 0;">{{ $benefit['title'] }}</h4>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="audience-card" style="display: flex; align-items: center; gap: 10px; flex-direction: row; text-align: left; padding: 1rem;">
+                        <i data-lucide="check-circle" style="color: #10b981;"></i>
+                        <h4 style="margin: 0;">Chatbots com IA</h4>
+                    </div>
+                    <div class="audience-card" style="display: flex; align-items: center; gap: 10px; flex-direction: row; text-align: left; padding: 1rem;">
+                        <i data-lucide="check-circle" style="color: #10b981;"></i>
+                        <h4 style="margin: 0;">WhatsApp Oficial</h4>
+                    </div>
+                    <div class="audience-card" style="display: flex; align-items: center; gap: 10px; flex-direction: row; text-align: left; padding: 1rem;">
+                        <i data-lucide="check-circle" style="color: #10b981;"></i>
+                        <h4 style="margin: 0;">Atendimento Humano</h4>
+                    </div>
+                @endif
             </div>
         </section>
 
@@ -264,45 +266,55 @@
                 <h2 class="section-title">Planos Transparentes</h2>
             </div>
             <div class="pricing-grid">
-                <div class="pricing-card">
-                    <div class="featured-label" style="background-color: #10b981; color: white;">14 DIAS GRÁTIS</div>
-                    <div class="pricing-name">Start</div>
-                    <div class="pricing-price">R$ 79,90<span>/mês</span></div>
-                    <p style="text-align: center; font-size: 0.85rem; color: #10b981; font-weight: bold; margin-top: -10px; margin-bottom: 20px;">500 Conversas IA / mês</p>
-                    <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> 1 Canal de atendimento</li>
-                        <li><i data-lucide="check-circle"></i> 1 Atendente</li>
-                        <li><i data-lucide="check-circle"></i> 1 Chatbot + FAQ</li>
-                        <li><i data-lucide="check-circle"></i> Widget para Site</li>
-                    </ul>
-                    <a href="/admin/register" class="btn-login" style="width: 100%;">Teste sem cartão</a>
-                </div>
-                <div class="pricing-card featured">
-                    <div class="featured-label">⭐ MAIS ESCOLHIDO</div>
-                    <div class="pricing-name">Professional</div>
-                    <div class="pricing-price">R$ 199,90<span>/mês</span></div>
-                    <p style="text-align: center; font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-top: -10px; margin-bottom: 20px;">3.000 Conversas IA / mês</p>
-                    <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> 3 Canais de atendimento</li>
-                        <li><i data-lucide="check-circle"></i> 5 Atendentes</li>
-                        <li><i data-lucide="check-circle"></i> 3 Chatbots Inteligentes</li>
-                        <li><i data-lucide="check-circle"></i> Base de Conhecimento</li>
-                        <li><i data-lucide="check-circle"></i> 14 Dias Grátis</li>
-                    </ul>
-                    <a href="/admin/register" class="btn-primary" style="width: 100%;">Começar Agora</a>
-                </div>
-                <div class="pricing-card">
-                    <div class="pricing-name">Enterprise</div>
-                    <div class="pricing-price" style="font-size: 2rem;">A partir de R$ 999</div>
-                    <p style="text-align: center; font-size: 0.85rem; color: #f59e0b; font-weight: bold; margin-bottom: 20px;">10.000+ Conversas IA</p>
-                    <ul class="pricing-features">
-                        <li><i data-lucide="check-circle"></i> 10 Canais & 20 Atendentes</li>
-                        <li><i data-lucide="check-circle"></i> Integração via API & SLA</li>
-                        <li><i data-lucide="check-circle"></i> White Label</li>
-                        <li><i data-lucide="check-circle"></i> Gerente de conta dedicado</li>
-                    </ul>
-                    <a href="#contact" class="btn-login" style="width: 100%;">Falar com Vendas</a>
-                </div>
+                @forelse($plans as $plan)
+                    <div class="pricing-card {{ $plan->is_popular ? 'featured' : '' }}">
+                        @if($plan->price == 0)
+                            <div class="featured-label" style="background-color: #10b981; color: white;">GRÁTIS</div>
+                        @elseif($plan->is_popular)
+                            <div class="featured-label">⭐ MAIS ESCOLHIDO</div>
+                        @endif
+                        
+                        <div class="pricing-name">{{ $plan->name }}</div>
+                        <div class="pricing-price">
+                            @if($plan->price > 0)
+                                R$ {{ number_format($plan->price, 2, ',', '.') }}<span>/mês</span>
+                            @else
+                                Grátis
+                            @endif
+                        </div>
+                        
+                        @if($plan->max_ai_conversations > 0)
+                            <p style="text-align: center; font-size: 0.85rem; color: {{ $plan->is_popular ? '#38bdf8' : ($plan->price == 0 ? '#10b981' : '#f59e0b') }}; font-weight: bold; margin-top: -10px; margin-bottom: 20px;">
+                                {{ number_format($plan->max_ai_conversations, 0, '', '.') }} Conversas IA / mês
+                            </p>
+                        @endif
+                        
+                        <ul class="pricing-features">
+                            @if($plan->max_channels > 0)
+                                <li><i data-lucide="check-circle"></i> {{ $plan->max_channels }} {{ $plan->max_channels == 1 ? 'Canal' : 'Canais' }} de atendimento</li>
+                            @endif
+                            @if($plan->max_attendants > 0)
+                                <li><i data-lucide="check-circle"></i> {{ $plan->max_attendants }} {{ $plan->max_attendants == 1 ? 'Atendente' : 'Atendentes' }}</li>
+                            @endif
+                            @if($plan->max_chatbots > 0)
+                                <li><i data-lucide="check-circle"></i> {{ $plan->max_chatbots }} Chatbot{{ $plan->max_chatbots == 1 ? '' : 's' }}</li>
+                            @endif
+                            @foreach($plan->features ?? [] as $feature)
+                                <li><i data-lucide="check-circle"></i> {{ $feature }}</li>
+                            @endforeach
+                        </ul>
+                        
+                        @if($plan->price == 0)
+                            <a href="/admin/register?plan={{ $plan->slug }}" class="btn-login" style="width: 100%;">Teste sem cartão</a>
+                        @elseif($plan->is_popular)
+                            <a href="/admin/register?plan={{ $plan->slug }}" class="btn-primary" style="width: 100%;">Começar Agora</a>
+                        @else
+                            <a href="/admin/register?plan={{ $plan->slug }}" class="btn-login" style="width: 100%;">Assinar Plano</a>
+                        @endif
+                    </div>
+                @empty
+                    <p style="text-align: center; width: 100%; color: #9ca3af;">Nenhum plano disponível no momento.</p>
+                @endforelse
             </div>
         </section>
 
@@ -343,31 +355,32 @@
                         seu negócio.
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        @if($settings->contact_email)
                         <div style="display: flex; align-items: center; gap: 1rem; color: white;">
-                            <i data-lucide="mail"></i> contato@chatbotpro.com
+                            <i data-lucide="mail"></i> {{ $settings->contact_email }}
                         </div>
+                        @endif
+                        @if($settings->contact_phone)
                         <div style="display: flex; align-items: center; gap: 1rem; color: white;">
-                            <i data-lucide="phone"></i> +55 (11) 9999-9999
+                            <i data-lucide="phone"></i> {{ $settings->contact_phone }}
+                        </div>
+                        @endif
+                        @if($settings->contact_whatsapp)
+                        <div style="display: flex; align-items: center; gap: 1rem; color: white;">
+                            <i data-lucide="message-circle"></i> {{ $settings->contact_whatsapp }}
+                        </div>
+                        @endif
+                        
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            @if($settings->social_linkedin)<a href="{{ $settings->social_linkedin }}" target="_blank" style="color: white; opacity: 0.7; hover: opacity: 1;"><i data-lucide="linkedin"></i></a>@endif
+                            @if($settings->social_instagram)<a href="{{ $settings->social_instagram }}" target="_blank" style="color: white; opacity: 0.7; hover: opacity: 1;"><i data-lucide="instagram"></i></a>@endif
+                            @if($settings->social_facebook)<a href="{{ $settings->social_facebook }}" target="_blank" style="color: white; opacity: 0.7; hover: opacity: 1;"><i data-lucide="facebook"></i></a>@endif
+                            @if($settings->social_youtube)<a href="{{ $settings->social_youtube }}" target="_blank" style="color: white; opacity: 0.7; hover: opacity: 1;"><i data-lucide="youtube"></i></a>@endif
                         </div>
                     </div>
                 </div>
                 <div class="contact-form">
-                    <form>
-                        <div class="form-group">
-                            <label>Nome Completo</label>
-                            <input type="text" class="form-control" placeholder="Seu nome">
-                        </div>
-                        <div class="form-group">
-                            <label>E-mail Corporativo</label>
-                            <input type="email" class="form-control" placeholder="seuemail@empresa.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Mensagem</label>
-                            <textarea class="form-control" rows="4" placeholder="Como podemos ajudar?"></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary"
-                            style="width: 100%; border: none; cursor: pointer;">Enviar Mensagem</button>
-                    </form>
+                    @livewire('contact-form')
                 </div>
             </div>
         </section>

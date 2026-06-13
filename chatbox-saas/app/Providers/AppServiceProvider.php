@@ -5,8 +5,10 @@ namespace App\Providers;
 use App\Events\MessageCreated;
 use App\Listeners\QueueWhatsAppOutbound;
 use App\Models\Message;
+use App\Models\Plan;
 use App\Models\User;
 use App\Observers\MessageObserver;
+use App\Observers\PlanObserver;
 use App\Observers\UserObserver;
 use Database\Seeders\DemoUsersSeeder;
 use Filament\Facades\Filament;
@@ -64,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
         Message::observe(MessageObserver::class);
         User::observe(UserObserver::class);
+        Plan::observe(PlanObserver::class);
 
         Event::listen(MessageCreated::class, QueueWhatsAppOutbound::class);
         Event::listen(\Illuminate\Auth\Events\Login::class, \App\Listeners\LogSuccessfulLogin::class);
@@ -128,7 +131,7 @@ class AppServiceProvider extends ServiceProvider
 
             \Filament\Support\Facades\FilamentView::registerRenderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('@livewire(\'global-help-button\')')
+                fn (): string => auth()->check() ? \Illuminate\Support\Facades\Blade::render('@livewire(\'global-help-button\')') : ''
             );
         });
     }

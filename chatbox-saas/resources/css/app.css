@@ -288,3 +288,14 @@ body.fi-body {
 .fi-main > * {
     animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* Força a correção do ícone de select repetido em todo o painel (Paginação, Filtros, etc) */
+select, select.fi-select-input, .fi-ta-pagination select {
+    background-repeat: no-repeat !important;
+    background-size: 1.25rem 1.25rem !important;
+    background-position: right 0.5rem center !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    padding-right: 2.5rem !important;
+}

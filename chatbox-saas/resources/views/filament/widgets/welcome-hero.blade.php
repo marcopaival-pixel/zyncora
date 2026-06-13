@@ -101,23 +101,23 @@
 
         <div class="relative z-10 mt-8 pt-6 border-t border-white/5 flex flex-wrap items-center gap-4">
             @if($isPlatform)
-                <a href="{{ \App\Filament\SuperAdmin\Resources\CompanyResource::getUrl('index') }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
+                <a href="{{ \App\Filament\SuperAdmin\Resources\CompanyResource::getUrl('index', panel: 'super-admin') }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
                     <x-heroicon-o-building-office class="h-4 w-4" />
                     Empresas
                 </a>
-                <a href="{{ \App\Filament\Resources\UserResource::getUrl('index') }}" class="group inline-flex items-center gap-2 rounded-xl bg-white/5 px-6 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 transition-all hover:bg-white/10 hover:translate-y-[-2px] active:scale-95">
+                <a href="{{ \App\Filament\Resources\UserResource::getUrl('index', panel: 'admin') }}" class="group inline-flex items-center gap-2 rounded-xl bg-white/5 px-6 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 transition-all hover:bg-white/10 hover:translate-y-[-2px] active:scale-95">
                     <x-heroicon-o-users class="h-4 w-4" />
                     Usuários
                 </a>
             @elseif($isOrphan)
                 <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 italic">Vincule uma organização para habilitar atalhos.</span>
             @else
-                <a href="{{ \App\Filament\Pages\AtendimentoProfissional::getUrl() }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
+                <a href="{{ \App\Filament\Pages\AtendimentoProfissional::getUrl(panel: 'admin') }}" class="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-primary-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary-600/20 transition-all hover:bg-primary-500 hover:translate-y-[-2px] active:scale-95">
                     <x-heroicon-s-chat-bubble-left-right class="h-4 w-4" />
                     Novo Atendimento
                 </a>
 
-                <a href="{{ \App\Filament\Resources\ChatbotResource::getUrl('index') }}" class="group inline-flex items-center gap-2 rounded-xl bg-white/5 px-6 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 transition-all hover:bg-white/10 hover:translate-y-[-2px] active:scale-95">
+                <a href="{{ \App\Filament\Resources\ChatbotResource::getUrl('index', panel: 'admin') }}" class="group inline-flex items-center gap-2 rounded-xl bg-white/5 px-6 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 transition-all hover:bg-white/10 hover:translate-y-[-2px] active:scale-95">
                     <x-heroicon-o-cpu-chip class="h-4 w-4" />
                     Gerenciar Bots
                 </a>

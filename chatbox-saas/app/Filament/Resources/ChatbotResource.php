@@ -146,47 +146,7 @@ class ChatbotResource extends Resource
                                             ->required()
                                             ->native(true),
                                     ]),
-                                Forms\Components\Section::make('Configuração Assistida por IA (Opcional)')
-                                    ->description('Gera fluxos, FAQ e mensagem inicial automaticamente após salvar.')
-                                    ->icon('heroicon-o-sparkles')
-                                    ->schema([
-                                        Forms\Components\Toggle::make('generate_with_ai')
-                                            ->label('Gerar conteúdo inicial com IA')
-                                            ->default(true)
-                                            ->live(),
-                                        Forms\Components\Select::make('chatbot_objective')
-                                            ->label('Objetivo principal')
-                                            ->options([
-                                                'vendas' => 'Vendas e Conversão',
-                                                'suporte' => 'Suporte ao Cliente / SAC',
-                                                'agendamento' => 'Agendamentos / Reservas',
-                                                'captacao' => 'Captação de Leads',
-                                                'informacao' => 'Tirar Dúvidas / Informações',
-                                            ])
-                                            ->default('suporte')
-                                            ->native(true)
-                                            ->visible(fn(Forms\Get $get) => $get('generate_with_ai')),
-                                        Forms\Components\Select::make('chatbot_segment')
-                                            ->label('Segmento Específico')
-                                            ->options(\App\Helpers\SegmentHelper::getSecondarySegments())
-                                            ->searchable()
-                                            ->helperText('Selecione para usar um template específico.')
-                                            ->visible(fn(Forms\Get $get) => $get('generate_with_ai')),
-                                        Forms\Components\CheckboxList::make('chatbot_channels')
-                                            ->label('Canais de Atendimento')
-                                            ->options([
-                                                'site' => 'Site / WebChat',
-                                                'whatsapp' => 'WhatsApp',
-                                                'instagram' => 'Instagram',
-                                                'facebook' => 'Facebook Messenger',
-                                                'telegram' => 'Telegram'
-                                            ])
-                                            ->required()
-                                            ->default(['site'])
-                                            ->columns(2)
-                                            ->visible(fn(Forms\Get $get) => $get('generate_with_ai')),
-                                    ])
-                                    ->visibleOn('create'),
+
                             ]),
 
                         Forms\Components\Tabs\Tab::make('Canais e Atendimento')
@@ -339,7 +299,17 @@ class ChatbotResource extends Resource
                                             ])
                                             ->default('none')
                                             ->live()
-                                            ->columns(3),
+                                            ->columns(3)
+                                            ->disabled(function (?Chatbot $record = null) {
+                                                if (!$record || !$record->company) return false; // Allow on create maybe?
+                                                return !app(\App\Services\PlanService::class)->hasFeature($record->company, 'custom_mascot');
+                                            })
+                                            ->helperText(function (?Chatbot $record = null) {
+                                                if ($record && $record->company && !app(\App\Services\PlanService::class)->hasFeature($record->company, 'custom_mascot')) {
+                                                    return '🔒 Recurso Premium: Faça o upgrade de plano para desbloquear Mascotes 3D Interativos na sua página!';
+                                                }
+                                                return '';
+                                            }),
                                         Forms\Components\Placeholder::make('mascot_preview')
                                             ->label('Pré-visualização')
                                             ->content(function (Forms\Get $get) {

@@ -31,6 +31,8 @@ class CreateKnowledgeBase extends CreateRecord
     {
         if ($this->record->source_type === 'url') {
             \App\Jobs\ScrapeUrlForKnowledgeBase::dispatch($this->record);
+        } else {
+            \App\Jobs\ExtractFaqFromKnowledgeBaseJob::dispatch($this->record);
         }
     }
 }

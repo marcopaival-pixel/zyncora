@@ -25,10 +25,6 @@ class PlanResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return auth()->user()?->isPlatformAdmin() ?? false;
-    }
 
     public static function form(Form $form): Form
     {
@@ -67,22 +63,31 @@ class PlanResource extends Resource
                             ->description('Valor cobrado e periodicidade da fatura.')
                             ->schema([
                                 Forms\Components\TextInput::make('price')
-                                    ->label('Valor')
+                                    ->label('Valor Mensal')
                                     ->numeric()
                                     ->prefix('R$')
                                     ->placeholder('0,00')
                                     ->step(0.01)
                                     ->minValue(0)
                                     ->required(),
-                                Forms\Components\Select::make('interval')
-                                    ->label('Periodicidade')
+                                Forms\Components\TextInput::make('price_yearly')
+                                    ->label('Valor Anual')
+                                    ->numeric()
+                                    ->prefix('R$')
+                                    ->placeholder('0,00')
+                                    ->step(0.01)
+                                    ->minValue(0),
+                                Forms\Components\Select::make('update_behavior')
+                                    ->label('Regra de Assinatura (na alteração)')
                                     ->options([
-                                        'month' => 'Mensal',
-                                        'year' => 'Anual',
+                                        'keep_old' => 'Manter valor para clientes antigos',
+                                        'apply_new' => 'Aplicar novo valor para todos',
+                                        'apply_renewal' => 'Aplicar na próxima renovação',
                                     ])
-                                    ->default('month')
+                                    ->default('keep_old')
                                     ->required()
                                     ->native(false),
+
                             ])
                             ->columns(2),
                     ])
@@ -130,8 +135,20 @@ class PlanResource extends Resource
                             ->default(500)
                             ->suffix('conversas')
                             ->helperText('Franquia mensal de conversas geradas por IA.'),
+                        Forms\Components\TextInput::make('max_messages')
+                            ->label('Mensagens')
+                            ->numeric()
+                            ->integer()
+                            ->default(-1)
+                            ->helperText('-1 para ilimitado'),
+                        Forms\Components\TextInput::make('max_integrations')
+                            ->label('Integrações')
+                            ->numeric()
+                            ->integer()
+                            ->default(-1)
+                            ->helperText('-1 para ilimitado'),
                     ])
-                    ->columns(['default' => 1, 'sm' => 2, 'lg' => 5])
+                    ->columns(['default' => 1, 'sm' => 2, 'lg' => 3])
                     ->collapsible(),
 
                 Forms\Components\Section::make('Funcionalidades e destaque')
@@ -146,6 +163,10 @@ class PlanResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Grid::make(3)
                             ->schema([
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label('Ordem')
+                                    ->numeric()
+                                    ->default(0),
                                 Forms\Components\Toggle::make('is_active')
                                     ->label('Plano ativo')
                                     ->helperText('Se desligado, novas subscrições não devem usar este plano.')
@@ -156,22 +177,25 @@ class PlanResource extends Resource
                                     ->helperText('Destaque visual em listagens de planos, se a UI suportar.')
                                     ->default(false)
                                     ->inline(false),
-                                Forms\Components\Toggle::make('has_advanced_customization')
-                                    ->label('Personalização Avançada (Premium)')
-                                    ->default(false)
-                                    ->inline(false),
-                                Forms\Components\Toggle::make('has_quick_replies')
-                                    ->label('Quick Replies (Premium)')
-                                    ->default(false)
-                                    ->inline(false),
-                                Forms\Components\Toggle::make('has_contextual_ai')
-                                    ->label('IA Contextual (Premium)')
-                                    ->default(false)
-                                    ->inline(false),
-                                Forms\Components\Toggle::make('has_chatbot_faq')
-                                    ->label('FAQ no Chatbot (Premium)')
-                                    ->default(false)
-                                    ->inline(false),
+                            ]),
+                        Forms\Components\Grid::make(4)
+                            ->schema([
+                                Forms\Components\Toggle::make('has_advanced_customization')->label('Personalização Avançada')->inline(false),
+                                Forms\Components\Toggle::make('has_quick_replies')->label('Quick Replies')->inline(false),
+                                Forms\Components\Toggle::make('has_contextual_ai')->label('IA Contextual')->inline(false),
+                                Forms\Components\Toggle::make('has_chatbot_faq')->label('FAQ no Chatbot')->inline(false),
+                                Forms\Components\Toggle::make('has_whatsapp')->label('WhatsApp')->inline(false),
+                                Forms\Components\Toggle::make('has_telegram')->label('Telegram')->inline(false),
+                                Forms\Components\Toggle::make('has_instagram')->label('Instagram')->inline(false),
+                                Forms\Components\Toggle::make('has_facebook')->label('Facebook')->inline(false),
+                                Forms\Components\Toggle::make('has_webchat')->label('Webchat')->inline(false),
+                                Forms\Components\Toggle::make('has_openai')->label('OpenAI')->inline(false),
+                                Forms\Components\Toggle::make('has_rag')->label('RAG (IA)')->inline(false),
+                                Forms\Components\Toggle::make('has_inbox')->label('Caixa de Entrada')->inline(false),
+                                Forms\Components\Toggle::make('has_flow_builder')->label('Construtor de Fluxo')->inline(false),
+                                Forms\Components\Toggle::make('has_api')->label('Acesso à API')->inline(false),
+                                Forms\Components\Toggle::make('has_whitelabel')->label('White Label')->inline(false),
+                                Forms\Components\Toggle::make('has_webhooks')->label('Webhooks')->inline(false),
                             ]),
                     ]),
             ]);
@@ -186,7 +210,11 @@ class PlanResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->label('Preço')
+                    ->label('Mensal')
+                    ->money('BRL')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('price_yearly')
+                    ->label('Anual')
                     ->money('BRL')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('max_attendants')
@@ -215,7 +243,8 @@ class PlanResource extends Resource
                     ->fontFamily('mono')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('name')
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order')
             ->searchPlaceholder('Pesquisar plano ou slug…')
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -223,6 +252,11 @@ class PlanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ReplicateAction::make()
+                    ->beforeReplicaSaved(function (\Illuminate\Database\Eloquent\Model $replica): void {
+                        $replica->name = $replica->name . ' (Cópia)';
+                        $replica->slug = $replica->slug . '-copia-' . time();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -232,6 +266,13 @@ class PlanResource extends Resource
             ->emptyStateHeading('Nenhum plano')
             ->emptyStateDescription('Crie planos com limites e preços para aparecerem na página de assinatura.')
             ->emptyStateIcon('heroicon-o-credit-card');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            PlanResource\RelationManagers\AuditLogsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

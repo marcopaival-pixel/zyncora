@@ -29,20 +29,39 @@ class PaymentHistoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required()
-                    ->disabled(fn() => !auth()->user()->isPlatformAdmin()),
-                Forms\Components\TextInput::make('type')
-                    ->required(),
-                Forms\Components\TextInput::make('amount')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('status')
-                    ->required(),
-                Forms\Components\TextInput::make('gateway'),
-                Forms\Components\TextInput::make('external_id'),
-                Forms\Components\DateTimePicker::make('paid_at'),
+                Forms\Components\Section::make('Detalhes do Histórico Financeiro')
+                    ->description('Informe os detalhes do pagamento ou recibo.')
+                    ->schema([
+                        Forms\Components\Select::make('company_id')
+                            ->relationship('company', 'name')
+                            ->required()
+                            ->label('Empresa')
+                            ->searchable()
+                            ->columnSpanFull()
+                            ->disabled(fn() => !auth()->user()->isPlatformAdmin()),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('type')
+                                    ->required()
+                                    ->label('Tipo (ex: plan_subscription)'),
+                                Forms\Components\TextInput::make('amount')
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('R$')
+                                    ->label('Valor'),
+                                Forms\Components\TextInput::make('status')
+                                    ->required()
+                                    ->label('Status'),
+                                Forms\Components\TextInput::make('gateway')
+                                    ->label('Gateway'),
+                                Forms\Components\TextInput::make('external_id')
+                                    ->label('ID Externo')
+                                    ->columnSpanFull(),
+                                Forms\Components\DateTimePicker::make('paid_at')
+                                    ->label('Data do Pagamento')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -80,7 +99,8 @@ class PaymentHistoryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->slideOver(),
                 Tables\Actions\Action::make('download_invoice')
                     ->label('NFS-e')
                     ->icon('heroicon-o-document-arrow-down')

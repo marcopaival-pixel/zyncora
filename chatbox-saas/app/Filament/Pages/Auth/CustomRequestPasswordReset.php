@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Facades\Filament;
 use Filament\Pages\Auth\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -22,5 +23,60 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
     public function getSubheading(): string|Htmlable|null
     {
         return null;
+    }
+
+    public function request(): void
+    {
+        $data = $this->form->getState();
+        $email = $data['email'];
+        $ip = request()->ip();
+
+        // Rate Limit: 3 tentativas por hora por IP
+        $rateLimitKey = 'password_reset_request_' . $ip;
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            \App\Models\PasswordRecoveryAudit::create([
+                'email' => $email,
+                'ip_address' => $ip,
+                'user_agent' => request()->userAgent(),
+                'action' => 'rate_limited',
+                'status' => 'failed',
+            ]);
+
+            \Filament\Notifications\Notification::make()
+                ->title('Muitas tentativas')
+                ->body('Você realizou muitas solicitações recentemente. Tente novamente mais tarde.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        \Illuminate\Support\Facades\RateLimiter::hit($rateLimitKey, 3600);
+
+        $user = \App\Models\User::where('email', $email)->first();
+
+        // Sempre registramos a solicitação, quer o usuário exista ou não.
+        \App\Models\PasswordRecoveryAudit::create([
+            'user_id' => $user?->id,
+            'email' => $email,
+            'ip_address' => $ip,
+            'user_agent' => request()->userAgent(),
+            'action' => 'requested',
+            'status' => 'success',
+        ]);
+
+        if ($user) {
+            $status = \Illuminate\Support\Facades\Password::broker(Filament::auth()->getProvider()->name ?? config('auth.defaults.passwords'))
+                ->sendResetLink(['email' => $email]);
+        }
+
+        // Mensagem Genérica de Sucesso para prevenir enumeração de contas
+        $this->form->fill();
+
+        \Filament\Notifications\Notification::make()
+            ->title('Solicitação Enviada')
+            ->body('Se existir uma conta vinculada a este e-mail, enviaremos instruções para redefinição da senha em instantes.')
+            ->success()
+            ->send();
     }
 }

@@ -5,7 +5,18 @@ use App\Http\Controllers\LgpdController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $plans = \App\Models\Plan::where('is_active', true)->orderBy('sort_order')->get();
+    $settings = \App\Models\LandingPageSetting::first() ?? new \App\Models\LandingPageSetting();
+    
+    // Log page view analytics
+    \App\Models\LandingPageAnalytic::create([
+        'type' => 'page_view',
+        'referer' => request()->headers->get('referer'),
+        'ip' => request()->ip(),
+        'browser' => request()->header('User-Agent'),
+    ]);
+
+    return view('welcome', compact('plans', 'settings'));
 });
 
 Route::get('/privacy/{companySlug}', [LgpdController::class, 'showPrivacyPolicy'])->name('lgpd.privacy');

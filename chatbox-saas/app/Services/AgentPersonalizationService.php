@@ -123,6 +123,9 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
             'Imobiliária', 'Corretor de Imóveis' => 'consultiva, paciente e vendedora',
             'Tecnologia', 'Software House' => 'técnica, objetiva e inovadora',
             'E-commerce', 'Loja Virtual' => 'comercial, ágil e focada em conversão',
+            'Salão de Beleza', 'Barbearia', 'Clínica de Estética (Beleza)' => 'atenciosa, descontraída e focada no bem-estar',
+            'Pet Shop', 'Veterinária' => 'carinhosa, alegre e apaixonada por animais',
+            'Auto Escola' => 'didática, paciente e encorajadora',
             default => 'educada, prestativa e objetiva',
         };
     }
@@ -193,6 +196,37 @@ Abaixo estão os dados da empresa para você usar como contexto ao responder:
                 
                 $flows[] = ['trigger' => 'Agendar Reunião', 'question' => 'Como posso marcar uma reunião?', 'answer' => 'Para agendar seu atendimento, por favor me informe um breve resumo do seu caso.'];
                 $flows[] = ['trigger' => 'Áreas de Atuação', 'question' => 'Quais as áreas de atuação do escritório?', 'answer' => 'Atuamos no consultivo e contencioso. Qual é a natureza do seu problema jurídico?'];
+                break;
+
+            case 'Salão de Beleza':
+            case 'Barbearia':
+            case 'Clínica de Estética (Beleza)':
+            case 'Nail Designer':
+                $knowledgeItems[] = ['title' => 'Serviços', 'content' => 'Oferecemos cortes, coloração, tratamentos capilares, manicure, pedicure, maquiagem e estética facial/corporal.'];
+                $knowledgeItems[] = ['title' => 'Agendamento', 'content' => 'Para agendar, basta nos informar qual serviço deseja e verificaremos a disponibilidade na agenda.'];
+                $knowledgeItems[] = ['title' => 'Pacotes', 'content' => 'Temos pacotes especiais para noivas, formaturas e combos semanais com desconto.'];
+
+                $flows[] = ['trigger' => 'Agendar Horário', 'question' => 'Qual serviço você gostaria de agendar?', 'answer' => 'Excelente! Me informe o serviço desejado e a data de preferência.'];
+                $flows[] = ['trigger' => 'Valores', 'question' => 'Qual a tabela de preços?', 'answer' => 'Nossos valores variam por serviço e profissional. Qual procedimento você tem interesse?'];
+                break;
+
+            case 'Pet Shop':
+            case 'Veterinária':
+                $knowledgeItems[] = ['title' => 'Banho e Tosa', 'content' => 'Oferecemos banho, tosa higiênica, tosa na tesoura ou máquina, hidratação e corte de unhas.'];
+                $knowledgeItems[] = ['title' => 'Clínica Veterinária', 'content' => 'Temos consultas clínicas, vacinação, exames laboratoriais e cirurgias.'];
+                $knowledgeItems[] = ['title' => 'Táxi Dog', 'content' => 'Buscamos e levamos o seu pet com total segurança. Consulte a taxa para o seu bairro.'];
+
+                $flows[] = ['trigger' => 'Marcar Banho', 'question' => 'Gostaria de agendar banho e tosa?', 'answer' => 'Que legal! Qual é a raça e o porte do seu pet? Precisa de transporte (Táxi Dog)?'];
+                $flows[] = ['trigger' => 'Consulta Vet', 'question' => 'Precisa de atendimento veterinário?', 'answer' => 'Nossos veterinários estão prontos para ajudar. Qual é o sintoma ou motivo da consulta?'];
+                break;
+
+            case 'Auto Escola':
+                $knowledgeItems[] = ['title' => 'Primeira Habilitação', 'content' => 'O processo inclui exames médico/psicotécnico, curso teórico (CFC) e aulas práticas.'];
+                $knowledgeItems[] = ['title' => 'Adição de Categoria', 'content' => 'Para adicionar a categoria A ou B, você precisará apenas realizar novas aulas práticas e exame prático.'];
+                $knowledgeItems[] = ['title' => 'Renovação', 'content' => 'Auxiliamos em todo o processo burocrático de renovação da CNH.'];
+
+                $flows[] = ['trigger' => 'Tirar Carteira', 'question' => 'Quer tirar a 1ª Habilitação?', 'answer' => 'Ótima decisão! Você deseja tirar carteira de carro (B), moto (A) ou ambos (AB)?'];
+                $flows[] = ['trigger' => 'Valores', 'question' => 'Quais os valores e formas de pagamento?', 'answer' => 'Temos condições facilitadas e parcelamento sem juros. Para qual categoria deseja saber o valor?'];
                 break;
 
             case 'Restaurante':

@@ -74,20 +74,20 @@
                     <div class="mt-6 w-full space-y-4">
                         <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
                             <span class="text-gray-500 dark:text-gray-400">Status</span>
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $company->subscription_status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
-                                {{ ucfirst($company->subscription_status ?? 'Ativo') }}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $company?->subscription_status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                                {{ ucfirst($company?->subscription_status ?? 'Ativo') }}
                             </span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
                             <span class="text-gray-500 dark:text-gray-400">Próxima Cobrança</span>
                             <span class="font-medium text-gray-900 dark:text-white">
-                                {{ $company->expires_at ? $company->expires_at->format('d/m/Y') : 'N/A' }}
+                                {{ $company?->expires_at ? $company->expires_at->format('d/m/Y') : 'N/A' }}
                             </span>
                         </div>
                         <div class="flex justify-between items-center py-2">
                             <span class="text-gray-500 dark:text-gray-400">Data de Renovação</span>
                             <span class="font-medium text-gray-900 dark:text-white">
-                                {{ $company->expires_at ? $company->expires_at->format('d/m/Y') : 'N/A' }}
+                                {{ $company?->expires_at ? $company->expires_at->format('d/m/Y') : 'N/A' }}
                             </span>
                         </div>
                     </div>
@@ -110,7 +110,7 @@
                 </x-slot>
 
                 <div class="space-y-8 mt-2">
-                    @foreach($usageData as $key => $resource)
+                    @foreach($usageData ?? [] as $key => $resource)
                         <div class="relative">
                             <div class="flex justify-between items-end mb-1">
                                 <div>
@@ -177,7 +177,7 @@
                     <div class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full mb-3">
                         <x-heroicon-o-chat-bubble-left-right class="w-8 h-8" />
                     </div>
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['conversations'], 0, ',', '.') }}</span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['conversations'] ?? 0, 0, ',', '.') }}</span>
                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Conversas Atendidas</span>
                 </div>
 
@@ -185,7 +185,7 @@
                     <div class="p-3 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-full mb-3">
                         <x-heroicon-o-users class="w-8 h-8" />
                     </div>
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['leads'], 0, ',', '.') }}</span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['leads'] ?? 0, 0, ',', '.') }}</span>
                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Leads Capturados</span>
                 </div>
 
@@ -193,7 +193,7 @@
                     <div class="p-3 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full mb-3">
                         <x-heroicon-o-clock class="w-8 h-8" />
                     </div>
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['hours_saved'], 0, ',', '.') }}h</span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($resultsMetrics['hours_saved'] ?? 0, 0, ',', '.') }}h</span>
                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Economia Estimada de Horas</span>
                 </div>
             </div>

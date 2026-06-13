@@ -14,9 +14,11 @@ class AiConsumptionStats extends BaseWidget
         if (!$user) return [];
 
         $company = $user->company;
+        if (!$company) return [];
+
         $monthlyTokens = AiConsumptionHistory::where('company_id', $company->id)
             ->whereMonth('created_at', now()->month)
-            ->sum('tokens_used');
+            ->sum('conversations_used');
 
         return [
             Stat::make('Mensagens IA Consumidas (Mês)', $monthlyTokens)

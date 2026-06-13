@@ -47,6 +47,9 @@ class ScrapeUrlForKnowledgeBase implements ShouldQueue
                 'embedding' => $embedding,
             ]);
             Log::info("ScrapeUrlForKnowledgeBase: Extração concluída. Snippet ID {$this->knowledgeBase->id} atualizado com " . ($embedding ? 'Embedding gerado' : 'Sem embedding') . ".");
+
+            // Extrair FAQ após o conteúdo estar pronto
+            \App\Jobs\ExtractFaqFromKnowledgeBaseJob::dispatch($this->knowledgeBase);
         } else {
             Log::warning("ScrapeUrlForKnowledgeBase: Nenhum conteúdo extraído da URL: {$url}");
         }

@@ -94,3 +94,4 @@ Route::middleware(['demo.enabled', 'throttle:30,1'])->group(function () {
     Route::post('demo-chat', [DemoChatController::class, 'chat'])->name('api.demo.chat');
     Route::post('demo-lead', [DemoChatController::class, 'captureLead'])->name('api.demo.lead');
 });
+Route::get('/plans', [\App\Http\Controllers\Api\PlanApiController::class, 'index']);

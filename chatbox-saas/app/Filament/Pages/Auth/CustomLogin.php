@@ -75,6 +75,16 @@ class CustomLogin extends BaseLogin
             $user = Filament::auth()->user();
             if ($user instanceof User) {
                 app(WebLoginSessionService::class)->syncAfterFilamentLogin($user);
+
+                // Redireciona o SuperAdmin para o painel correto caso ele tenha logado pelo painel padrão
+                if ($user->isPlatformAdmin() && Filament::getCurrentPanel()->getId() !== 'super-admin' && !$user->is_impersonating) {
+                    return new class implements \Filament\Http\Responses\Auth\Contracts\LoginResponse {
+                        public function toResponse($request)
+                        {
+                            return redirect()->to(Filament::getPanel('super-admin')->getUrl());
+                        }
+                    };
+                }
             }
         }
 

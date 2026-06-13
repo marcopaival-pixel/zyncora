@@ -329,6 +329,7 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('name')
+            ->paginated([10, 25, 50, 100])
             ->searchPlaceholder('Pesquisar por nome ou e-mail...')
             ->emptyStateHeading('Nenhum membro encontrado')
             ->emptyStateDescription('Tente ajustar os filtros ou adicionar um novo utilizador à equipa.')
@@ -363,9 +364,31 @@ class UserResource extends Resource
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->slideOver()
                     ->label('Editar')
                     ->button()
-                    ->icon('heroicon-m-pencil-square'),
+                    ->icon('heroicon-m-pencil-square')
+                    ->before(function (Tables\Actions\EditAction $action, User $record, array $data) {
+                        $user = auth()->user();
+                        $targetStatus = $data['status'] ?? $record->status;
+                        $targetRole = $data['role'] ?? $record->role;
+                        
+                        $isBecameActiveAgent = ($targetStatus === 'active' && $targetRole === User::ROLE_AGENT) 
+                                               && (! ($record->status === 'active' && $record->role === User::ROLE_AGENT));
+
+                        if ($user && ! $user->isPlatformAdmin() && $isBecameActiveAgent) {
+                            $company = $user->company;
+                            $planService = app(\App\Services\PlanService::class);
+                            if (! $planService->canAddAttendant($company)) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Limite de Atendentes Atingido')
+                                    ->body("A sua subscrição permite apenas {$company->max_attendants} atendentes ativos.")
+                                    ->danger()
+                                    ->send();
+                                $action->halt();
+                            }
+                        }
+                    }),
                 Tables\Actions\DeleteAction::make()
                     ->label('Eliminar')
                     ->iconButton()
@@ -386,8 +409,6 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

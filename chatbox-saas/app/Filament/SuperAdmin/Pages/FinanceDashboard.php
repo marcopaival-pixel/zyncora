@@ -3,8 +3,8 @@
 namespace App\Filament\SuperAdmin\Pages;
 
 use Filament\Pages\Page;
-use App\Models\PaymentHistory;
-use App\Models\Invoice;
+use App\Filament\SuperAdmin\Widgets\FinanceStatsWidget;
+use App\Filament\SuperAdmin\Widgets\RevenueChartWidget;
 
 class FinanceDashboard extends Page
 {
@@ -14,7 +14,7 @@ class FinanceDashboard extends Page
 
     protected static ?string $title = 'Dashboard Financeiro';
 
-    protected static string $view = 'filament.pages.finance-dashboard';
+    protected static string $view = 'filament.pages.finance-dashboard-empty';
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -26,14 +26,11 @@ class FinanceDashboard extends Page
         return auth()->user()?->isPlatformAdmin() ?? false;
     }
 
-    protected function getViewData(): array
+    protected function getHeaderWidgets(): array
     {
         return [
-            'totalRevenue' => PaymentHistory::where('status', 'paid')->sum('amount'),
-            'mrr' => PaymentHistory::where('status', 'paid')->where('type', 'subscription')->where('paid_at', '>=', now()->subDays(30))->sum('amount'),
-            'invoicesGenerated' => Invoice::count(),
-            'invoicesFailed' => Invoice::where('status', 'failed')->count(),
-            'latestPayments' => PaymentHistory::with('company')->latest('paid_at')->take(5)->get(),
+            FinanceStatsWidget::class,
+            RevenueChartWidget::class,
         ];
     }
 }

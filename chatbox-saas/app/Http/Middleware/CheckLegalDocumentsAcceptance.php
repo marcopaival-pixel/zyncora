@@ -19,20 +19,26 @@ class CheckLegalDocumentsAcceptance
         if (Auth::check() && !$request->routeIs('legal.pending-acceptance') && !$request->routeIs('legal.accept-pending') && !$request->routeIs('filament.admin.auth.logout')) {
             $user = Auth::user();
             
-            $activeDocuments = \App\Models\PlatformLegalDocument::where('is_active', true)->get();
-            $pendingDocuments = [];
-
-            foreach ($activeDocuments as $doc) {
-                $hasAccepted = \App\Models\PlatformLegalConsent::where('user_id', $user->id)
-                    ->where('platform_legal_document_id', $doc->id)
-                    ->exists();
-
-                if (!$hasAccepted) {
-                    $pendingDocuments[] = $doc;
+            $hasPendingDocuments = \Illuminate\Support\Facades\Cache::remember("user_{$user->id}_has_pending_legal_docs", now()->addHours(12), function () use ($user) {
+                $activeDocuments = \App\Models\PlatformLegalDocument::where('is_active', true)->get();
+                if ($activeDocuments->isEmpty()) {
+                    return false;
                 }
-            }
 
-            if (count($pendingDocuments) > 0) {
+                $acceptedDocIds = \App\Models\PlatformLegalConsent::where('user_id', $user->id)
+                    ->pluck('platform_legal_document_id')
+                    ->toArray();
+
+                foreach ($activeDocuments as $doc) {
+                    if (!in_array($doc->id, $acceptedDocIds)) {
+                        return true; // Encontrou pelo menos um não aceite
+                    }
+                }
+
+                return false;
+            });
+
+            if ($hasPendingDocuments) {
                 return redirect()->route('legal.pending-acceptance');
             }
         }

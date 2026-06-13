@@ -13,6 +13,8 @@ class WelcomeAgentWidget extends Widget
 
     protected int | string | array $columnSpan = 'full';
     
+    protected static bool $isLazy = true;
+
     protected static ?int $sort = -1;
 
     public function getDaysRemaining(): int
@@ -30,12 +32,16 @@ class WelcomeAgentWidget extends Widget
 
     public function getKnowledgeCount(): int
     {
-        return Auth::user()?->company?->knowledgeBases()->count() ?? 0;
+        $company = Auth::user()?->company;
+        if (!$company) return 0;
+        return \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_knowledge_count", now()->addMinutes(30), fn () => $company->knowledgeBases()->count());
     }
 
     public function getFlowsCount(): int
     {
-        return Auth::user()?->company?->chatbotFlows()->count() ?? 0;
+        $company = Auth::user()?->company;
+        if (!$company) return 0;
+        return \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_flows_count", now()->addMinutes(30), fn () => $company->chatbotFlows()->count());
     }
 }
 
