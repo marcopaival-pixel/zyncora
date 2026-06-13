@@ -23,16 +23,25 @@ class UpgradePlan extends Page
     protected static ?int $navigationSort = 10;
 
     public Company $company;
+    public \Illuminate\Database\Eloquent\Collection $plans;
 
     public function mount(): void
     {
         $company = auth()->user()?->company;
 
         if ($company === null) {
-            abort(403, 'Apenas usuários vinculados a uma empresa podem gerir planos.');
+            if (auth()->user()?->isPlatformAdmin()) {
+                $company = new Company([
+                    'name' => 'Visualização de Admin',
+                    'plan' => null,
+                ]);
+            } else {
+                abort(403, 'Apenas usuários vinculados a uma empresa podem gerir planos.');
+            }
         }
 
         $this->company = $company;
+        $this->plans = Plan::where('is_active', true)->orderBy('sort_order')->get();
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -47,6 +56,17 @@ class UpgradePlan extends Page
 
     public function changePlan(string $newPlan): void
     {
+        $user = auth()->user();
+
+        if ($user && $user->isPlatformAdmin() && $user->company_id === null) {
+            Notification::make()
+                ->title('Ação Restrita')
+                ->warning()
+                ->body('Administradores de plataforma não podem assinar planos. Utilize a gestão de Empresas no painel Super Admin.')
+                ->send();
+            return;
+        }
+
         if (app(BillingCheckoutService::class)->supportsCheckout()) {
             $plan = Plan::query()->where('slug', $newPlan)->first();
             $user = auth()->user();
@@ -78,21 +98,18 @@ class UpgradePlan extends Page
         }
 
         // Mocking payment success. In a real world, redirect to Stripe/MercadoPago.
-        $limits = [
-            'start' => ['users' => 1, 'attendants' => 1, 'channels' => 1, 'bots' => 1, 'ai' => 500],
-            'professional' => ['users' => 5, 'attendants' => 5, 'channels' => 3, 'bots' => 3, 'ai' => 3000],
-            'enterprise' => ['users' => 20, 'attendants' => 20, 'channels' => 10, 'bots' => 10, 'ai' => 10000],
-        ];
-
-        $this->company->update([
-            'plan' => $newPlan,
-            'max_users' => $limits[$newPlan]['users'],
-            'max_attendants' => $limits[$newPlan]['attendants'],
-            'max_channels' => $limits[$newPlan]['channels'],
-            'max_chatbots' => $limits[$newPlan]['bots'],
-            'ai_credits_balance' => $limits[$newPlan]['ai'], // Atribuir limite básico como saldo renovado no mock
-            'expires_at' => now()->addMonth(),
-        ]);
+        $plan = Plan::where('slug', $newPlan)->first();
+        if ($plan) {
+            $this->company->update([
+                'plan' => $newPlan,
+                'max_users' => $plan->max_users,
+                'max_attendants' => $plan->max_attendants,
+                'max_channels' => $plan->max_channels,
+                'max_chatbots' => $plan->max_chatbots,
+                'ai_credits_balance' => $plan->max_ai_conversations,
+                'expires_at' => now()->addMonth(),
+            ]);
+        }
 
         Notification::make()
             ->title('Plano Atualizado!')

@@ -100,6 +100,74 @@
         @endif
 
         {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::HEAD_END, scopes: $livewire?->getRenderHookScopes()) }}
+
+        <!-- ZYNKORA DIAGNOSTIC SCRIPT (NavFix) -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const navLog = (msg, data) => {
+                    const logData = {
+                        timestamp: new Date().toISOString(),
+                        ...data
+                    };
+                    console.log(`[NavDiag] ${msg}`, logData);
+                };
+
+                let lastClick = null;
+                
+                document.body.addEventListener('click', (e) => {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+                    
+                    // Expansão: Aplicar o fallback agressivo a TODOS os links da plataforma
+                    const link = e.target.closest('a[href]');
+                    if (link && link.href && !link.href.includes('javascript:') && !link.getAttribute('href').startsWith('#') && link.getAttribute('target') !== '_blank') {
+                        const now = performance.now();
+                        lastClick = {
+                            time: now,
+                            url: link.href,
+                            resolved: false
+                        };
+                        
+                        navLog('Clique realizado em Link', { 
+                            destino: link.href, 
+                            pagina_atual: window.location.href,
+                            texto: link.innerText.trim().substring(0, 30)
+                        });
+
+                        // Fallback agressivo: se após 400ms a navegação não for desencadeada.
+                        // Resolve o bug do "clique duplo" globalmente (Tooltips / Touch / MorphDOM).
+                        setTimeout(() => {
+                            if (lastClick && lastClick.url === link.href && !lastClick.resolved) {
+                                navLog('ALERTA: Clique não propagou navegação nativa. Forçando redirecionamento.', {
+                                    destino: link.href,
+                                    tempo_decorrido: Math.round(performance.now() - now) + 'ms'
+                                });
+                                window.location.href = link.href;
+                            }
+                        }, 400);
+                    }
+                }, true); // Capturing phase to avoid stopPropagation
+
+                window.addEventListener('beforeunload', () => {
+                    if (lastClick && !lastClick.resolved) {
+                        lastClick.resolved = true;
+                        navLog('Navegação nativa iniciada com sucesso.', {
+                            destino: lastClick.url,
+                            tempo_decorrido: Math.round(performance.now() - lastClick.time) + 'ms'
+                        });
+                    }
+                });
+                
+                // Tratar requests pushState do livewire:navigate se existirem acidentalmente
+                document.addEventListener('livewire:navigating', () => {
+                    if (lastClick && !lastClick.resolved) {
+                        lastClick.resolved = true;
+                        navLog('Navegação via Livewire Navigate detectada.', { destino: lastClick.url });
+                    }
+                });
+                
+                navLog('Módulo de Diagnóstico Global Iniciado', { url: window.location.href });
+            });
+        </script>
     </head>
 
     <body

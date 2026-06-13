@@ -41,6 +41,7 @@ class LatestLogs extends BaseWidget
                     ->since()
                     ->color('gray'),
             ])
+            ->deferLoading()
             ->defaultPaginationPageOption(5)
             ->paginated([5]);
     }

@@ -23,7 +23,7 @@
 
         <div class="mt-2 flex items-center justify-center gap-2">
             <span class="flex h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse"></span>
-            <span class="text-[9px] font-bold text-primary-500/80 uppercase tracking-[0.3em]">Instruções serão enviadas por e-mail</span>
+            <span class="text-[9px] font-bold text-primary-500/80 uppercase tracking-[0.3em]">Instruções de segurança serão enviadas</span>
         </div>
     </div>
 

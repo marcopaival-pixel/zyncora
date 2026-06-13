@@ -6,9 +6,13 @@ use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
 {
-    protected static ?string $title = 'Painel de controle';
+    protected static ?string $title = 'Dashboard Executivo';
 
-    protected static ?string $navigationLabel = 'Painel de controle';
+    protected static ?string $navigationLabel = 'Dashboard Executivo';
+
+    protected static ?string $navigationGroup = 'Dashboard Executivo';
+
+    protected static ?int $navigationSort = 1;
 
     protected ?string $subheading = null;
 

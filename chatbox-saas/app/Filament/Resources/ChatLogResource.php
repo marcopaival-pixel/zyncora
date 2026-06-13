@@ -147,6 +147,35 @@ class ChatLogResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('Abrir'),
+                Tables\Actions\Action::make('create_faq')
+                    ->label('Criar FAQ')
+                    ->icon('heroicon-o-academic-cap')
+                    ->color('success')
+                    ->tooltip('Transformar esta dúvida numa regra para a IA')
+                    ->visible(fn (ChatLog $record): bool => str_contains(strtolower($record->log_type), 'fallback') || str_contains(strtolower($record->log_type), 'human'))
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('title')
+                            ->label('Título / Pergunta')
+                            ->default(fn (ChatLog $record) => $record->context['user_message'] ?? 'Pergunta do Usuário')
+                            ->required(),
+                        \Filament\Forms\Components\Textarea::make('content')
+                            ->label('Resposta Recomendada (O que a IA deve dizer na próxima vez?)')
+                            ->required(),
+                    ])
+                    ->action(function (ChatLog $record, array $data) {
+                        \App\Models\KnowledgeBase::create([
+                            'company_id' => $record->company_id,
+                            'title' => $data['title'],
+                            'content' => $data['content'],
+                            'source_type' => 'manual',
+                            'is_active' => true,
+                        ]);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Treinamento concluído')
+                            ->body('A IA agora sabe responder a essa dúvida!')
+                            ->success()
+                            ->send();
+                    }),
             ]);
     }
 

@@ -95,6 +95,8 @@ class PlatformLegalController extends Controller
             }
         }
 
+        \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_has_pending_legal_docs");
+
         return redirect('/admin');
     }
 }

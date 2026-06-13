@@ -10,7 +10,7 @@ class WelcomeHero extends Widget
 
     protected static string $view = 'filament.widgets.welcome-hero';
 
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     protected static ?int $sort = 1;
 
@@ -75,8 +75,14 @@ class WelcomeHero extends Widget
             return $this->emptyTenantData('orphan');
         }
 
-        $usersCount = $company->users()->count();
-        $chatbotsCount = $company->chatbots()->count();
+        $usersCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_users_count", now()->addMinutes(15), function () use ($company) {
+            return $company->users()->count();
+        });
+
+        $chatbotsCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_chatbots_count", now()->addMinutes(15), function () use ($company) {
+            return $company->chatbots()->count();
+        });
+
         $daysLeft = $company->expires_at ? now()->diffInDays($company->expires_at, false) : 999;
 
         return [

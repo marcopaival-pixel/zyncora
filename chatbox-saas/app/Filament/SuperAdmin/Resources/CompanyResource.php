@@ -362,6 +362,18 @@ class CompanyResource extends Resource
                     ->label('Vencimento')
                     ->date('d/m/Y')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('plan.monthly_price')
+                    ->label('Valor Assinatura')
+                    ->money('BRL')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('users.last_login_at')
+                    ->label('Último Login')
+                    ->getStateUsing(function (Company $record) {
+                        $lastLogin = $record->users()->max('last_login_at');
+                        return $lastLogin ? \Carbon\Carbon::parse($lastLogin)->format('d/m/Y H:i') : 'Nunca';
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -382,6 +394,19 @@ class CompanyResource extends Resource
                         'enterprise' => 'Empresarial',
                     ])
                     ->native(false),
+                Tables\Filters\Filter::make('ai_credits_used')
+                    ->form([
+                        Forms\Components\TextInput::make('consumo_minimo')
+                            ->label('Consumo IA Mínimo')
+                            ->numeric(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['consumo_minimo'],
+                                fn (Builder $query, $consumo): Builder => $query->where('ai_credits_used', '>=', $consumo),
+                            );
+                    }),
             ])
             ->defaultSort('created_at', 'desc')
             ->searchPlaceholder('Pesquisar organização...')
@@ -638,6 +663,9 @@ class CompanyResource extends Resource
     {
         return [
             CompanyResource\RelationManagers\UsersRelationManager::class,
+            CompanyResource\RelationManagers\InvoicesRelationManager::class,
+            CompanyResource\RelationManagers\PaymentHistoriesRelationManager::class,
+            CompanyResource\RelationManagers\SubscriptionAuditLogsRelationManager::class,
         ];
     }
 

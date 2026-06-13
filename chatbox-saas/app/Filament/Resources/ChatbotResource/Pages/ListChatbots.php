@@ -29,4 +29,11 @@ class ListChatbots extends ListRecords
                 ->icon('heroicon-o-plus-circle'),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\ChatbotResource\Widgets\ChatbotOverviewWidget::class,
+        ];
+    }
 }

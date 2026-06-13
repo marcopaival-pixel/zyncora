@@ -61,7 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Inter')
             ->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('260px')
+            ->sidebarWidth('18rem')
             ->collapsedSidebarWidth('80px')
             ->brandLogo(function (): ?string {
                 $company = Auth::user()?->company;
@@ -70,8 +70,8 @@ class AdminPanelProvider extends PanelProvider
             })
             ->brandName(fn () => Auth::user()?->company?->name ?? 'Zynkora')
             ->defaultThemeMode(ThemeMode::Dark)
+            ->spa(false)
             ->viteTheme('resources/css/app.css')
-            ->spa()
             ->globalSearch(true)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->userMenuItems([
@@ -79,20 +79,23 @@ class AdminPanelProvider extends PanelProvider
                 // O Javascript customizado já intercepta o form de logout e exibe o modal de confirmação.
             ])
             ->navigationGroups([
-                NavigationGroup::make('Atendimento')
-                    ->label('Atendimento Profissional')
+                NavigationGroup::make('Dashboard Executivo')
+                    ->label('Dashboard Executivo')
                     ->collapsed(false),
-                NavigationGroup::make('Automação')
-                    ->label('Automação & Bot')
+                NavigationGroup::make('Gestão de Clientes')
+                    ->label('Gestão de Clientes')
+                    ->collapsed(false),
+                NavigationGroup::make('Gestão Financeira')
+                    ->label('Gestão Financeira')
                     ->collapsed(true),
-                NavigationGroup::make('Integrações')
-                    ->label('Conexões & Canais')
+                NavigationGroup::make('Gestão de Chatbots')
+                    ->label('Gestão de Chatbots')
                     ->collapsed(true),
-                NavigationGroup::make('Plataforma')
-                    ->label('Gestão & Cobrança')
+                NavigationGroup::make('Analytics')
+                    ->label('Analytics')
                     ->collapsed(true),
-                NavigationGroup::make('Configurações & Auditoria')
-                    ->label('Configurações & Auditoria')
+                NavigationGroup::make('Configurações')
+                    ->label('Configurações')
                     ->collapsed(true),
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
@@ -106,7 +109,6 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Widgets\WelcomeAgentWidget::class,
                 QuickActions::class,
                 CompanyUsageStats::class,
-                LatestLogs::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -191,9 +193,14 @@ class AdminPanelProvider extends PanelProvider
                         }
                         
                         /* Fix Native Select Repeating Icons (ex: Pagination) */
-                        select {
+                        select, .fi-select-input {
                             background-repeat: no-repeat !important;
                             background-position: right 0.5rem center !important;
+                            background-size: 1.25rem 1.25rem !important;
+                            padding-right: 2.5rem !important;
+                            -webkit-appearance: none !important;
+                            -moz-appearance: none !important;
+                            appearance: none !important;
                         }
 
                         /* Global Focus Style */
@@ -201,12 +208,6 @@ class AdminPanelProvider extends PanelProvider
                         *:focus-visible { 
                             outline: 2px solid rgba(59, 130, 246, 0.5) !important; 
                             outline-offset: 2px !important; 
-                        }
-
-                        /* SPA Navigation and Multiple Click Prevention */
-                        html.nprogress-busy {
-                            pointer-events: none !important;
-                            cursor: wait !important;
                         }
                     </style>";
 
@@ -308,13 +309,33 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_END,
                 fn (): string => Blade::render('
-                    <form action="{{ filament()->getLogoutUrl() }}" method="post" class="mt-auto p-4 w-full" onsubmit="try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center gap-3 py-2 px-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 hover:border-zinc-700 transition-all text-sm font-semibold">
+                    <div x-data="{ showLogoutModal: false }" class="mt-auto p-4 w-full">
+                        <button @click="showLogoutModal = true" type="button" class="w-full flex items-center gap-3 py-2 px-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 hover:border-zinc-700 transition-all text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                             Sair do Sistema
                         </button>
-                    </form>
+                        
+                        <template x-teleport="body">
+                            <div x-show="showLogoutModal" style="display: none;" class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" x-transition.opacity>
+                                <div @click.away="showLogoutModal = false" class="bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-200 dark:border-gray-800 p-8 max-w-sm w-full text-center space-y-6" x-transition>
+                                    <div class="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+                                        <svg class="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Sair do Sistema?</h3>
+                                        <p class="text-sm text-gray-500 mt-2 font-medium">Tem certeza que deseja encerrar a sua sessão? Você precisará fazer login novamente para voltar.</p>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button @click="showLogoutModal = false" class="w-1/2 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl font-bold transition-all">Cancelar</button>
+                                        <form action="{{ filament()->getLogoutUrl() }}" method="post" class="w-1/2" onsubmit="try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}">
+                                            @csrf
+                                            <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-lg shadow-rose-500/20 active:scale-95 transition-all">Sim, Sair</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 ')
             )
             ->renderHook(

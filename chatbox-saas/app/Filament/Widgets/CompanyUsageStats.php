@@ -37,18 +37,21 @@ class CompanyUsageStats extends BaseWidget
     {
         $user = auth()->user();
 
-        // Admins see a global summary, Clients see their own usage
         if ($user->isPlatformAdmin()) {
+            $totalCompanies = \Illuminate\Support\Facades\Cache::remember('platform_total_companies', now()->addMinutes(15), fn () => Company::count());
+            $totalMessagesToday = \Illuminate\Support\Facades\Cache::remember('platform_messages_today', now()->addMinutes(15), fn () => Message::whereDate('created_at', now())->count());
+            $enterprisePlans = \Illuminate\Support\Facades\Cache::remember('platform_enterprise_plans', now()->addMinutes(15), fn () => Company::where('plan', 'enterprise')->count());
+
             return [
-                Stat::make('Total de Empresas', Company::count())
+                Stat::make('Total de Empresas', $totalCompanies)
                     ->description('Organizações ativas na plataforma')
                     ->descriptionIcon('heroicon-m-building-office')
                     ->color('primary'),
-                Stat::make('Conversas (Hoje)', Message::whereDate('created_at', now())->count())
+                Stat::make('Conversas (Hoje)', $totalMessagesToday)
                     ->description('Volume total de mensagens')
                     ->descriptionIcon('heroicon-m-chat-bubble-left-right')
                     ->color('success'),
-                Stat::make('Planos Enterprise', Company::where('plan', 'enterprise')->count())
+                Stat::make('Planos Enterprise', $enterprisePlans)
                     ->description('Clientes de alto nível')
                     ->descriptionIcon('heroicon-m-star'),
             ];
@@ -60,10 +63,10 @@ class CompanyUsageStats extends BaseWidget
             return [];
         }
 
-        $membersCount = $company->users()->count();
-        $attendantsCount = $company->users()->where('role', \App\Models\User::ROLE_AGENT)->where('status', 'active')->count();
-        $channelsCount = $company->channels()->count();
-        $chatbotsCount = $company->chatbots()->count();
+        $membersCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_members_count", now()->addMinutes(15), fn () => $company->users()->count());
+        $attendantsCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_attendants_count", now()->addMinutes(15), fn () => $company->users()->where('role', \App\Models\User::ROLE_AGENT)->where('status', 'active')->count());
+        $channelsCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_channels_count", now()->addMinutes(15), fn () => $company->channels()->count());
+        $chatbotsCount = \Illuminate\Support\Facades\Cache::remember("company_{$company->id}_chatbots_count", now()->addMinutes(15), fn () => $company->chatbots()->count());
 
         return [
             Stat::make('Equipa (Membros)', "{$membersCount} / {$company->max_users}")

@@ -29,23 +29,39 @@ class AiConsumptionHistoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
-                Forms\Components\DatePicker::make('period_start')
-                    ->required(),
-                Forms\Components\DatePicker::make('period_end')
-                    ->required(),
-                Forms\Components\TextInput::make('conversations_contracted')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('conversations_used')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('credits_purchased')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+                Forms\Components\Section::make('Detalhes do Consumo de IA')
+                    ->description('Informe os dados de consumo para o período.')
+                    ->schema([
+                        Forms\Components\Select::make('company_id')
+                            ->relationship('company', 'name')
+                            ->required()
+                            ->label('Empresa')
+                            ->searchable()
+                            ->columnSpanFull(),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('period_start')
+                                    ->required()
+                                    ->label('Início do Período'),
+                                Forms\Components\DatePicker::make('period_end')
+                                    ->required()
+                                    ->label('Fim do Período'),
+                                Forms\Components\TextInput::make('conversations_contracted')
+                                    ->required()
+                                    ->numeric()
+                                    ->label('Conversas Contratadas'),
+                                Forms\Components\TextInput::make('conversations_used')
+                                    ->required()
+                                    ->numeric()
+                                    ->label('Conversas Utilizadas'),
+                                Forms\Components\TextInput::make('credits_purchased')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0)
+                                    ->label('Créditos Comprados')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -84,7 +100,8 @@ class AiConsumptionHistoryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
