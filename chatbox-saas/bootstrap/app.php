@@ -43,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.docs.auth' => \App\Http\Middleware\EnsureApiDocsBasicAuth::class,
             'health.token' => \App\Http\Middleware\EnsureHealthCheckToken::class,
             'white_label' => \App\Http\Middleware\WhiteLabelMiddleware::class,
+            'widget.access' => \App\Http\Middleware\ValidateWidgetAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

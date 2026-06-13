@@ -72,6 +72,7 @@ class FilamentCrudTest extends TestCase
                 'name' => 'Bot Comercial',
                 'default_channel' => 'site',
                 'status' => 'active',
+                'chatbot_segment' => 'Outro Segmento',
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -79,7 +80,7 @@ class FilamentCrudTest extends TestCase
         $this->assertDatabaseHas('chatbots', [
             'company_id' => $company->id,
             'name' => 'Bot Comercial',
-            'status' => 'active',
+            'status' => Chatbot::STATUS_READY,
         ]);
     }
 
